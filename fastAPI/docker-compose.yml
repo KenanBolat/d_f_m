@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - '8090:8090'
+    command: >
+      sh -c "python fastAPI.py"

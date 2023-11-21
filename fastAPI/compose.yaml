@@ -1,0 +1,8 @@
+services:
+  app:
+    image: kenanbolat/fast-face-compare
+    build: .
+    ports:
+      - '8090:8090'
+    command: >
+      sh -c "python fastAPI.py"
