@@ -1,3 +1,9 @@
 venv/
 .idea/
 dev-db-data/
+
+venv/*
+db/*
+mysql/*
+mysql/
+

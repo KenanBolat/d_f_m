@@ -1,0 +1,5 @@
+flask 
+apscheduler
+pika
+requests
+uwsgi

@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  authdb:
+    image: mysql:5.7.44
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: auth
+      #MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - 3306:3306
+    volumes:
+      - ./src/auth/db/mysql:/var/lib/mysql
+
+  mongodb:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: data
+    ports:
+      - 27017:27017
+  mongo-express:
+    image: mongo-express:latest
+    restart: always
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongodb
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_URL: mongodb://root:root@mongodb:27017
+
+  rabbitmq_d:
+    image: rabbitmq:3-management
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - 5672:5672
+      - 15672:15672
+  mailhog:
+    image: mailhog/mailhog
+    logging:
+      driver: 'none'  # disable saving logs
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui

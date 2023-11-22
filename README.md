@@ -21,7 +21,8 @@
 
 ### Screen-shot 
 
-![alt text](https://github.com/KenanBolat/face-id-app-api/blob/main/faq/ss001.png?raw=true)
+![alt text](https://github.com/KenanBolat/d_f_m/blob/main/faq/ss001.png?raw=true)
+![alt text](https://github.com/KenanBolat/d_f_m/blob/main/faq/ss002.png?raw=true)
 
 # data-download-app-api
 ## Notes 
