@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoServer Layer with Leaflet</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+</head>
+<body>
+
+<div id="map" style="width: 100%; height: 600px;"></div>
+
+<!-- Leaflet JavaScript -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    // Initialize the map
+    var map = L.map('map').setView([37.5, 33.5], 5);  // Centered approximately in the middle of the provided BBOX
+
+    // Add a base map (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Add the GeoServer WMS layer
+    // var wmsLayer = L.tileLayer.wms('http://localhost:8080/geoserver/ne/wms', {
+    //     layers: 'ne:HRV_20230814_060000',
+    //     format: 'image/png',
+    //     transparent: true,
+    //     version: '1.1.0',
+    //     attribution: "Your attribution here",  // Change to your data's attribution
+    //     bbox: '22.0,30.0,45.0,45.0',
+    //     width: 768,
+    //     height: 500,
+    //     crs: L.CRS.EPSG4326,
+    //     srs: 'EPSG:4326',
+    //     styles: ''
+    // }).addTo(map);
+
+    var wmsLayer = L.tileLayer.wms('http://localhost:8080/geoserver/ne/wms', {
+        layers: 'ne:HRV_20230814_060000',
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.0',
+        attribution: "Your attribution here",
+        crs: L.CRS.EPSG4326  // Specify the coordinate reference system
+    }).addTo(map);
+
+
+    
+
+</script>
+
+</body>
+</html>

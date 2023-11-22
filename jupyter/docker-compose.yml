@@ -1,0 +1,29 @@
+version: '3'
+services:
+  geoserver:
+    build:
+      context: ./geoserver/
+      args:
+        - GEOSERVER_VERSION=2.22.0
+        - CORS_ENABLED=true
+        - CORS_ALLOWED_METHODS=GET,POST,PUT,HEAD,OPTIONS
+    ports:
+      - 8080:8080
+    environment:
+      - INSTALL_EXTENSIONS=true
+      - STABLE_EXTENSIONS=wps,csw
+      - EXTRA_JAVA_OPTS=-Xms1G -Xmx2G
+      - GEOSERVER_ADMIN_USER=admin
+      - GEOSERVER_ADMIN_PASSWORD=geoserver
+    volumes:
+      - ./geoserver_data:/opt/geoserver_data
+      - ./additional_libs:/opt/additional_libs # by mounting this we can install libs from host on startup
+
+  ftp_server:
+    build: ./ftp/
+    ports:
+      - '200-201:20-21/tcp'
+      - '40000-40009:40000-40009/tcp'
+    volumes:
+      - '/home/knn/Desktop/Test_Data/:/data/'
+
