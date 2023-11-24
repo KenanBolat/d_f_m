@@ -6,4 +6,5 @@ venv/*
 db/*
 mysql/*
 mysql/
-
+*.tif
+geoserver_data/

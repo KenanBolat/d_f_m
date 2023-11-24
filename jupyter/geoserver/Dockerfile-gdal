@@ -1,0 +1,22 @@
+FROM ghcr.io/osgeo/gdal:ubuntu-full-3.8.0 as gdal
+LABEL maintainer='Kenan BOLAT'
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
+
+
+RUN apt-get update && \
+    apt-get -y install python3-pip && \
+    apt-get -y install python3-dev && \
+    apt-get -y install libpq-dev && \
+    apt-get -y install iputils-ping && \
+    apt-get -y install python3-pip
+
+RUN pip3 install --upgrade pip && \
+    pip3 install --upgrade setuptools && \
+    pip3 install --upgrade wheel && \
+    pip3 install --upgrade geoserver-rest
+
+
+
+
+

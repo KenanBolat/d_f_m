@@ -1,5 +1,5 @@
-FROM ubuntu:22.04 as tomcat
-
+#FROM ubuntu:22.04 as tomcat
+FROM ghcr.io/osgeo/gdal:ubuntu-full-3.8.0 as tomcat
 ARG TOMCAT_VERSION=9.0.75
 ARG CORS_ENABLED=false
 ARG CORS_ALLOWED_ORIGINS=*
