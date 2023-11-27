@@ -20,3 +20,4 @@ def token(request):
         return response.text, None
     else:
         return None, (response.text, response.status_code)
+    response = requests.post(f"http://{host}/api/satellite_mission/"  )
