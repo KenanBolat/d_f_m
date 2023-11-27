@@ -8,3 +8,6 @@ mysql/*
 mysql/
 *.tif
 geoserver_data/
+
+*.pyc 
+
