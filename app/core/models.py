@@ -70,3 +70,34 @@ class Data(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Configuration(models.Model):
+    """Configuration object."""
+    satellite_mission = models.CharField(max_length=255)
+    folder_locations = models.JSONField(null=True, blank=True, default={
+        'chanel 01': '_________',
+        'chanel 02': 'HRV______',
+        'chanel 03': 'IR_016___',
+        'chanel 04': 'IR_039___',
+        'chanel 05': 'IR_087___',
+        'chanel 06': 'IR_097___',
+        'chanel 07': 'IR_108___',
+        'chanel 08': 'IR_120___',
+        'chanel 09': 'IR_134___',
+        'chanel 10': 'VIS006___',
+        'chanel 11': 'VIS008___',
+        'chanel 12': 'WV_062___',
+        'chanel 13': 'WV_073___'
+    })
+    ftp_server = models.CharField(max_length=255, default='localhost')
+    ftp_user_name = models.CharField(max_length=255, default='foo')
+    ftp_password = models.CharField(max_length=255, default='bar')
+    ftp_port = models.IntegerField(default=201)
+    status = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(null=True, blank=True)
+
+    def __str__(self):
+        return self.satellite_mission

@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from core.models import (Data,)
+from core.models import (Data,Configuration)
 
 from . import serializers
 # from .serializers import ForeignerSerializer
@@ -100,4 +100,9 @@ class DataViewSet(viewsets.ModelViewSet):
             return Response(None, status=status.HTTP_200_OK)
 
         return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ConfigurationViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.ConfigurationSerializer
+    queryset = Configuration.objects.all()
+    lookup_field = 'satellite_mission'
 

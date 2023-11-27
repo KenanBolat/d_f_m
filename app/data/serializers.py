@@ -3,7 +3,7 @@ Serializers for FaceID API.
 """
 from rest_framework import serializers
 
-from core.models import (Data)
+from core.models import (Data, Configuration)
 
 
 class DataSerializer(serializers.ModelSerializer):
@@ -44,4 +44,23 @@ class FaceIDImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image']
         read_only_fields = ['id']
         extra_kwargs = {'image': {'required': 'True'}}
+
+
+class ConfigurationSerializer(serializers.ModelSerializer):
+    satellite_mission = serializers.CharField(required=True)
+    class Meta:
+        model = Configuration
+        fields = [ 'satellite_mission', 'folder_locations', 'ftp_server', 'ftp_user_name', 'ftp_password', 'ftp_port',]
+        lookup_field = 'satellite_mission'
+        read_only_fields = ['satellite_mission']
+        extra_kwargs = {
+            'url': {'lookup_field': 'satellite_mission'}
+        }
+
+
+
+    def create(self, validated_data):
+        """Create a data."""
+        return Configuration.objects.create(**validated_data)
+
 
