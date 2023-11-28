@@ -59,7 +59,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Data(models.Model):
-    """FaceID object."""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -72,9 +71,26 @@ class Data(models.Model):
         return self.title
 
 
+class Missions(models.Model):
+    """Missions object."""
+    satellite_mission = models.CharField(max_length=255, unique=True)
+    is_active = models.BooleanField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.satellite_mission}"
+
+
 class Configuration(models.Model):
     """Configuration object."""
-    satellite_mission = models.CharField(max_length=255)
+    # satellite_mission = models.CharField(max_length=255)
+    satellite_mission = models.ForeignKey(
+        Missions,
+        on_delete=models.CASCADE, related_name='missions'
+    )
     folder_locations = models.JSONField(null=True, blank=True, default={
         'chanel 01': '_________',
         'chanel 02': 'HRV______',
@@ -100,4 +116,29 @@ class Configuration(models.Model):
     is_active = models.BooleanField(null=True, blank=True)
 
     def __str__(self):
-        return self.satellite_mission
+        return f"{self.satellite_mission}"
+
+
+class DataTracking(models.Model):
+    """DataTracking object."""
+    # user = models.ForeignKey(
+    #     settings.AUTH_USER_MODEL,
+    #     on_delete=models.CASCADE,
+    # )
+    # data = models.ForeignKey(
+    #     Data,
+    #     on_delete=models.CASCADE,
+    # )
+    satellite_mission = models.CharField(max_length=255)
+    file_name = models.CharField(max_length=255)
+    file_path = models.CharField(max_length=255)
+    file_size = models.CharField(max_length=255)
+    file_date = models.CharField(max_length=255)
+    file_type = models.CharField(max_length=255)
+    file_status = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(null=True, blank=True)
+
+    def __str__(self):
+        return self.file_name

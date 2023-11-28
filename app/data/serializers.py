@@ -3,7 +3,7 @@ Serializers for FaceID API.
 """
 from rest_framework import serializers
 
-from core.models import (Data, Configuration)
+from core.models import (Data, Configuration, Missions, )
 
 
 class DataSerializer(serializers.ModelSerializer):
@@ -47,10 +47,10 @@ class FaceIDImageSerializer(serializers.ModelSerializer):
 
 
 class ConfigurationSerializer(serializers.ModelSerializer):
-    satellite_mission = serializers.CharField(required=True)
+    satellite_mission = serializers.SlugRelatedField(required=True, slug_field='satellite_mission', many=False, queryset=Missions.objects.all())
     class Meta:
         model = Configuration
-        fields = [ 'satellite_mission', 'folder_locations', 'ftp_server', 'ftp_user_name', 'ftp_password', 'ftp_port',]
+        fields = ['satellite_mission', 'folder_locations', 'ftp_server', 'ftp_user_name', 'ftp_password', 'ftp_port',]
         lookup_field = 'satellite_mission'
         read_only_fields = ['satellite_mission']
         extra_kwargs = {
@@ -64,3 +64,21 @@ class ConfigurationSerializer(serializers.ModelSerializer):
         return Configuration.objects.create(**validated_data)
 
 
+class MissionsSerializer(serializers.ModelSerializer):
+    """Serializer for missions."""
+
+    class Meta:
+        model = Missions
+        fields = ['id', 'satellite_mission', 'is_active', 'created_at', 'updated_at', 'description',]
+        read_only_fields = ['id']
+
+    def create(self, validated_data):
+        """Create a data."""
+        return Missions.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        """Update data."""
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance

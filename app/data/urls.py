@@ -11,6 +11,7 @@ from data import views
 
 router = DefaultRouter()
 router.register('data', views.DataViewSet)
+router.register('missions', views.MissionsViewSet)
 router.register('configuration', views.ConfigurationViewSet)
 
 app_name = 'data'

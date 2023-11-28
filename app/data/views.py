@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from core.models import (Data,Configuration)
+from core.models import (Data,Configuration, Missions, )
 
 from . import serializers
 # from .serializers import ForeignerSerializer
@@ -106,3 +106,7 @@ class ConfigurationViewSet(viewsets.ModelViewSet):
     queryset = Configuration.objects.all()
     lookup_field = 'satellite_mission'
 
+
+class MissionsViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.MissionsSerializer
+    queryset = Missions.objects.all()
