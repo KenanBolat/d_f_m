@@ -3,7 +3,7 @@ Serializers for FaceID API.
 """
 from rest_framework import serializers
 
-from core.models import (Data, Configuration, Missions, )
+from core.models import (Data, Configuration, Mission, Event, Consumed, )
 
 
 class DataSerializer(serializers.ModelSerializer):
@@ -33,7 +33,7 @@ class DataDetailSerializer(DataSerializer):
     """Serializer for data detail view."""
 
     class Meta(DataSerializer.Meta):
-        fields = DataSerializer.Meta.fields + ['description',]
+        fields = DataSerializer.Meta.fields + ['description', ]
 
 
 class FaceIDImageSerializer(serializers.ModelSerializer):
@@ -47,34 +47,86 @@ class FaceIDImageSerializer(serializers.ModelSerializer):
 
 
 class ConfigurationSerializer(serializers.ModelSerializer):
-    satellite_mission = serializers.SlugRelatedField(required=True, slug_field='satellite_mission', many=False, queryset=Missions.objects.all())
+    satellite_mission = serializers.SlugRelatedField(required=True,
+                                                     slug_field='satellite_mission',
+                                                     many=False,
+                                                     queryset=Mission.objects.all())
+
     class Meta:
         model = Configuration
-        fields = ['satellite_mission', 'folder_locations', 'ftp_server', 'ftp_user_name', 'ftp_password', 'ftp_port',]
+        fields = ['satellite_mission',
+                  'folder_locations',
+                  'ftp_server',
+                  'ftp_user_name',
+                  'ftp_password',
+                  'ftp_port', ]
         lookup_field = 'satellite_mission'
         read_only_fields = ['satellite_mission']
         extra_kwargs = {
             'url': {'lookup_field': 'satellite_mission'}
         }
 
-
-
     def create(self, validated_data):
         """Create a data."""
         return Configuration.objects.create(**validated_data)
 
 
-class MissionsSerializer(serializers.ModelSerializer):
+class MissionSerializer(serializers.ModelSerializer):
     """Serializer for missions."""
 
     class Meta:
-        model = Missions
-        fields = ['id', 'satellite_mission', 'is_active', 'created_at', 'updated_at', 'description',]
+        model = Mission
+        fields = ['id', 'satellite_mission', 'is_active', 'created_at', 'updated_at', 'description', ]
         read_only_fields = ['id']
 
     def create(self, validated_data):
         """Create a data."""
-        return Missions.objects.create(**validated_data)
+        return Mission.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        """Update data."""
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
+class EventSerializer(serializers.ModelSerializer):
+    """Serializer for produced messages."""
+
+    class Meta:
+        model = Event
+        fields = ['id', 'message_id', 'queue_name', 'content', 'created_at', 'service_name', 'producer_ip', ]
+        read_only_fields = ['id']
+
+    def create(self, validated_data):
+        """Create a data."""
+        return Event.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        """Update data."""
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
+class ConsumedMessageSerializer(serializers.ModelSerializer):
+    """Serializer for consumed messages."""
+
+    message_id = serializers.SlugRelatedField(required=True,
+                                              slug_field='message_id',
+                                              many=False,
+                                              queryset=Event.objects.all())
+
+    class Meta:
+        model = Consumed
+        fields = ['id', 'message_id', 'consumed_at', 'consumer_ip', 'consumer_name', ]
+        read_only_fields = ['id']
+
+    def create(self, validated_data):
+        """Create a data."""
+        return Consumed.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         """Update data."""

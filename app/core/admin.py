@@ -51,5 +51,7 @@ class UserAdmin(BaseUserAdmin):
 admin.site.register(models.User, UserAdmin)
 # for the customization UserAdmin must be included
 admin.site.register(models.Data)
-admin.site.register(models.Missions)
+admin.site.register(models.Mission)
 admin.site.register(models.Configuration)
+admin.site.register(models.Event)
+admin.site.register(models.Consumed)

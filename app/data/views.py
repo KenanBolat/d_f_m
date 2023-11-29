@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from core.models import (Data,Configuration, Missions, )
+from core.models import (Data, Configuration, Mission, Consumed, Event, )
 
 from . import serializers
 # from .serializers import ForeignerSerializer
@@ -37,6 +37,7 @@ class DataViewSet(viewsets.ModelViewSet):
     queryset = Data.objects.all()
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
     # profile_serializer = serializers.ForeignerSerializer
 
     def _params_to_ints(self, qs):
@@ -71,7 +72,7 @@ class DataViewSet(viewsets.ModelViewSet):
         profile = Data.objects.all()
         p = profile.filter(user=self.request.user).order_by('-id')
         s = ForeignerSerializer(p, many=True)
-        print("=="*5)
+        print("==" * 5)
         img1 = "/vol/web/media/uploads/data/" + s.data[0]['image'].split('/')[-1]
         # imgRead1 = read_image(img1)
 
@@ -83,7 +84,6 @@ class DataViewSet(viewsets.ModelViewSet):
 
         if serializers.is_valid():
             serializers.save()
-
 
             print("==" * 3)
             img2 = os.path.join("/vol/web/media/uploads/data/", serializers.data['image'].split('/')[-1])
@@ -101,12 +101,23 @@ class DataViewSet(viewsets.ModelViewSet):
 
         return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class ConfigurationViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ConfigurationSerializer
     queryset = Configuration.objects.all()
     lookup_field = 'satellite_mission'
 
 
-class MissionsViewSet(viewsets.ModelViewSet):
-    serializer_class = serializers.MissionsSerializer
-    queryset = Missions.objects.all()
+class MissionViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.MissionSerializer
+    queryset = Mission.objects.all()
+
+
+class ConsumedViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.ConsumedMessageSerializer
+    queryset = Consumed.objects.all()
+
+
+class EventViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.EventSerializer
+    queryset = Event.objects.all()

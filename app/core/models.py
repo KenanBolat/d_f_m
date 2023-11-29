@@ -71,7 +71,7 @@ class Data(models.Model):
         return self.title
 
 
-class Missions(models.Model):
+class Mission(models.Model):
     """Missions object."""
     satellite_mission = models.CharField(max_length=255, unique=True)
     is_active = models.BooleanField(null=True, blank=True)
@@ -88,7 +88,7 @@ class Configuration(models.Model):
     """Configuration object."""
     # satellite_mission = models.CharField(max_length=255)
     satellite_mission = models.ForeignKey(
-        Missions,
+        Mission,
         on_delete=models.CASCADE, related_name='missions'
     )
     folder_locations = models.JSONField(null=True, blank=True, default={
@@ -142,3 +142,26 @@ class DataTracking(models.Model):
 
     def __str__(self):
         return self.file_name
+
+
+class Event(models.Model):
+    message_id = models.UUIDField(max_length=255, default=uuid.uuid4, unique=True, editable=False)
+    queue_name = models.CharField(max_length=255)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    service_name = models.CharField(max_length=255)  # Name of the service producing the message
+    producer_ip = models.GenericIPAddressField()
+
+    def __str__(self):
+        return f"{self.message_id}"
+
+
+class Consumed(models.Model):
+    message_id = models.OneToOneField(Event, on_delete=models.CASCADE)
+    consumed_at = models.DateTimeField(auto_now_add=True)
+    consumer_ip = models.GenericIPAddressField()
+    consumer_name = models.CharField(max_length=255)  # Name of the service consuming the message
+
+    def __str__(self):
+        return f"{self.message_id}"
+
