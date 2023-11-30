@@ -91,27 +91,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'HOST': os.environ.get('DB_HOST', 'db'),
-        # 'HOST': os.environ.get('DB_HOST', '192.168.128.2'),
+        # 'HOST': os.environ.get('DB_HOST', '172.28.0.3'),
         'NAME': os.environ.get('DB_NAME', 'devdb'),
         'USER': os.environ.get('DB_USER', 'devuser'),
         'PASSWORD': os.environ.get('DB_PASS', 'kalman'),
     }
 }
-#
-#
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'HOST': 'localhost',
-#         'PORT': 54054,
-#         'NAME': 'devdb',
-#         'USER': 'devuser',
-#         'PASSWORD': 'kalman',
-#     }
-# }
-
-# Password validation
-# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {

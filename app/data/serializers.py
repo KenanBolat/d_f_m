@@ -60,15 +60,18 @@ class ConfigurationSerializer(serializers.ModelSerializer):
                   'ftp_user_name',
                   'ftp_password',
                   'ftp_port', ]
-        lookup_field = 'satellite_mission'
-        read_only_fields = ['satellite_mission']
-        extra_kwargs = {
-            'url': {'lookup_field': 'satellite_mission'}
-        }
+        lookup_field = 'satellite_mission__satellite_mission'
+        # read_only_fields = ['satellite_mission']
+        # extra_kwargs = {
+        #     'url': {'lookup_field': 'satellite_mission'}
+        # }
 
     def create(self, validated_data):
         """Create a data."""
         return Configuration.objects.create(**validated_data)
+
+    def get_satellite_mission(self, obj):
+        return obj.satellite_mission.satellite_mission
 
 
 class MissionSerializer(serializers.ModelSerializer):

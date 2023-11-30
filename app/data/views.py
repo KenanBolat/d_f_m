@@ -105,7 +105,7 @@ class DataViewSet(viewsets.ModelViewSet):
 class ConfigurationViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ConfigurationSerializer
     queryset = Configuration.objects.all()
-    lookup_field = 'satellite_mission'
+    lookup_field = 'satellite_mission__satellite_mission'
 
 
 class MissionViewSet(viewsets.ModelViewSet):
