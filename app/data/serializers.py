@@ -54,14 +54,15 @@ class ConfigurationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Configuration
-        fields = ['satellite_mission',
+        fields = ['id',
+                  'satellite_mission',
                   'folder_locations',
                   'ftp_server',
                   'ftp_user_name',
                   'ftp_password',
                   'ftp_port', ]
         lookup_field = 'satellite_mission__satellite_mission'
-        # read_only_fields = ['satellite_mission']
+        read_only_fields = ['satellite_mission', 'id']
         # extra_kwargs = {
         #     'url': {'lookup_field': 'satellite_mission'}
         # }

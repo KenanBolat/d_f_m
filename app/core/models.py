@@ -87,7 +87,7 @@ class Mission(models.Model):
 class Configuration(models.Model):
     """Configuration object."""
     # satellite_mission = models.CharField(max_length=255)
-    satellite_mission = models.ForeignKey(
+    satellite_mission = models.OneToOneField(
         Mission,
         on_delete=models.CASCADE, related_name='missions'
     )
