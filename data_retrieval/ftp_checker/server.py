@@ -46,7 +46,7 @@ def ftp_check_task():
         # time.sleep(8)  # Simulate time taken to check FTP
         print("4 FTP check done")
         publish_message('FTP check completed successfully')
-        raise Exception("FTP check failed")
+        # raise Exception("FTP check failed")
     except Exception as e:
         print(f"FTP check failed: {e}")
         publish_message(f'FTP check failed: {e}')

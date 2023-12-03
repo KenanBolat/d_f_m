@@ -7,5 +7,5 @@ services:
       - '200-201:20-21/tcp'
       - '40000-40009:40000-40009/tcp'
     volumes:
-      - '/home/knn/Desktop/Test_Data/:/data/'
-#      - '/media/knn/New Volume/Test_Data/:/data/'
+#      - '/home/knn/Desktop/Test_Data/:/data/'
+      - '/media/knn/New Volume/Test_Data/:/data/'

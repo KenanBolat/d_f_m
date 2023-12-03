@@ -34,8 +34,53 @@ services:
       - POSTGRES_PASSWORD=kalman
     ports:
       - '5432:5432'
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - 5672:5672
+      - 15672:15672
+  #    networks:
+  #      - ttmet-net
+
+#  ftp_checker:
+#    build:
+#      context: ./data_retrieval/ftp_checker/
+#      dockerfile: Dockerfile
+#    restart: always
+#    depends_on:
+#      - rabbitmq
+#    environment:
+#      - RABBITMQ_HOST=rabbitmq
+#      - RABBITMQ_PORT=5672
+#      - FTP_CHECKER_SVC=localhost
+#      - FTP_CHECKER_PORT=5000
+#
+#    ports:
+#      - 5021:5000
+#    networks:
+#      - mynet
+
+# dummy ftp server to create a demo
+
+  ftp_server:
+    build: j_data/ftp/
+    ports:
+      - '200-201:20-21/tcp'
+      - '40000-40009:40000-40009/tcp'
+    volumes:
+#      - '/home/knn/Desktop/Test_Data/:/data/'
+      - '/media/knn/New Volume/Test_Data/:/data/'
+
+
 
 volumes:
   dev-static-data:
 
-
+# define network if necessary
+#networks:
+#  ttmet-net:
+#    driver: bridge
