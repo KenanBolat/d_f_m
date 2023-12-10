@@ -58,19 +58,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
 
 
-class Data(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-    )
-    title = models.CharField(max_length=255)
-    data_tag = models.ImageField(null=True, upload_to=data_path)
-    description = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-        return self.title
-
-
 class Mission(models.Model):
     """Missions object."""
     satellite_mission = models.CharField(max_length=255, unique=True)
@@ -165,3 +152,34 @@ class Consumed(models.Model):
     def __str__(self):
         return f"{self.message_id}"
 
+
+class Data(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    title = models.CharField(max_length=255)
+    satellite_mission = models.ForeignKey(Mission, on_delete=models.CASCADE)
+    date_tag = models.CharField(max_length=255)
+    data_tag = models.ImageField(null=True, upload_to=data_path)
+    files = models.JSONField(max_length=255)
+    description = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    PROCESSING = 'processing'
+    CANCELLED = 'cancelled'
+    READY = 'ready'
+    ERROR = 'error'
+    DOWNLOADING = 'downloading'
+    STATUS_CHOICES = [
+        (PROCESSING, 'Processing'),
+        (CANCELLED, 'Cancelled'),
+        (READY, 'Ready'),
+        (ERROR, 'Error'),
+        (DOWNLOADING, 'Downloading'),
+    ]
+
+    status = models.CharField(max_length=255, choices=STATUS_CHOICES)
+    def __str__(self):
+        return self.title

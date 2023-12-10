@@ -18,5 +18,5 @@ if __name__ == '__main__':
     flask_thread.start()
     consumer_thread.start()
 
-    flask_thread.join()
-    consumer_thread.join()
+    # flask_thread.join()
+    # consumer_thread.join()

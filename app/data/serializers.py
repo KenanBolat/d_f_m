@@ -13,7 +13,11 @@ class DataSerializer(serializers.ModelSerializer):
         model = Data
         fields = ['id',
                   'title',
-                  'data_tag', ]
+                  'data_tag',
+                  'date_tag',
+                  'status',
+                  'files',
+                  'satellite_mission']
         read_only_fields = ['id']
 
     def create(self, validated_data):

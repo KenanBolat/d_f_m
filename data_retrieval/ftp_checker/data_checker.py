@@ -1,4 +1,3 @@
-import datetime
 import ftplib
 import re
 import requests
@@ -104,10 +103,6 @@ class CheckProducts(object):
 if __name__ == '__main__':
     a = CheckProducts()
     a.get_missions()
-
-    for mission in a.available_missions:
-        print(f"[ {str(datetime.datetime.now())} ]Checking mission: {mission}")
-        a.satellite_mission(mission)
-        a.check()
-        print(f"[ {str(datetime.datetime.now())} ]Done checking mission: {mission}")
-        print('-----------------------------------------------')
+    a.satellite_mission('MSG')
+    a.satellite_mission('IODC')
+    a.check()

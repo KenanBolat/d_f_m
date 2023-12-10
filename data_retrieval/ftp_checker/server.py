@@ -1,9 +1,12 @@
 from flask import Flask
 from apscheduler.schedulers.background import BackgroundScheduler
 import threading
-import pika
 import time
 import os
+import json
+from test_files_and_folders import CheckProducts
+import requests
+from datetime import datetime
 
 app = Flask(__name__)
 scheduler = BackgroundScheduler()
@@ -15,41 +18,58 @@ task_lock = threading.Lock()
 
 # RabbitMQ Setup
 # rabbitmq_host = 'localhost'  # Change as necessary
-rabbitmq_host = os.environ.get('RABBITMQ_HOST')
-connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host=rabbitmq_host, heartbeat=600, blocked_connection_timeout=300))
-channel = connection.channel()
-channel.queue_declare(queue='ftp_tasks')
+from messagebroker import RabbitMQInterface as rabbitmq
 
-
-def publish_message(body):
-    channel.basic_publish(exchange='',
-                          routing_key='ftp_tasks',
-                          body=body)
+rabbit = rabbitmq(os.environ.get('RABBITMQ_HOST'), 5672, 'guest', 'guest', 'ftp_tasks')
+rabbit.connect()
 
 
 def ftp_check_task():
     global is_task_running
     with task_lock:
         is_task_running = True
-        publish_message('FTP check started')
 
     # Simulate FTP check (replace with real logic)
     print("FTP check started")
     try:
         time.sleep(8)  # Simulate time taken to check FTP
         print("1 FTP checking...")
-        # time.sleep(8)  # Simulate time taken to check FTP
-        # print("2 FTP check...")
-        # time.sleep(8)  # Simulate time taken to check FTP
-        # print("3 FTP check...")
-        # time.sleep(8)  # Simulate time taken to check FTP
-        print("4 FTP check done")
-        publish_message('FTP check completed successfully')
+        satellite_mission = CheckProducts()
+        satellite_mission.get_missions()
+
+        for mission in satellite_mission.available_missions:
+            print(f"[ {str(datetime.now())} ]Checking mission: {mission}")
+            satellite_mission.satellite_mission(mission)
+            res = satellite_mission.check()
+            print(res)
+            print(f"[ {str(datetime.now())} ]Done checking mission: {mission}")
+            print('-' * 50)
+
+
+            url = "http://localhost:8000/api/events/"
+            payload = {
+                "queue_name": "ftp-tasks",
+                "content": f"{rabbit.get_current_time()}::{res}",
+                "service_name": "FTP Checker",
+                "producer_ip": rabbit.get_ip(),
+            }
+            r = requests.post("http://localhost:8000/api/events/", json=payload)
+            if r.status_code == 201:
+                message_id = r.json()['message_id']
+                print(f"Message ID: {message_id}")
+                print("Event sent successfully")
+
+        # Test Fail Scenario
         # raise Exception("FTP check failed")
     except Exception as e:
         print(f"FTP check failed: {e}")
-        publish_message(f'FTP check failed: {e}')
+        payload = {
+            "queue_name": "ftp-tasks",
+            "content": f"{rabbit.get_current_time()}:Failed:Task:{e}",
+            "service_name": "FTP Checker",
+            "producer_ip": rabbit.get_ip(),
+        }
+        rabbit.send(message=json.dumps(payload))
 
     with task_lock:
         is_task_running = False
@@ -60,6 +80,7 @@ def start_monitoring():
     global job
     if not scheduler.running:
         job = scheduler.add_job(ftp_check_task, 'interval', minutes=1)
+        # job = scheduler.add_job(ftp_check_task, 'interval', minutes=1)
         scheduler.start()
         return "FTP Monitoring Started"
     return "FTP Monitoring is already running"
@@ -93,4 +114,4 @@ if __name__ == '__main__':
     try:
         app.run(debug=True, host='0.0.0.0')
     finally:
-        connection.close()
+        rabbit.close()

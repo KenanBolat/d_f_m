@@ -90,3 +90,4 @@ def compare_view(request):
 def health_check(request):
     """Returns successful response."""
     return Response({'healthy': True})
+
