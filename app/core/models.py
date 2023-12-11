@@ -161,7 +161,8 @@ class Data(models.Model):
     title = models.CharField(max_length=255)
     satellite_mission = models.ForeignKey(Mission, on_delete=models.CASCADE)
     date_tag = models.CharField(max_length=255)
-    data_tag = models.ImageField(null=True, upload_to=data_path)
+    # data_tag = models.ImageField(null=True, upload_to=data_path)
+    data_tag = models.CharField(max_length=255)
     files = models.JSONField(max_length=255)
     description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now=True)
@@ -181,5 +182,6 @@ class Data(models.Model):
     ]
 
     status = models.CharField(max_length=255, choices=STATUS_CHOICES)
+
     def __str__(self):
-        return self.title
+        return f"{self.satellite_mission} : {self.date_tag}"
