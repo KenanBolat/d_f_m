@@ -47,7 +47,17 @@ class DataViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Retrieve data for authenticated user."""
-        return self.queryset.filter(user=self.request.user).order_by('-id')
+        queryset = Data.objects.all()
+        satellite_mission = self.request.query_params.get('satellite_mission', None)
+        date_tag = self.request.query_params.get('date_tag', None)
+        status = self.request.query_params.get('status', None)
+        if satellite_mission:
+            queryset = queryset.filter(satellite_mission__satellite_mission=satellite_mission).order_by('-id')
+        if date_tag:
+            queryset = queryset.filter(date_tag=date_tag).order_by('-id')
+        if status:
+            queryset = queryset.filter(status=status).order_by('-id')
+        return queryset
 
     def get_serializer_class(self):
         """Return the serializer class for request."""

@@ -182,6 +182,8 @@ class Data(models.Model):
     ]
 
     status = models.CharField(max_length=255, choices=STATUS_CHOICES)
+    class Meta:
+        unique_together = ('satellite_mission', 'date_tag')
 
     def __str__(self):
         return f"{self.satellite_mission} : {self.date_tag}"

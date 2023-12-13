@@ -6,14 +6,22 @@ from rest_framework import serializers
 from core.models import (Data, Configuration, Mission, Event, Consumed, )
 
 
+class MissionField(serializers.Field):
+    def to_representation(self, value):
+        return value.satellite_mission
+
+    def to_internal_value(self, data):
+        mission = Mission.objects.get(satellite_mission=data)
+        return mission
+
+
 class DataSerializer(serializers.ModelSerializer):
     """Serializer for data."""
+    satellite_mission = MissionField()
 
     class Meta:
         model = Data
         fields = ['id',
-                  'title',
-                  'data_tag',
                   'date_tag',
                   'status',
                   'files',
