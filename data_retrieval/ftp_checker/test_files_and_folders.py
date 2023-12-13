@@ -3,6 +3,7 @@ import ftplib
 import json
 import re
 import requests
+from messagebroker import RabbitMQInterface as rabbit
 
 
 class CheckProducts(object):
@@ -13,10 +14,12 @@ class CheckProducts(object):
         self.config = None  # Configuration of the mission
         self.available_missions = [row['satellite_mission'] for row in self.get_missions()[0]]  # List of missions
         self.file_list = None  # List of files in the FTP server
+        self.rabbit = rabbit('localhost', 5672, 'guest', 'guest', 'ftp_tasks')
 
     def satellite_mission(self, satellite_mission):
         self._satellite_mission = satellite_mission
         self.config = self.get_config()[0]
+        self.rabbit.connect()
 
     def folder_list(self):
         return self.config['folder_locations'].values()
@@ -151,6 +154,21 @@ class CheckProducts(object):
         if response.status_code == 200:
             return response.json(), None
 
+    def create_event(self, queue_name, content, service_name, producer_ip):
+        payload = {
+            "queue_name": queue_name,
+            "content": content,
+            "service_name": service_name,
+            "producer_ip": producer_ip,
+        }
+        r = requests.post("http://localhost:8000/api/events/", json=payload)
+        if r.status_code == 201:
+            message_id = r.json()['message_id']
+
+            print(f"Message ID: {message_id}")
+            print("Event sent successfully")
+            return message_id
+
     def upsert_data(self, status, files=None, date_tag=None):
         data = {'satellite_mission': self._satellite_mission,
                 'status': status,
@@ -187,6 +205,16 @@ if __name__ == '__main__':
 
                 files = a.list_files(f'/{mission}/{date_}/')
                 a.upsert_data('ready', files, date_)
+                content = {
+                    'status': 'ready',
+                    'mission': mission,
+                    'date': date_,
+                    'event_id': None
+                }
+                event_id = a.create_event('ftp-tasks', json.dumps(content), 'FTP Checker', a.rabbit.get_ip())
+                if event_id:
+                    content['event_id'] = event_id
+                    a.rabbit.send(message=json.dumps(content))
             else:
                 print(f'files for {mission} and date {date_} already exist')
 
