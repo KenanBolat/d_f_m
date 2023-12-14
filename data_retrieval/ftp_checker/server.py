@@ -4,7 +4,7 @@ import threading
 import time
 import os
 import json
-from test_files_and_folders import CheckProducts
+from test_files_and_folders import FtpDataCheck
 import requests
 from datetime import datetime
 
@@ -20,7 +20,7 @@ task_lock = threading.Lock()
 # rabbitmq_host = 'localhost'  # Change as necessary
 from messagebroker import RabbitMQInterface as rabbitmq
 
-rabbit = rabbitmq(os.environ.get('RABBITMQ_HOST'), 5672, 'guest', 'guest', 'ftp_tasks')
+rabbit = rabbitmq(os.environ.get('RABBITMQ_HOST', "localhost"), 5672, 'guest', 'guest', 'ftp_tasks')
 rabbit.connect()
 
 
@@ -33,8 +33,10 @@ def ftp_check_task():
     print("FTP check started")
     try:
         # Test Success Scenario
-        CheckProducts()
+
         # Test Fail Scenario
+        checker = FtpDataCheck()
+        checker.full_check()
         # raise Exception("FTP check failed")
     except Exception as e:
         print(f"FTP check failed: {e}")
@@ -43,6 +45,7 @@ def ftp_check_task():
             "content": f"{rabbit.get_current_time()}:Failed:Task:{e}",
             "service_name": "FTP Checker",
             "producer_ip": rabbit.get_ip(),
+            "status": "Failed",
         }
         rabbit.send(message=json.dumps(payload))
 
@@ -87,6 +90,6 @@ start_monitoring()
 
 if __name__ == '__main__':
     try:
-        app.run(debug=True, host='0.0.0.0')
+        app.run(debug=True, host='0.0.0.0', port=5000)
     finally:
         rabbit.close()

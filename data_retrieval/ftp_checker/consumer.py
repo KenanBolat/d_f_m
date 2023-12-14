@@ -9,15 +9,15 @@ import os
 # from data_retrieval.ftp_checker.test_files_and_folders import CheckProducts
 from messagebroker import RabbitMQInterface as rabbitmq
 
-rabbit_ftp = rabbitmq(os.environ.get('RABBITMQ_HOST'), 5672, 'guest', 'guest', 'ftp_tasks')
-rabbit_geo = rabbitmq(os.environ.get('RABBITMQ_HOST'), 5672, 'guest', 'guest', 'geoserver_tasks')
+rabbit_ftp = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'ftp_tasks')
+rabbit_geo = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'geoserver_tasks')
 
 rabbit_ftp.connect()
 rabbit_geo.connect()
 
 
 def callback(ch, method, properties, body):
-    token = 'f4206d39b62d861d105c7b3f184a73dd61782713'
+    token = os.environ.get('TOKEN')
     headers = {'Authorization': f'Token {token}', 'Content-Type': 'application/json'}
     print(f"Received {body}")
 
@@ -33,20 +33,20 @@ def callback(ch, method, properties, body):
 
         ##
         # Initiate the download process
-        if response_current.status_code == 200:
+        if response_current.status_code == 200 and response_current.json()[0]['status'] == 'ready':
             response_on_update = requests.patch(f"http://localhost:8000/api/data/{response_current.json()[0]['id']}/",
                                                 data=json.dumps({
                                                     "status": "downloading",
                                                 }), headers=headers)
             time.sleep(5)
-        if response_on_update.status_code == 200:
+        if response_on_update.status_code == 200 and response_current.json()[0]['status'] == 'downloading':
             time.sleep(5)
             response_done = requests.patch(f"http://localhost:8000/api/data/{response_current.json()[0]['id']}/",
                                            data=json.dumps({
                                                "status": "done",
                                            }), headers=headers)
         ##
-        if response_done.status_code == 200:
+        if response_done.status_code == 200 and response_current.json()[0]['status'] == 'done':
             content = {
                 'status': 'ready',
                 'mission': data['mission'],
@@ -57,7 +57,7 @@ def callback(ch, method, properties, body):
 
 
 def start_consuming():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(os.environ.get('RABBITMQ_HOST')))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(os.environ.get('RABBITMQ_HOST', 'localhost')))
     channel = connection.channel()
 
     channel.queue_declare(queue='ftp_tasks')

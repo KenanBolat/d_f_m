@@ -8,4 +8,4 @@ services:
       - '40000-40009:40000-40009/tcp'
     volumes:
 #      - '/home/knn/Desktop/Test_Data/:/data/'
-      - '/media/knn/New Volume/Test_Data/:/data/'
+      - '/media/knn/New Volume1/Test_Data/:/data/'

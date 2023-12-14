@@ -4,7 +4,7 @@ import json
 import re
 import requests
 from messagebroker import RabbitMQInterface as rabbit
-
+import os
 
 class CheckProducts(object):
     def __init__(self):
@@ -148,7 +148,8 @@ class CheckProducts(object):
         params = {'satellite_mission': self._satellite_mission,
                   'status': status,
                   'date_tag': date_tag}
-        token = 'f4206d39b62d861d105c7b3f184a73dd61782713'
+
+        token = os.environ.get('TOKEN')
         headers = {'Authorization': f'Token {token}'}
         response = requests.get(f"http://{self.host}/api/data/", params=params, headers=headers)
         if response.status_code == 200:
@@ -174,7 +175,8 @@ class CheckProducts(object):
                 'status': status,
                 'date_tag': date_tag,
                 'files': files}
-        token = 'f4206d39b62d861d105c7b3f184a73dd61782713'
+
+        token = os.environ.get('TOKEN')
         headers = {'Authorization': f'Token {token}', 'Content-Type': 'application/json'}
 
         if id := self.get_processed_files(date_tag=date_tag)[0]:
@@ -187,42 +189,46 @@ class CheckProducts(object):
         return response.status_code
 
 
+class FtpDataCheck:
+    def __init__(self):
+        self.status = None
+
+    def full_check(self):
+        check_ = CheckProducts()
+        check_.get_missions()
+        for mission in check_.available_missions:
+            check_.satellite_mission(mission)
+            ftp_ready = check_.check()
+            ftp_ready_dates = ftp_ready[mission]
+            processed_files = check_.get_processed_files()[0]
+
+            dates_ = [row['date_tag'] for row in processed_files if row['status'] not in ['processing', 'downloading', 'ready']]
+            for date_ in ftp_ready_dates:
+                if date_ not in dates_:
+                    print(f'checking data  for {mission} and date {date_} ')
+
+                    files = check_.list_files(f'/{mission}/{date_}/')
+                    check_.upsert_data('ready', files, date_)
+                    content = {
+                        'status': 'ready',
+                        'mission': mission,
+                        'date': date_,
+                        'event_id': None
+                    }
+                    event_id = check_.create_event('ftp-tasks',
+                                                   json.dumps(content),
+                                                   'FTP Checker',
+                                                   check_.rabbit.get_ip())
+                    if event_id:
+                        content['event_id'] = event_id
+                        check_.rabbit.send(message=json.dumps(content))
+                else:
+                    print(f'files for {mission} and date {date_} already exist')
+
+            print(f"[ {str(datetime.datetime.now())} ]Done checking mission: {mission}")
 
 
 if __name__ == '__main__':
+    checker = FtpDataCheck()
+    checker.full_check()
 
-    a = CheckProducts()
-    a.get_missions()
-
-    for mission in a.available_missions:
-        print(f"[ {str(datetime.datetime.now())} ]Checking mission: {mission}")
-        a.satellite_mission(mission)
-        # get all the files in the ftp server that are ready to be downloaded for each mission
-        ftp_ready = a.check()
-        ftp_ready_dates = ftp_ready[mission]
-        c = a.get_processed_files()[0]
-        dates_ = [row['date_tag'] for row in c if row['status'] not in ['processing', 'downloading', 'ready']]
-        for date_ in ftp_ready_dates:
-            if date_ not in dates_:
-                print(f'checking data  for {mission} and date {date_} ')
-
-                files = a.list_files(f'/{mission}/{date_}/')
-                a.upsert_data('ready', files, date_)
-                content = {
-                    'status': 'ready',
-                    'mission': mission,
-                    'date': date_,
-                    'event_id': None
-                }
-                event_id = a.create_event('ftp-tasks', json.dumps(content), 'FTP Checker', a.rabbit.get_ip())
-                if event_id:
-                    content['event_id'] = event_id
-                    a.rabbit.send(message=json.dumps(content))
-            else:
-                print(f'files for {mission} and date {date_} already exist')
-
-        # l['mission]
-
-        a.get_processed_files('202308140600')
-        print(f"[ {str(datetime.datetime.now())} ]Done checking mission: {mission}")
-        print('-----------------------------------------------')
