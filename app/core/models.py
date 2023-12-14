@@ -173,12 +173,14 @@ class Data(models.Model):
     READY = 'ready'
     ERROR = 'error'
     DOWNLOADING = 'downloading'
+    DONE = 'done'
     STATUS_CHOICES = [
         (PROCESSING, 'Processing'),
         (CANCELLED, 'Cancelled'),
         (READY, 'Ready'),
         (ERROR, 'Error'),
         (DOWNLOADING, 'Downloading'),
+        (DONE, 'Done'),
     ]
 
     status = models.CharField(max_length=255, choices=STATUS_CHOICES)

@@ -32,33 +32,8 @@ def ftp_check_task():
     # Simulate FTP check (replace with real logic)
     print("FTP check started")
     try:
-        time.sleep(8)  # Simulate time taken to check FTP
-        print("1 FTP checking...")
-        satellite_mission = CheckProducts()
-        satellite_mission.get_missions()
-
-        for mission in satellite_mission.available_missions:
-            print(f"[ {str(datetime.now())} ]Checking mission: {mission}")
-            satellite_mission.satellite_mission(mission)
-            res = satellite_mission.check()
-            print(res)
-            print(f"[ {str(datetime.now())} ]Done checking mission: {mission}")
-            print('-' * 50)
-
-
-            url = "http://localhost:8000/api/events/"
-            payload = {
-                "queue_name": "ftp-tasks",
-                "content": f"{rabbit.get_current_time()}::{res}",
-                "service_name": "FTP Checker",
-                "producer_ip": rabbit.get_ip(),
-            }
-            r = requests.post("http://localhost:8000/api/events/", json=payload)
-            if r.status_code == 201:
-                message_id = r.json()['message_id']
-                print(f"Message ID: {message_id}")
-                print("Event sent successfully")
-
+        # Test Success Scenario
+        CheckProducts()
         # Test Fail Scenario
         # raise Exception("FTP check failed")
     except Exception as e:

@@ -187,7 +187,10 @@ class CheckProducts(object):
         return response.status_code
 
 
+
+
 if __name__ == '__main__':
+
     a = CheckProducts()
     a.get_missions()
 
