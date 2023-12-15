@@ -12,11 +12,10 @@ from messagebroker import RabbitMQInterface as rabbitmq
 rabbit_ftp = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'ftp_tasks')
 rabbit_geo = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'geoserver_tasks')
 
-rabbit_ftp.connect()
-rabbit_geo.connect()
-
 
 def callback(ch, method, properties, body):
+    rabbit_ftp.connect()
+    rabbit_geo.connect()
     token = os.environ.get('TOKEN')
     headers = {'Authorization': f'Token {token}', 'Content-Type': 'application/json'}
     print(f"Received {body}")
@@ -39,21 +38,21 @@ def callback(ch, method, properties, body):
                                                     "status": "downloading",
                                                 }), headers=headers)
             time.sleep(5)
-        if response_on_update.status_code == 200 and response_current.json()[0]['status'] == 'downloading':
-            time.sleep(5)
-            response_done = requests.patch(f"http://localhost:8000/api/data/{response_current.json()[0]['id']}/",
-                                           data=json.dumps({
-                                               "status": "done",
-                                           }), headers=headers)
-        ##
-        if response_done.status_code == 200 and response_current.json()[0]['status'] == 'done':
-            content = {
-                'status': 'ready',
-                'mission': data['mission'],
-                'date': data['date'],
-                'event_id': data['event_id']
-            }
-            rabbit_geo.send(message=json.dumps(content))
+            if response_on_update.status_code == 200 and response_on_update.json()['status'] == 'downloading':
+                time.sleep(5)
+                response_done = requests.patch(f"http://localhost:8000/api/data/{response_current.json()[0]['id']}/",
+                                               data=json.dumps({
+                                                   "status": "done",
+                                               }), headers=headers)
+                ##
+                if response_done.status_code == 200 and response_done.json()['status'] == 'done':
+                    content = {
+                        'status': 'ready',
+                        'mission': data['mission'],
+                        'date': data['date'],
+                        'event_id': data['event_id']
+                    }
+                    rabbit_geo.send(message=json.dumps(content))
 
 
 def start_consuming():
