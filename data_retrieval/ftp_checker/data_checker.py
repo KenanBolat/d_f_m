@@ -1,7 +1,7 @@
 import ftplib
 import re
 import requests
-
+import os
 
 class CheckProducts(object):
     def __init__(self):
@@ -98,6 +98,21 @@ class CheckProducts(object):
             self.ftp.quit()
         except ftplib.all_errors as e:
             print(f"FTP error: {e}")
+
+    def download_files(self, files):
+        self.connect()
+        for file_ in files:
+            file_name = file_.split('/')[-1]
+            local_file_path = f"./downloaded_files/{file_}"
+            os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
+
+            with open(f"{local_file_path}", 'wb') as local_file:
+                def file_write(data):
+                    local_file.write(data)
+
+                self.ftp.retrbinary(f'RETR {file_}', file_write)
+            print(f"Downloaded {file_name}")
+        self.ftp.quit()
 
 
 if __name__ == '__main__':

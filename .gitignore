@@ -11,3 +11,8 @@ geoserver_data/
 
 *.pyc 
 __pycache__
+
+
+downloaded_files/*
+downloaded_files/
+

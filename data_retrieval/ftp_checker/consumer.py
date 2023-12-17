@@ -11,6 +11,7 @@ from messagebroker import RabbitMQInterface as rabbitmq
 
 rabbit_ftp = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'ftp_tasks')
 rabbit_geo = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'geoserver_tasks')
+rabbit_download = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'download_tasks')
 
 
 def callback(ch, method, properties, body):
@@ -37,13 +38,21 @@ def callback(ch, method, properties, body):
                                                 data=json.dumps({
                                                     "status": "downloading",
                                                 }), headers=headers)
+            rabbit_download.send(message=json.dumps({
+                "status": "downloading",
+                "mission": data['mission'],
+                "date": data['date'],
+                "event_id": data['event_id'],
+
+            }))
+
             time.sleep(5)
             if response_on_update.status_code == 200 and response_on_update.json()['status'] == 'downloading':
-                time.sleep(5)
                 response_done = requests.patch(f"http://localhost:8000/api/data/{response_current.json()[0]['id']}/",
                                                data=json.dumps({
                                                    "status": "done",
                                                }), headers=headers)
+                time.sleep(5)
                 ##
                 if response_done.status_code == 200 and response_done.json()['status'] == 'done':
                     content = {
