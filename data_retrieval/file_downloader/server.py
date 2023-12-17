@@ -2,8 +2,8 @@ import os
 import pika
 import json
 import requests
-from data_retrieval.ftp_checker.messagebroker import RabbitMQInterface as rabbitmq
-from data_retrieval.ftp_checker.data_checker import CheckProducts as checker
+from ftp_checker.messagebroker import RabbitMQInterface as rabbitmq
+from ftp_checker.data_checker import CheckProducts as checker
 import os
 import requests
 
