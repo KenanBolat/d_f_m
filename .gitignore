@@ -15,4 +15,6 @@ __pycache__
 
 downloaded_files/*
 downloaded_files/
+ssh/
+ssh/*
 

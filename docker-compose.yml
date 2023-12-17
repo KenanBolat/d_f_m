@@ -88,10 +88,11 @@ services:
       - USER_UID=1000
       - USER_GID=1000
       - GITEA__database__DB_TYPE=mysql
-      - GITEA__database__HOST=db:3306
+      - GITEA__database__HOST=gitdb:3306
       - GITEA__database__NAME=gitea
       - GITEA__database__USER=gitea
       - GITEA__database__PASSWD=gitea
+      - GITEA__REPOSITORY__ENABLE_PUSH_CREATE_USER=true
     restart: always
     depends_on:
       - gitdb
