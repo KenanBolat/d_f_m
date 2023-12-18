@@ -46,6 +46,7 @@ services:
   #    networks:
   #      - ttmet-net
 
+
 #  ftp_checker:
 #    build:
 #      context: ./data_retrieval/ftp_checker/
@@ -77,6 +78,7 @@ services:
 
   gitserver:
     image: gitea/gitea:latest
+    container_name: gitserver
     ports:
       - '3000:3000'
       - '222:22'
@@ -96,8 +98,7 @@ services:
     restart: always
     depends_on:
       - gitdb
-    networks:
-      - gitea
+
 
   gitdb:
     image: mysql
@@ -107,10 +108,26 @@ services:
         - MYSQL_USER=gitea
         - MYSQL_PASSWORD=gitea
         - MYSQL_DATABASE=gitea
-    networks:
-        - gitea
     volumes:
         - ./mysql:/var/lib/mysql
+
+  data_downloader:
+    build:
+      context: ./data_retrieval/file_downloader/
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+      - gitserver
+      - ftp_server
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - DATA_DOWNLOADER_SVC=localhost
+      - DATA_DOWNLOADER_PORT=5000
+    ports:
+      - 5020:5000
+
 
 volumes:
   dev-static-data:
