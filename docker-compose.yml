@@ -24,6 +24,7 @@ services:
     depends_on:
       - db
 
+
   db:
     image: postgres:13-alpine
     volumes:
@@ -43,29 +44,27 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+
+
+  #  ftp_checker:
+  #    build:
+  #      context: ./data_retrieval/ftp_checker/
+  #      dockerfile: Dockerfile
+  #    restart: always
+  #    depends_on:
+  #      - rabbitmq
+  #    environment:
+  #      - RABBITMQ_HOST=rabbitmq
+  #      - RABBITMQ_PORT=5672
+  #      - FTP_CHECKER_SVC=localhost
+  #      - FTP_CHECKER_PORT=5000
+  #
+  #    ports:
+  #      - 5021:5000
   #    networks:
-  #      - ttmet-net
+  #      - mynet
 
-
-#  ftp_checker:
-#    build:
-#      context: ./data_retrieval/ftp_checker/
-#      dockerfile: Dockerfile
-#    restart: always
-#    depends_on:
-#      - rabbitmq
-#    environment:
-#      - RABBITMQ_HOST=rabbitmq
-#      - RABBITMQ_PORT=5672
-#      - FTP_CHECKER_SVC=localhost
-#      - FTP_CHECKER_PORT=5000
-#
-#    ports:
-#      - 5021:5000
-#    networks:
-#      - mynet
-
-# dummy ftp server to create a demo
+  # dummy ftp server to create a demo
 
   ftp_server:
     build: j_data/ftp/
@@ -73,8 +72,8 @@ services:
       - '200-201:20-21/tcp'
       - '40000-40009:40000-40009/tcp'
     volumes:
-#      - '/home/knn/Desktop/Test_Data/:/data/'
-      - '/media/knn/New Volume/Test_Data/:/data/'
+      - '/home/knn/Desktop/Test_Data/:/data/'
+#      - '/media/knn/New Volume/Test_Data/:/data/'
 
   gitserver:
     image: gitea/gitea:latest
@@ -104,12 +103,12 @@ services:
     image: mysql
     restart: always
     environment:
-        - MYSQL_ROOT_PASSWORD=gitea
-        - MYSQL_USER=gitea
-        - MYSQL_PASSWORD=gitea
-        - MYSQL_DATABASE=gitea
+      - MYSQL_ROOT_PASSWORD=gitea
+      - MYSQL_USER=gitea
+      - MYSQL_PASSWORD=gitea
+      - MYSQL_DATABASE=gitea
     volumes:
-        - ./mysql:/var/lib/mysql
+      - ./mysql:/var/lib/mysql
 
   data_downloader:
     build:
@@ -119,28 +118,28 @@ services:
     depends_on:
       - rabbitmq
       - gitserver
+      - gitdb
       - ftp_server
     environment:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
       - DATA_DOWNLOADER_SVC=localhost
       - DATA_DOWNLOADER_PORT=5000
+      - CORE_APP=app
+      - TOKEN=f4206d39b62d861d105c7b3f184a73dd61782713
     ports:
       - 5020:5000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 
 
 volumes:
   dev-static-data:
 
 # define network if necessary
-#networks:
-#  ttmet-net:
-#    driver: bridge
-
-
-
-
-
 networks:
-    gitea:
-        external: false
+  ttmet-net:
+    driver: bridge
+  gitea:
+    external: false

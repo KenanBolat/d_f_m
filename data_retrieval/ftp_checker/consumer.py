@@ -29,7 +29,7 @@ def callback(ch, method, properties, body):
                    }
         headers = {'Authorization': f'Token {token}', 'Content-Type': 'application/json'}
 
-        response_current = requests.get(f"http://localhost:8000/api/data", params=payload, headers=headers)
+        response_current = requests.get(f"http://localhost:8000/api/data/", params=payload, headers=headers)
 
         ##
         # Initiate the download process

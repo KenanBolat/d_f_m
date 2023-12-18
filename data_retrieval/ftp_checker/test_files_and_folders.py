@@ -29,7 +29,7 @@ class CheckProducts(object):
             print(f"Invalid mission name: {self._satellite_mission}")
             assert "Invalid mission name"
 
-        response = requests.get(f"http://{self.host}/api/configuration/{self._satellite_mission}")
+        response = requests.get(f"http://{self.host}/api/configuration/{self._satellite_mission}/")
         try:
             if response.status_code == 200:
                 return response.json(), None
@@ -38,7 +38,7 @@ class CheckProducts(object):
             return None, (response.text, response.status_code)
 
     def get_missions(self):
-        response = requests.get(f"http://{self.host}/api/configuration")
+        response = requests.get(f"http://{self.host}/api/configuration/")
         try:
             if response.status_code == 200:
                 return response.json(), None
