@@ -1,12 +1,12 @@
-[gc]
-	reflogexpire = 90
-	writeCommitGraph = true
 [diff]
 	algorithm = histogram
 [core]
 	logallrefupdates = true
 	quotePath = false
 	commitGraph = true
+[gc]
+	reflogexpire = 90
+	writeCommitGraph = true
 [user]
 	name = Gitea
 	email = gitea@fake.local

@@ -13,4 +13,4 @@
 
 > ```git remote add origin  http://localhost:3000/mgm/dataconverter.git```
 
-> ```git push -u origin master```
+> ```git push -u origin main```
