@@ -3,13 +3,13 @@ import ftplib
 import json
 import re
 import requests
-from messagebroker import RabbitMQInterface as rabbit
+from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbit
 import os
 
 class CheckProducts(object):
     def __init__(self):
         self._satellite_mission = None
-        self.host = 'localhost:8000'  # Main server host
+        self.host = f"{os.environ.get('CORE_APP', 'localhost')}:8000"  # Main server host
         self.ftp = ftplib.FTP()
         self.config = None  # Configuration of the mission
         self.available_missions = [row['satellite_mission'] for row in self.get_missions()[0]]  # List of missions
@@ -162,7 +162,7 @@ class CheckProducts(object):
             "service_name": service_name,
             "producer_ip": producer_ip,
         }
-        r = requests.post("http://localhost:8000/api/events/", json=payload)
+        r = requests.post(f"http://{os.environ.get('CORE_APP', 'localhost')}:8000/api/events/", json=payload)
         if r.status_code == 201:
             message_id = r.json()['message_id']
 

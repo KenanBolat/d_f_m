@@ -6,8 +6,8 @@ import json
 
 import datetime
 import os
-# from data_retrieval.ftp_checker.test_files_and_folders import CheckProducts
-from messagebroker import RabbitMQInterface as rabbitmq
+from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
+
 
 rabbit_ftp = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'ftp_tasks')
 rabbit_geo = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'geoserver_tasks')
@@ -29,7 +29,9 @@ def callback(ch, method, properties, body):
                    }
         headers = {'Authorization': f'Token {token}', 'Content-Type': 'application/json'}
 
-        response_current = requests.get(f"http://localhost:8000/api/data/", params=payload, headers=headers)
+        response_current = requests.get(f"http://{os.environ.get('CORE_APP', 'localhost')}:8000/api/data/",
+                                        params=payload,
+                                        headers=headers)
 
         ##
         # Initiate the download process
