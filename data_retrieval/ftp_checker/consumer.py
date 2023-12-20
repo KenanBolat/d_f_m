@@ -6,7 +6,8 @@ import json
 
 import datetime
 import os
-from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
+# from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
+from temp.dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
 
 
 rabbit_ftp = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'ftp_tasks')
@@ -36,7 +37,7 @@ def callback(ch, method, properties, body):
         ##
         # Initiate the download process
         if response_current.status_code == 200 and response_current.json()[0]['status'] == 'ready':
-            response_on_update = requests.patch(f"http://localhost:8000/api/data/{response_current.json()[0]['id']}/",
+            response_on_update = requests.patch(f"http://{os.environ.get('CORE_APP', 'localhost')}:8000/api/data/{response_current.json()[0]['id']}/",
                                                 data=json.dumps({
                                                     "status": "downloading",
                                                 }), headers=headers)
@@ -50,7 +51,7 @@ def callback(ch, method, properties, body):
 
             time.sleep(5)
             if response_on_update.status_code == 200 and response_on_update.json()['status'] == 'downloading':
-                response_done = requests.patch(f"http://localhost:8000/api/data/{response_current.json()[0]['id']}/",
+                response_done = requests.patch(f"http://{os.environ.get('CORE_APP', 'localhost')}:8000/api/data/{response_current.json()[0]['id']}/",
                                                data=json.dumps({
                                                    "status": "done",
                                                }), headers=headers)

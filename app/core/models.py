@@ -93,10 +93,10 @@ class Configuration(models.Model):
         'chanel 12': 'WV_062___',
         'chanel 13': 'WV_073___'
     })
-    ftp_server = models.CharField(max_length=255, default='localhost')
+    ftp_server = models.CharField(max_length=255, default='ftp_server')
     ftp_user_name = models.CharField(max_length=255, default='foo')
     ftp_password = models.CharField(max_length=255, default='bar')
-    ftp_port = models.IntegerField(default=201)
+    ftp_port = models.IntegerField(default=21)
     status = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

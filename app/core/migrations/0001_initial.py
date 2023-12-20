@@ -88,10 +88,10 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('folder_locations', models.JSONField(blank=True, default={'chanel 01': '_________', 'chanel 02': 'HRV______', 'chanel 03': 'IR_016___', 'chanel 04': 'IR_039___', 'chanel 05': 'IR_087___', 'chanel 06': 'IR_097___', 'chanel 07': 'IR_108___', 'chanel 08': 'IR_120___', 'chanel 09': 'IR_134___', 'chanel 10': 'VIS006___', 'chanel 11': 'VIS008___', 'chanel 12': 'WV_062___', 'chanel 13': 'WV_073___'}, null=True)),
-                ('ftp_server', models.CharField(default='localhost', max_length=255)),
+                ('ftp_server', models.CharField(default='ftp_server', max_length=255)),
                 ('ftp_user_name', models.CharField(default='foo', max_length=255)),
                 ('ftp_password', models.CharField(default='bar', max_length=255)),
-                ('ftp_port', models.IntegerField(default=201)),
+                ('ftp_port', models.IntegerField(default=21)),
                 ('status', models.CharField(max_length=255)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),

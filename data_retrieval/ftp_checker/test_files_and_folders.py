@@ -3,7 +3,8 @@ import ftplib
 import json
 import re
 import requests
-from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbit
+# from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbit
+from temp.dataconverter.communication.message_broker_if import RabbitMQInterface as rabbit
 import os
 
 class CheckProducts(object):
@@ -14,7 +15,7 @@ class CheckProducts(object):
         self.config = None  # Configuration of the mission
         self.available_missions = [row['satellite_mission'] for row in self.get_missions()[0]]  # List of missions
         self.file_list = None  # List of files in the FTP server
-        self.rabbit = rabbit('localhost', 5672, 'guest', 'guest', 'ftp_tasks')
+        self.rabbit = rabbit(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'ftp_tasks')
 
     def satellite_mission(self, satellite_mission):
         self._satellite_mission = satellite_mission
@@ -154,6 +155,8 @@ class CheckProducts(object):
         response = requests.get(f"http://{self.host}/api/data/", params=params, headers=headers)
         if response.status_code == 200:
             return response.json(), None
+        else:
+            raise Exception(response.text)
 
     def create_event(self, queue_name, content, service_name, producer_ip):
         payload = {
