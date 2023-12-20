@@ -16,10 +16,7 @@ job = None
 is_task_running = False
 task_lock = threading.Lock()
 
-# RabbitMQ Setup
-# rabbitmq_host = 'localhost'  # Change as necessary
-# from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
-from temp.dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
+from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
 
 rabbit = rabbitmq(os.environ.get('RABBITMQ_HOST', "localhost"), 5672, 'guest', 'guest', 'ftp_tasks')
 rabbit.connect()

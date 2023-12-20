@@ -3,9 +3,10 @@ import ftplib
 import json
 import re
 import requests
-# from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbit
-from temp.dataconverter.communication.message_broker_if import RabbitMQInterface as rabbit
 import os
+
+from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbit
+
 
 class CheckProducts(object):
     def __init__(self):
@@ -205,7 +206,8 @@ class FtpDataCheck:
             ftp_ready_dates = ftp_ready[mission]
             processed_files = check_.get_processed_files()[0]
 
-            dates_ = [row['date_tag'] for row in processed_files if row['status'] not in ['processing', 'downloading', 'ready']]
+            dates_ = [row['date_tag'] for row in processed_files if
+                      row['status'] not in ['processing', 'downloading', 'ready']]
             for date_ in ftp_ready_dates:
                 if date_ not in dates_:
                     print(f'checking data  for {mission} and date {date_} ')
@@ -234,4 +236,3 @@ class FtpDataCheck:
 if __name__ == '__main__':
     checker = FtpDataCheck()
     checker.full_check()
-

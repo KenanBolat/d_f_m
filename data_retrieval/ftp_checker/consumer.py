@@ -6,8 +6,7 @@ import json
 
 import datetime
 import os
-# from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
-from temp.dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
+from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
 
 
 rabbit_ftp = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'ftp_tasks')
