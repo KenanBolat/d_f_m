@@ -6,11 +6,16 @@ RUN apt-get update \
   && pip install --no-cache-dir --upgrade pip
 
 WORKDIR /app
+
 COPY ./requirements.txt /app
 COPY ./server.py ./server.py
+
+COPY ./temp /app/temp
+
 RUN pip install --no-cache-dir --requirement /app/requirements.txt
 
 COPY ./initiator.sh ./initiator.sh
+
 RUN chmod +x ./initiator.sh
 
 ENV PYTHONUNBUFFERED=1
