@@ -1,12 +1,9 @@
 from flask import Flask
 from apscheduler.schedulers.background import BackgroundScheduler
 import threading
-import time
 import os
 import json
-from test_files_and_folders import FtpDataCheck
-import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 scheduler = BackgroundScheduler()
@@ -17,6 +14,7 @@ is_task_running = False
 task_lock = threading.Lock()
 
 from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
+from dataconverter.utils.data_checker import FtpDataCheck
 
 rabbit = rabbitmq(os.environ.get('RABBITMQ_HOST', "localhost"), 5672, 'guest', 'guest', 'ftp_tasks')
 rabbit.connect()
@@ -55,7 +53,8 @@ def ftp_check_task():
 def start_monitoring():
     global job
     if not scheduler.running:
-        job = scheduler.add_job(ftp_check_task, 'interval', minutes=2, next_run_time=datetime.now())
+        job = scheduler.add_job(ftp_check_task, 'interval', minutes=10,
+                                next_run_time=datetime.now() + timedelta(minutes=1))
         # job = scheduler.add_job(ftp_check_task, 'interval', minutes=1)
         scheduler.start()
         return "FTP Monitoring Started"

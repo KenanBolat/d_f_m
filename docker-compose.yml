@@ -20,7 +20,7 @@ services:
       - DB_NAME=devdb
       - DB_USER=devuser
       - DB_PASS=kalman
-      - DEBUG=1
+      - DEBUG_MODE=0
     depends_on:
       - db
 
@@ -60,7 +60,8 @@ services:
       - FTP_CHECKER_PORT=5000
       - CORE_APP=app
       - TOKEN=f4206d39b62d861d105c7b3f184a73dd61782713
-  # - TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
+      - DEBUG_MODE=F
+    # - TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
     command: >
       sh -c "bash /app/initiator.sh"
     ports:
@@ -112,7 +113,7 @@ services:
     volumes:
       - ./mysql:/var/lib/mysql
     ports:
-        - 3306:3306
+      - 3306:3306
 
   data_downloader:
     build:
@@ -127,7 +128,6 @@ services:
       - ftp_server
       - ftp_checker
       - db
-
     environment:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
@@ -138,8 +138,6 @@ services:
       # TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
     ports:
       - 5020:5000
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
 
 

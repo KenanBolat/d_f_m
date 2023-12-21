@@ -10,6 +10,7 @@ COPY .env /.env
 
 WORKDIR /app
 COPY ./requirements.txt /app
+#COPY temp/ /app/.temp
 RUN pip install --no-cache-dir --requirement /app/requirements.txt
 COPY . /app
 COPY ./initiator.sh ./initiator.sh
