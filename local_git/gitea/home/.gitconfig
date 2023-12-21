@@ -8,8 +8,8 @@
 	reflogexpire = 90
 	writeCommitGraph = true
 [user]
-	name = Gitea
 	email = gitea@fake.local
+	name = Gitea
 [receive]
 	advertisePushOptions = true
 	procReceiveRefs = refs/for

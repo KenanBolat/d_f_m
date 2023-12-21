@@ -18,3 +18,5 @@ downloaded_files/
 ssh/
 ssh/*
 
+local_git
+local_git/*
