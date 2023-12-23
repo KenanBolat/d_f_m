@@ -59,9 +59,10 @@ services:
       - FTP_CHECKER_SVC=localhost
       - FTP_CHECKER_PORT=5000
       - CORE_APP=app
-      - TOKEN=f4206d39b62d861d105c7b3f184a73dd61782713
       - DEBUG_MODE=F
-    # - TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
+      - TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
+      # - TOKEN=f4206d39b62d861d105c7b3f184a73dd61782713
+
     command: >
       sh -c "bash /app/initiator.sh"
     ports:
@@ -85,7 +86,7 @@ services:
       - '3000:3000'
       - '222:22'
     volumes:
-      - './local_git:/data/'
+      - '.gitserver/git_data:/data/'
       - '/etc/timezone:/etc/timezone:ro'
       - '/etc/localtime:/etc/localtime:ro'
     environment:
@@ -111,7 +112,7 @@ services:
       - MYSQL_PASSWORD=gitea
       - MYSQL_DATABASE=gitea
     volumes:
-      - ./mysql:/var/lib/mysql
+      - .gitserver/db/mysql:/var/lib/mysql
     ports:
       - 3306:3306
 
@@ -134,8 +135,8 @@ services:
       - DATA_DOWNLOADER_SVC=localhost
       - DATA_DOWNLOADER_PORT=5000
       - CORE_APP=app
-      - TOKEN=f4206d39b62d861d105c7b3f184a73dd61782713
-      # TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
+      # - TOKEN=f4206d39b62d861d105c7b3f184a73dd61782713
+      - TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
     ports:
       - 5020:5000
 

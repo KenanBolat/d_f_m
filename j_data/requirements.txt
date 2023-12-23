@@ -17,7 +17,6 @@ traitlets==5.9.0
 notebook==6.4.12
 confluent_kafka
 pika
-fastapi
 pydantic
 typing
 uvicorn
