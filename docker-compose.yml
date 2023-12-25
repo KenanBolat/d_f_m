@@ -20,7 +20,7 @@ services:
       - DB_NAME=devdb
       - DB_USER=devuser
       - DB_PASS=kalman
-      - DEBUG_MODE=0
+      - DEBUG=1
     depends_on:
       - db
 
@@ -59,9 +59,8 @@ services:
       - FTP_CHECKER_SVC=localhost
       - FTP_CHECKER_PORT=5000
       - CORE_APP=app
-      - DEBUG_MODE=F
-      - TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
-      # - TOKEN=f4206d39b62d861d105c7b3f184a73dd61782713
+      - DEBUG_MODE=False
+      - TOKEN=4d08fb583941ba6a6c3e91ba597487cf149b2d45
 
     command: >
       sh -c "bash /app/initiator.sh"
@@ -135,8 +134,8 @@ services:
       - DATA_DOWNLOADER_SVC=localhost
       - DATA_DOWNLOADER_PORT=5000
       - CORE_APP=app
-      # - TOKEN=f4206d39b62d861d105c7b3f184a73dd61782713
-      - TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
+      - TOKEN=4d08fb583941ba6a6c3e91ba597487cf149b2d45
+
     ports:
       - 5020:5000
 

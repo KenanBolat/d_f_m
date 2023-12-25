@@ -20,3 +20,6 @@ ssh/*
 
 local_git
 local_git/*
+
+.gitserver
+.gitserver/*
