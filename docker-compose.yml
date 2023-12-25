@@ -51,7 +51,6 @@ services:
     restart: on-failure
     depends_on:
       - rabbitmq
-      - gitserver
       - app
     environment:
       - RABBITMQ_HOST=rabbitmq
@@ -60,7 +59,7 @@ services:
       - FTP_CHECKER_PORT=5000
       - CORE_APP=app
       - DEBUG_MODE=False
-      - TOKEN=4d08fb583941ba6a6c3e91ba597487cf149b2d45
+      - TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
 
     command: >
       sh -c "bash /app/initiator.sh"
@@ -78,43 +77,6 @@ services:
     volumes:
       - '/media/knn/New Volume/Test_Data/:/data/'
 
-  gitserver:
-    image: gitea/gitea:latest
-    container_name: gitserver
-    ports:
-      - '3000:3000'
-      - '222:22'
-    volumes:
-      - '.gitserver/git_data:/data/'
-      - '/etc/timezone:/etc/timezone:ro'
-      - '/etc/localtime:/etc/localtime:ro'
-    environment:
-      - USER_UID=1000
-      - USER_GID=1000
-      - GITEA__database__DB_TYPE=mysql
-      - GITEA__database__HOST=gitdb:3306
-      - GITEA__database__NAME=gitea
-      - GITEA__database__USER=gitea
-      - GITEA__database__PASSWD=gitea
-      - GITEA__REPOSITORY__ENABLE_PUSH_CREATE_USER=true
-    restart: always
-    depends_on:
-      - gitdb
-
-
-  gitdb:
-    image: mysql
-    restart: always
-    environment:
-      - MYSQL_ROOT_PASSWORD=gitea
-      - MYSQL_USER=gitea
-      - MYSQL_PASSWORD=gitea
-      - MYSQL_DATABASE=gitea
-    volumes:
-      - .gitserver/db/mysql:/var/lib/mysql
-    ports:
-      - 3306:3306
-
   data_downloader:
     build:
       context: ./data_retrieval/file_downloader/
@@ -122,8 +84,6 @@ services:
     restart: always
     depends_on:
       - rabbitmq
-      - gitserver
-      - gitdb
       - app
       - ftp_server
       - ftp_checker
@@ -134,11 +94,48 @@ services:
       - DATA_DOWNLOADER_SVC=localhost
       - DATA_DOWNLOADER_PORT=5000
       - CORE_APP=app
-      - TOKEN=4d08fb583941ba6a6c3e91ba597487cf149b2d45
+      - TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
 
     ports:
       - 5020:5000
 
+
+#  gitserver:
+#    image: gitea/gitea:latest
+#    container_name: gitserver
+#    ports:
+#      - '3000:3000'
+#      - '222:22'
+#    volumes:
+#      - '.gitserver/git_data:/data/'
+#      - '/etc/timezone:/etc/timezone:ro'
+#      - '/etc/localtime:/etc/localtime:ro'
+#    environment:
+#      - USER_UID=1000
+#      - USER_GID=1000
+#      - GITEA__database__DB_TYPE=mysql
+#      - GITEA__database__HOST=gitdb:3306
+#      - GITEA__database__NAME=gitea
+#      - GITEA__database__USER=gitea
+#      - GITEA__database__PASSWD=gitea
+#      - GITEA__REPOSITORY__ENABLE_PUSH_CREATE_USER=true
+#    restart: always
+#    depends_on:
+#      - gitdb
+
+#
+#  gitdb:
+#    image: mysql
+#    restart: always
+#    environment:
+#      - MYSQL_ROOT_PASSWORD=gitea
+#      - MYSQL_USER=gitea
+#      - MYSQL_PASSWORD=gitea
+#      - MYSQL_DATABASE=gitea
+#    volumes:
+#      - .gitserver/db/mysql:/var/lib/mysql
+#    ports:
+#      - 3306:3306
 
 
 volumes:

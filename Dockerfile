@@ -3,7 +3,6 @@ LABEL maintainer='Kenan BOLAT'
 
 ENV PYTHONUNBUFFERED 1
 COPY ./requirements.txt /tmp/requirements.txt
-COPY ./requirements.dev.txt /tmp/requirements.dev.txt
 COPY ./scripts/run.sh /scripts/run.sh
 COPY ./app /app
 WORKDIR /app

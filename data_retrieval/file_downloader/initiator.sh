@@ -1,8 +1,10 @@
 #!/bin/bash
 
 cd /app/;
-git clone http://gitserver:3000/mgm/dataconverter.git ;
-cd dataconverter;
+#git clone http://gitserver:3000/mgm/dataconverter.git ;
+#cd dataconverter;
+git clone https://github.com/KenanBolat/tmet_sdk.git
+cd tmet_sdk;
 python setup.py install ;
 
 cd /app; 
