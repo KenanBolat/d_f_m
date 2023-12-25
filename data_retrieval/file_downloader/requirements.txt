@@ -1,3 +1,10 @@
 pika
 requests
 flask
+numpy 
+pandas 
+xarray
+matplotlib
+satpy
+rasterio
+netcdf4==1.6.2
