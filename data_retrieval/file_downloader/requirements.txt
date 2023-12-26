@@ -8,3 +8,6 @@ matplotlib
 satpy
 rasterio
 netcdf4==1.6.2
+hdf5plugin==4.3.0
+h5py
+rioxarray

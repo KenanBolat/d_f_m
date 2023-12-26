@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import satpy
 import rasterio
 from satpy.utils import check_satpy
+import rasterio
+import rioxarray
 
 os.environ['XRIT_DECOMPRESS_PATH'] = '/opt/conda/pkgs/public-decomp-wt-2.8.1-h3fd9d12_1/bin/xRITDecompress'
 # os.environ['XRIT_DECOMPRESS_PATH'] = '/usr/local/bin/xRITDecompress'
@@ -15,13 +17,18 @@ os.environ['TOKEN'] = '4d08fb583941ba6a6c3e91ba597487cf149b2d45'
 
 
 class DataConverter(object):
-    def __init__(self, date_tag, mission, event_id, filenames):
+    def __init__(self, date_tag, mission, event_id, file_list):
         self.date_tag = date_tag
         self.mission = mission
         self.event_id = event_id
-        self.filenames = filenames
+        self.filenames = file_list
         self.scn = None
-        self.prefix = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/downloaded_files/'
+        self.aoi = None
+        self.expiration_date = 300  # 5 minutes
+        self.nc_filename_hrv = None
+        self.nc_filename_vis = None
+        # self.prefix = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/downloaded_files/'
+        self.prefix = r'/media/knn/New Volume/Test_Data/'
         self.TEMP_DIR = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/temp/'
         self.TOKEN = os.environ.get('TOKEN')
         self.readers = {'MSG': 'seviri_l1b_hrit',
@@ -48,17 +55,35 @@ class DataConverter(object):
                     writers=['geotiff', 'cf', 'simple_image'],
                     extras=['cartopy', 'geoviews'])
 
+    def apply_aoi(self):
+        """Applies area of interest to the data"""
+        pass
+
     def convert(self):
-        if self.data_type == 'netcdf':
-            return self._convert_netcdf()
-        elif self.data_type == 'png':
-            return self._convert_png()
-        elif self.data_type == 'xml':
-            return self._convert_geotiff()
-        elif self.data_type == 'hdf':
-            return self._convert_hdf()
-        else:
-            raise ValueError('Invalid data type: {}'.format(self.data_type))
+        self.reader()
+        self.read_data()
+
+        if self._convert_netcdf():
+            self.upload_to_mongodb()
+
+        if self._convert_png():
+            self.upload_to_mongodb()
+
+        if self._convert_tiff():
+            self.upload_to_mongodb()
+
+    def remove_files(self):
+        """Removes all files from the temp directory"""
+        pass
+
+    def upload_to_mongodb(self):
+        # TODO: Upload to mongodb
+        # TODO: Delete temp files
+        # TODO: Delete downloaded files
+        # TODO: Delete netcdf files
+        # TODO: Delete png files
+        #
+        pass
 
     def read_data(self):
 
@@ -69,8 +94,6 @@ class DataConverter(object):
         self.scn.load(self.seviri_data_names)
         if self.check_bands():
             self._convert_netcdf()
-
-        pass
 
     def check_bands(self):
         channels = [r for r in self.scn.available_dataset_names() if r not in self.seviri_data_names]
@@ -85,18 +108,28 @@ class DataConverter(object):
         """Converts netcdf data to netcdf"""
         vis_datasets = [r for r in self.seviri_data_names if r is not 'HRV']
         hrv_datasets = [r for r in self.seviri_data_names if r is 'HRV']
-        nc_filename_hrv = os.path.join(self.TEMP_DIR, f'{self.mission}_{self.date_tag}_hrv.nc')
-        nc_filename_vis = os.path.join(self.TEMP_DIR, f'{self.mission}_{self.date_tag}_vis.nc')
-        self.scn.save_datasets(writer='cf', datasets=hrv_datasets, filename=nc_filename_hrv)
-        self.scn.save_datasets(writer='cf', datasets=vis_datasets, filename=nc_filename_vis)
+        self.nc_filename_hrv = os.path.join(self.TEMP_DIR, f'{self.mission}_{self.date_tag}_hrv.nc')
+        self.nc_filename_vis = os.path.join(self.TEMP_DIR, f'{self.mission}_{self.date_tag}_vis.nc')
+        self.scn.save_datasets(writer='cf', datasets=hrv_datasets, filename=self.nc_filename_hrv)
+        self.scn.save_datasets(writer='cf', datasets=vis_datasets, filename=self.nc_filename_vis)
 
-    def _convert_csv(self):
-        """Converts csv data to netcdf"""
-        pass
+    def _convert_png(self):
+        from satpy.composites import GenericCompositor
+        # compositor = GenericCompositor("overview")
+        # compositor = GenericCompositor(['IR_108', 'IR_087', 'IR_120'])
+        # rgb_composite = satpy.composits.GenericCompositor(['IR_108', 'IR_087', 'IR_120'])
+        tag = f'{self.mission}_{self.date_tag}'
+        self.scn.save_datasets(writer='simple_image', filename=os.path.join(self.TEMP_DIR, tag + '_{name}.png'))
 
-    def _convert_xml(self):
-        """Converts xml data to netcdf"""
-        pass
+    def _convert_tiff(self):
+        """Converts data to geotiff"""
+        rds = rioxarray.open_rasterio(self.nc_filename_vis)
+        for ch in [r for r in self.seviri_data_names if r is not 'HRV']:
+            rds[ch].rio.to_raster(os.path.join(self.TEMP_DIR, f"{self.mission}_{self.date_tag}_{ch}.tif"))
+        del rds
+        rds = rioxarray.open_rasterio(self.nc_filename_hrv)
+        for ch in ['HRV']:
+            rds[ch].rio.to_raster(os.path.join(self.TEMP_DIR, f"{self.mission}_{self.date_tag}_{ch}.tif"))
 
 
 if __name__ == '__main__':
@@ -215,7 +248,7 @@ if __name__ == '__main__':
                  "/MSG/202308140645/_________/H-000-MSG3__-MSG3________-_________-EPI______-202308140645-__",
                  "/MSG/202308140645/_________/H-000-MSG3__-MSG3________-_________-PRO______-202308140645-__"]
 
-    d = DataConverter('202308140845', 'MSG', '0fbfb057-bc61-48ef-b9ff-e4c2d8ef8bd0', filenames=filenames)
+    d = DataConverter('202308140845', 'MSG', '0fbfb057-bc61-48ef-b9ff-e4c2d8ef8bd0', file_list=filenames)
     d.check_imports()
     d.read_data()
     d._convert_netcdf()
