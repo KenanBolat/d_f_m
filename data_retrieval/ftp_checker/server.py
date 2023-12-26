@@ -53,7 +53,7 @@ def ftp_check_task():
 def start_monitoring():
     global job
     if not scheduler.running:
-        job = scheduler.add_job(ftp_check_task, 'interval', minutes=10,
+        job = scheduler.add_job(ftp_check_task, 'interval', minutes=2,
                                 next_run_time=datetime.now() + timedelta(minutes=1))
         # job = scheduler.add_job(ftp_check_task, 'interval', minutes=1)
         scheduler.start()
@@ -83,6 +83,7 @@ def status():
 
 
 # Call the start monitoring method directly
+print(f"Starting FTP Monitoring: {datetime.now()}")
 start_monitoring()
 
 if __name__ == '__main__':

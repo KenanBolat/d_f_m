@@ -27,6 +27,7 @@ attempt_num=1
 if [[ -z "${RABBITMQ_HOST}" ]]; then
   echo "var"
 else
+  echo "var2"
   until ping -c 1 ${RABBITMQ_HOST}  || [ $attempt_num -eq $max_attempts ]
     do
       echo "Attempt $attempt_num of $max_attempts failed! Trying again in 5 seconds..."
@@ -35,7 +36,8 @@ else
     done
 fi
 
-
+# wait for rabbitmq to start
+sleep 25
 python server.py &
 python consumer.py &
 tail -f /dev/null

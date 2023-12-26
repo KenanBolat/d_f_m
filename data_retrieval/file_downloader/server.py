@@ -1,3 +1,4 @@
+import datetime
 import os
 import pika
 import json
@@ -62,5 +63,6 @@ class FileDownloadConsumer:
 
 
 # Usage
+print(f"[{datetime.datetime.now().strftime('%Y%m%d%H%S')}] : ", "Starting consumer...")
 consumer = FileDownloadConsumer()
 consumer.run()
