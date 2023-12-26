@@ -23,3 +23,9 @@ local_git/*
 
 .gitserver
 .gitserver/*
+*.nc 
+*.netcdf
+*.geotiff
+*.tiff
+*.tif
+/temp/
