@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from core.models import (Data, Configuration, Mission, Consumed, Event, )
+from core.models import (Data, Configuration, Mission, Consumed, Event, File)
 
 from . import serializers
 # from .serializers import ForeignerSerializer
@@ -131,3 +131,8 @@ class ConsumedViewSet(viewsets.ModelViewSet):
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.EventSerializer
     queryset = Event.objects.all()
+
+
+class FileViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.FileSerializer
+    queryset = File.objects.all()

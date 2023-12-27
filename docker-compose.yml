@@ -59,7 +59,7 @@ services:
       - FTP_CHECKER_PORT=5000
       - CORE_APP=app
       - DEBUG_MODE=False
-      - TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
+      - TOKEN=${TOKEN}
 
     command: >
       sh -c "bash /app/initiator.sh"
@@ -94,7 +94,7 @@ services:
       - DATA_DOWNLOADER_SVC=localhost
       - DATA_DOWNLOADER_PORT=5000
       - CORE_APP=app
-      - TOKEN=50192004bc9fc7498b3a55f0e8e7bbc22967553a
+      - TOKEN=${TOKEN}
 
     ports:
       - 5020:5000

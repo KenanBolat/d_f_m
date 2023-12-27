@@ -15,6 +15,7 @@ router.register('missions', views.MissionViewSet)
 router.register('configuration', views.ConfigurationViewSet)
 router.register('events', views.EventViewSet)
 router.register('consumer', views.ConsumedViewSet)
+router.register('file', views.FileViewSet)
 
 app_name = 'data'
 urlpatterns = [path('', include(router.urls)), ]

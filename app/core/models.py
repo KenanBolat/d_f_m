@@ -189,3 +189,24 @@ class Data(models.Model):
 
     def __str__(self):
         return f"{self.satellite_mission} : {self.date_tag}"
+
+
+class File(models.Model):
+    data = models.ForeignKey(Data, on_delete=models.CASCADE)
+    file_name = models.CharField(max_length=255)
+    file_path = models.CharField(max_length=255)
+    file_size = models.CharField(max_length=255)
+    file_date = models.CharField(max_length=255)
+    file_type = models.CharField(max_length=255)
+    file_status = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    is_active = models.BooleanField(null=True, blank=True)
+
+    download_url = models.CharField(max_length=255, null=True, blank=True)
+    downloaded = models.BooleanField(max_length=255, null=True, blank=True)
+    downloaded_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.file_name

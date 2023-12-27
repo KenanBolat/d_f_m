@@ -3,7 +3,7 @@ Serializers for FaceID API.
 """
 from rest_framework import serializers
 
-from core.models import (Data, Configuration, Mission, Event, Consumed, )
+from core.models import (Data, Configuration, Mission, Event, Consumed, File)
 
 
 class MissionField(serializers.Field):
@@ -127,6 +127,26 @@ class EventSerializer(serializers.ModelSerializer):
         return instance
 
 
+class FileSerializer(serializers.ModelSerializer):
+    """Serializer for files."""
+
+    class Meta:
+        model = File
+        fields = ['id', 'file_name', 'file_path', 'file_size', 'file_type', 'file_status', 'created_at', 'updated_at', 'is_active', 'download_url', 'downloaded_at', ]
+        read_only_fields = ['id']
+
+    def create(self, validated_data):
+        """Create a data."""
+        return File.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        """Update data."""
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
 class ConsumedMessageSerializer(serializers.ModelSerializer):
     """Serializer for consumed messages."""
 
@@ -137,7 +157,7 @@ class ConsumedMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Consumed
-        fields = ['id', 'message_id', 'consumed_at', 'consumer_ip', 'consumer_name', ]
+        fields = ['id', 'message_id', 'consumed_at', 'consumer_ip', 'consumer_name',  ]
         read_only_fields = ['id']
 
     def create(self, validated_data):

@@ -120,6 +120,11 @@ class DataConverter(object):
         # rgb_composite = satpy.composits.GenericCompositor(['IR_108', 'IR_087', 'IR_120'])
         tag = f'{self.mission}_{self.date_tag}'
         self.scn.save_datasets(writer='simple_image', filename=os.path.join(self.TEMP_DIR, tag + '_{name}.png'))
+        self._create_overiew()
+
+    def _create_overiew(self):
+        """ Create an overview image of the data"""
+        pass
 
     def _convert_tiff(self):
         """Converts data to geotiff"""
