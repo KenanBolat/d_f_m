@@ -7,8 +7,10 @@ import requests
 from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
 from dataconverter.utils.data_checker import CheckProducts as checker
 
+from converter import DataConverter
 
-class FileDownloadConsumer:
+
+class FileConverterConsumer:
     def __init__(self, queue_name='geoserver_tasks'):
         self._queue_name = queue_name
         self._channel = None
@@ -26,22 +28,23 @@ class FileDownloadConsumer:
                 "date_tag": message_body['date'],
             }
             headers = {'Authorization': f'Token {os.environ.get("TOKEN")}', 'Content-Type': 'application/json'}
-            response = requests.get(f"http://{os.environ.get('CORE_APP', 'app')}:8000/api/data/", params=payload,
+            response = requests.get(f"http://{os.environ.get('CORE_APP', 'localhost')}:8000/api/data/",
+                                    params=payload,
                                     headers=headers)
-            if response.status_code == 200 and len(response.json())==1:
+            if response.status_code == 200 and len(response.json()) == 1:
                 files = response.json()[0]['files']
-                self.download_files(payload['satellite_mission'], files)
+                date_tag = response.json()[0]['date_tag']
+                satellite_mission = response.json()[0]['satellite_mission']
+                id = response.json()[0]['id']
+                dcv = DataConverter(date_tag, satellite_mission, id, file_list=files)
+                dcv.convert()
+
             channel.basic_ack(delivery_tag=method_frame.delivery_tag)
 
         except Exception as e:
             print(f"Failed to process message: {e}")
             # Requeue the message for future processing
             channel.basic_nack(delivery_tag=method_frame.delivery_tag)
-
-    def download_files(self, satellite_mission, files_list):
-        checker_ = checker()
-        checker_.satellite_mission(satellite_mission)
-        checker_.download_files(files_list)
 
     def start_consuming(self):
         self._channel.basic_consume(queue=self._queue_name, on_message_callback=self.on_message)
@@ -64,5 +67,5 @@ class FileDownloadConsumer:
 
 # Usage
 print(f"[{datetime.datetime.now().strftime('%Y%m%d%H%S')}] : ", "Starting consumer...")
-consumer = FileDownloadConsumer()
+consumer = FileConverterConsumer()
 consumer.run()

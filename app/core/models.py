@@ -184,6 +184,7 @@ class Data(models.Model):
     ]
 
     status = models.CharField(max_length=255, choices=STATUS_CHOICES)
+
     class Meta:
         unique_together = ('satellite_mission', 'date_tag')
 
@@ -207,6 +208,9 @@ class File(models.Model):
     download_url = models.CharField(max_length=255, null=True, blank=True)
     downloaded = models.BooleanField(max_length=255, null=True, blank=True)
     downloaded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('data', 'file_name')
 
     def __str__(self):
         return self.file_name

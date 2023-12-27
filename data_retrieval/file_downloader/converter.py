@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import matplotlib.pyplot as plt
+import requests
 import satpy
 import rasterio
 from satpy.utils import check_satpy
@@ -13,20 +14,31 @@ import rioxarray
 
 os.environ['XRIT_DECOMPRESS_PATH'] = '/opt/conda/pkgs/public-decomp-wt-2.8.1-h3fd9d12_1/bin/xRITDecompress'
 # os.environ['XRIT_DECOMPRESS_PATH'] = '/usr/local/bin/xRITDecompress'
-os.environ['TOKEN'] = '4d08fb583941ba6a6c3e91ba597487cf149b2d45'
+os.environ['TOKEN'] = '7620dd5174895ae5dd4b99817b9ff47225733913'
 
 
 class DataConverter(object):
-    def __init__(self, date_tag, mission, event_id, file_list):
+    def __init__(self, date_tag, mission, id, file_list):
         self.date_tag = date_tag
         self.mission = mission
-        self.event_id = event_id
+        self.data = id
         self.filenames = file_list
         self.scn = None
         self.aoi = None
         self.expiration_date = 300  # 5 minutes
         self.nc_filename_hrv = None
         self.nc_filename_vis = None
+        self.file_payload = {
+            "data": self.data,
+            "file_name": None,
+            "file_date": self.date_tag,
+            "file_path": None,
+            "file_size": None,
+            "file_type": None,
+            "file_status": None,
+            "is_active": True,
+        }
+
         # self.prefix = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/downloaded_files/'
         self.prefix = r'/media/knn/New Volume/Test_Data/'
         self.TEMP_DIR = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/temp/'
@@ -61,7 +73,7 @@ class DataConverter(object):
 
     def convert(self):
         self.reader()
-        self.read_data()
+        self.convert_data()
 
         if self._convert_netcdf():
             self.upload_to_mongodb()
@@ -85,7 +97,7 @@ class DataConverter(object):
         #
         pass
 
-    def read_data(self):
+    def convert_data(self):
 
         files_updated = [os.path.join(self.prefix, f[1:]) for f in self.filenames]
 
@@ -94,6 +106,7 @@ class DataConverter(object):
         self.scn.load(self.seviri_data_names)
         if self.check_bands():
             self._convert_netcdf()
+            self._convert_png()
 
     def check_bands(self):
         channels = [r for r in self.scn.available_dataset_names() if r not in self.seviri_data_names]
@@ -104,14 +117,46 @@ class DataConverter(object):
         else:
             return True
 
+    def update_payload(self, **kwargs):
+        """Updates the file status"""
+        for key, value in kwargs.items():
+            self.file_payload[key] = value
+
+    def update_file_status(self):
+        """Updates the file status"""
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(f"http://{os.environ.get('CORE_APP', 'localhost')}:8000/api/file/",
+                                 json=self.file_payload,
+                                 headers=headers)
+        if response.status_code == 201:
+            print(f"File {self.file_payload['file_name']} uploaded successfully")
+        else:
+            print(f"File {self.file_payload['file_name']} upload failed {response.status_code} {response.json()}")
+
     def _convert_netcdf(self):
         """Converts netcdf data to netcdf"""
         vis_datasets = [r for r in self.seviri_data_names if r is not 'HRV']
         hrv_datasets = [r for r in self.seviri_data_names if r is 'HRV']
         self.nc_filename_hrv = os.path.join(self.TEMP_DIR, f'{self.mission}_{self.date_tag}_hrv.nc')
         self.nc_filename_vis = os.path.join(self.TEMP_DIR, f'{self.mission}_{self.date_tag}_vis.nc')
+
         self.scn.save_datasets(writer='cf', datasets=hrv_datasets, filename=self.nc_filename_hrv)
         self.scn.save_datasets(writer='cf', datasets=vis_datasets, filename=self.nc_filename_vis)
+
+        self.update_payload(file_name=f'{self.mission}_{self.date_tag}_hrv.nc',
+                            file_path=self.nc_filename_hrv,
+                            file_type='netcdf',
+                            file_size=os.path.getsize(self.nc_filename_hrv),
+                            file_status='converted')
+
+        self.update_file_status()
+
+        self.update_payload(file_name=f'{self.mission}_{self.date_tag}_vis.nc',
+                            file_path=self.nc_filename_vis,
+                            file_type='netcdf',
+                            file_size=os.path.getsize(self.nc_filename_vis),
+                            file_status='converted')
+        self.update_file_status()
 
     def _convert_png(self):
         from satpy.composites import GenericCompositor
@@ -120,6 +165,15 @@ class DataConverter(object):
         # rgb_composite = satpy.composits.GenericCompositor(['IR_108', 'IR_087', 'IR_120'])
         tag = f'{self.mission}_{self.date_tag}'
         self.scn.save_datasets(writer='simple_image', filename=os.path.join(self.TEMP_DIR, tag + '_{name}.png'))
+
+        for png in glob.glob(os.path.join(self.TEMP_DIR, tag + '_*.png')):
+            self.update_payload(file_name=f'{png.split("/")[-1]}',
+                                file_path=png,
+                                file_type='png',
+                                file_size=os.path.getsize(png),
+                                file_status='converted')
+            self.update_file_status()
+
         self._create_overiew()
 
     def _create_overiew(self):
@@ -136,124 +190,9 @@ class DataConverter(object):
         for ch in ['HRV']:
             rds[ch].rio.to_raster(os.path.join(self.TEMP_DIR, f"{self.mission}_{self.date_tag}_{ch}.tif"))
 
-
-if __name__ == '__main__':
-    filenames = ["/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000001___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000002___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000003___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000004___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000005___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000006___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000007___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000008___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000009___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000010___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000011___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000012___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000013___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000014___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000015___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000016___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000017___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000018___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000019___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000020___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000021___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000022___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000023___-202308140645-__",
-                 "/MSG/202308140645/HRV______/H-000-MSG3__-MSG3________-HRV______-000024___-202308140645-__",
-                 "/MSG/202308140645/IR_016___/H-000-MSG3__-MSG3________-IR_016___-000001___-202308140645-__",
-                 "/MSG/202308140645/IR_016___/H-000-MSG3__-MSG3________-IR_016___-000002___-202308140645-__",
-                 "/MSG/202308140645/IR_016___/H-000-MSG3__-MSG3________-IR_016___-000003___-202308140645-__",
-                 "/MSG/202308140645/IR_016___/H-000-MSG3__-MSG3________-IR_016___-000004___-202308140645-__",
-                 "/MSG/202308140645/IR_016___/H-000-MSG3__-MSG3________-IR_016___-000005___-202308140645-__",
-                 "/MSG/202308140645/IR_016___/H-000-MSG3__-MSG3________-IR_016___-000006___-202308140645-__",
-                 "/MSG/202308140645/IR_016___/H-000-MSG3__-MSG3________-IR_016___-000007___-202308140645-__",
-                 "/MSG/202308140645/IR_016___/H-000-MSG3__-MSG3________-IR_016___-000008___-202308140645-__",
-                 "/MSG/202308140645/IR_039___/H-000-MSG3__-MSG3________-IR_039___-000001___-202308140645-__",
-                 "/MSG/202308140645/IR_039___/H-000-MSG3__-MSG3________-IR_039___-000002___-202308140645-__",
-                 "/MSG/202308140645/IR_039___/H-000-MSG3__-MSG3________-IR_039___-000003___-202308140645-__",
-                 "/MSG/202308140645/IR_039___/H-000-MSG3__-MSG3________-IR_039___-000004___-202308140645-__",
-                 "/MSG/202308140645/IR_039___/H-000-MSG3__-MSG3________-IR_039___-000005___-202308140645-__",
-                 "/MSG/202308140645/IR_039___/H-000-MSG3__-MSG3________-IR_039___-000006___-202308140645-__",
-                 "/MSG/202308140645/IR_039___/H-000-MSG3__-MSG3________-IR_039___-000007___-202308140645-__",
-                 "/MSG/202308140645/IR_039___/H-000-MSG3__-MSG3________-IR_039___-000008___-202308140645-__",
-                 "/MSG/202308140645/IR_087___/H-000-MSG3__-MSG3________-IR_087___-000001___-202308140645-__",
-                 "/MSG/202308140645/IR_087___/H-000-MSG3__-MSG3________-IR_087___-000002___-202308140645-__",
-                 "/MSG/202308140645/IR_087___/H-000-MSG3__-MSG3________-IR_087___-000003___-202308140645-__",
-                 "/MSG/202308140645/IR_087___/H-000-MSG3__-MSG3________-IR_087___-000004___-202308140645-__",
-                 "/MSG/202308140645/IR_087___/H-000-MSG3__-MSG3________-IR_087___-000005___-202308140645-__",
-                 "/MSG/202308140645/IR_087___/H-000-MSG3__-MSG3________-IR_087___-000006___-202308140645-__",
-                 "/MSG/202308140645/IR_087___/H-000-MSG3__-MSG3________-IR_087___-000007___-202308140645-__",
-                 "/MSG/202308140645/IR_087___/H-000-MSG3__-MSG3________-IR_087___-000008___-202308140645-__",
-                 "/MSG/202308140645/IR_097___/H-000-MSG3__-MSG3________-IR_097___-000001___-202308140645-__",
-                 "/MSG/202308140645/IR_097___/H-000-MSG3__-MSG3________-IR_097___-000002___-202308140645-__",
-                 "/MSG/202308140645/IR_097___/H-000-MSG3__-MSG3________-IR_097___-000003___-202308140645-__",
-                 "/MSG/202308140645/IR_097___/H-000-MSG3__-MSG3________-IR_097___-000004___-202308140645-__",
-                 "/MSG/202308140645/IR_097___/H-000-MSG3__-MSG3________-IR_097___-000005___-202308140645-__",
-                 "/MSG/202308140645/IR_097___/H-000-MSG3__-MSG3________-IR_097___-000006___-202308140645-__",
-                 "/MSG/202308140645/IR_097___/H-000-MSG3__-MSG3________-IR_097___-000007___-202308140645-__",
-                 "/MSG/202308140645/IR_097___/H-000-MSG3__-MSG3________-IR_097___-000008___-202308140645-__",
-                 "/MSG/202308140645/IR_108___/H-000-MSG3__-MSG3________-IR_108___-000001___-202308140645-__",
-                 "/MSG/202308140645/IR_108___/H-000-MSG3__-MSG3________-IR_108___-000002___-202308140645-__",
-                 "/MSG/202308140645/IR_108___/H-000-MSG3__-MSG3________-IR_108___-000003___-202308140645-__",
-                 "/MSG/202308140645/IR_108___/H-000-MSG3__-MSG3________-IR_108___-000004___-202308140645-__",
-                 "/MSG/202308140645/IR_108___/H-000-MSG3__-MSG3________-IR_108___-000005___-202308140645-__",
-                 "/MSG/202308140645/IR_108___/H-000-MSG3__-MSG3________-IR_108___-000006___-202308140645-__",
-                 "/MSG/202308140645/IR_108___/H-000-MSG3__-MSG3________-IR_108___-000007___-202308140645-__",
-                 "/MSG/202308140645/IR_108___/H-000-MSG3__-MSG3________-IR_108___-000008___-202308140645-__",
-                 "/MSG/202308140645/IR_120___/H-000-MSG3__-MSG3________-IR_120___-000001___-202308140645-__",
-                 "/MSG/202308140645/IR_120___/H-000-MSG3__-MSG3________-IR_120___-000002___-202308140645-__",
-                 "/MSG/202308140645/IR_120___/H-000-MSG3__-MSG3________-IR_120___-000003___-202308140645-__",
-                 "/MSG/202308140645/IR_120___/H-000-MSG3__-MSG3________-IR_120___-000004___-202308140645-__",
-                 "/MSG/202308140645/IR_120___/H-000-MSG3__-MSG3________-IR_120___-000005___-202308140645-__",
-                 "/MSG/202308140645/IR_120___/H-000-MSG3__-MSG3________-IR_120___-000006___-202308140645-__",
-                 "/MSG/202308140645/IR_120___/H-000-MSG3__-MSG3________-IR_120___-000007___-202308140645-__",
-                 "/MSG/202308140645/IR_120___/H-000-MSG3__-MSG3________-IR_120___-000008___-202308140645-__",
-                 "/MSG/202308140645/IR_134___/H-000-MSG3__-MSG3________-IR_134___-000001___-202308140645-__",
-                 "/MSG/202308140645/IR_134___/H-000-MSG3__-MSG3________-IR_134___-000002___-202308140645-__",
-                 "/MSG/202308140645/IR_134___/H-000-MSG3__-MSG3________-IR_134___-000003___-202308140645-__",
-                 "/MSG/202308140645/IR_134___/H-000-MSG3__-MSG3________-IR_134___-000004___-202308140645-__",
-                 "/MSG/202308140645/IR_134___/H-000-MSG3__-MSG3________-IR_134___-000005___-202308140645-__",
-                 "/MSG/202308140645/IR_134___/H-000-MSG3__-MSG3________-IR_134___-000006___-202308140645-__",
-                 "/MSG/202308140645/IR_134___/H-000-MSG3__-MSG3________-IR_134___-000007___-202308140645-__",
-                 "/MSG/202308140645/IR_134___/H-000-MSG3__-MSG3________-IR_134___-000008___-202308140645-__",
-                 "/MSG/202308140645/VIS006___/H-000-MSG3__-MSG3________-VIS006___-000001___-202308140645-__",
-                 "/MSG/202308140645/VIS006___/H-000-MSG3__-MSG3________-VIS006___-000002___-202308140645-__",
-                 "/MSG/202308140645/VIS006___/H-000-MSG3__-MSG3________-VIS006___-000003___-202308140645-__",
-                 "/MSG/202308140645/VIS006___/H-000-MSG3__-MSG3________-VIS006___-000004___-202308140645-__",
-                 "/MSG/202308140645/VIS006___/H-000-MSG3__-MSG3________-VIS006___-000005___-202308140645-__",
-                 "/MSG/202308140645/VIS006___/H-000-MSG3__-MSG3________-VIS006___-000006___-202308140645-__",
-                 "/MSG/202308140645/VIS006___/H-000-MSG3__-MSG3________-VIS006___-000007___-202308140645-__",
-                 "/MSG/202308140645/VIS006___/H-000-MSG3__-MSG3________-VIS006___-000008___-202308140645-__",
-                 "/MSG/202308140645/VIS008___/H-000-MSG3__-MSG3________-VIS008___-000001___-202308140645-__",
-                 "/MSG/202308140645/VIS008___/H-000-MSG3__-MSG3________-VIS008___-000002___-202308140645-__",
-                 "/MSG/202308140645/VIS008___/H-000-MSG3__-MSG3________-VIS008___-000003___-202308140645-__",
-                 "/MSG/202308140645/VIS008___/H-000-MSG3__-MSG3________-VIS008___-000004___-202308140645-__",
-                 "/MSG/202308140645/VIS008___/H-000-MSG3__-MSG3________-VIS008___-000005___-202308140645-__",
-                 "/MSG/202308140645/VIS008___/H-000-MSG3__-MSG3________-VIS008___-000006___-202308140645-__",
-                 "/MSG/202308140645/VIS008___/H-000-MSG3__-MSG3________-VIS008___-000007___-202308140645-__",
-                 "/MSG/202308140645/VIS008___/H-000-MSG3__-MSG3________-VIS008___-000008___-202308140645-__",
-                 "/MSG/202308140645/WV_062___/H-000-MSG3__-MSG3________-WV_062___-000001___-202308140645-__",
-                 "/MSG/202308140645/WV_062___/H-000-MSG3__-MSG3________-WV_062___-000002___-202308140645-__",
-                 "/MSG/202308140645/WV_062___/H-000-MSG3__-MSG3________-WV_062___-000003___-202308140645-__",
-                 "/MSG/202308140645/WV_062___/H-000-MSG3__-MSG3________-WV_062___-000004___-202308140645-__",
-                 "/MSG/202308140645/WV_062___/H-000-MSG3__-MSG3________-WV_062___-000005___-202308140645-__",
-                 "/MSG/202308140645/WV_062___/H-000-MSG3__-MSG3________-WV_062___-000006___-202308140645-__",
-                 "/MSG/202308140645/WV_062___/H-000-MSG3__-MSG3________-WV_062___-000007___-202308140645-__",
-                 "/MSG/202308140645/WV_062___/H-000-MSG3__-MSG3________-WV_062___-000008___-202308140645-__",
-                 "/MSG/202308140645/WV_073___/H-000-MSG3__-MSG3________-WV_073___-000001___-202308140645-__",
-                 "/MSG/202308140645/WV_073___/H-000-MSG3__-MSG3________-WV_073___-000002___-202308140645-__",
-                 "/MSG/202308140645/WV_073___/H-000-MSG3__-MSG3________-WV_073___-000003___-202308140645-__",
-                 "/MSG/202308140645/WV_073___/H-000-MSG3__-MSG3________-WV_073___-000004___-202308140645-__",
-                 "/MSG/202308140645/WV_073___/H-000-MSG3__-MSG3________-WV_073___-000005___-202308140645-__",
-                 "/MSG/202308140645/WV_073___/H-000-MSG3__-MSG3________-WV_073___-000006___-202308140645-__",
-                 "/MSG/202308140645/WV_073___/H-000-MSG3__-MSG3________-WV_073___-000007___-202308140645-__",
-                 "/MSG/202308140645/WV_073___/H-000-MSG3__-MSG3________-WV_073___-000008___-202308140645-__",
-                 "/MSG/202308140645/_________/H-000-MSG3__-MSG3________-_________-EPI______-202308140645-__",
-                 "/MSG/202308140645/_________/H-000-MSG3__-MSG3________-_________-PRO______-202308140645-__"]
-
-    d = DataConverter('202308140845', 'MSG', '0fbfb057-bc61-48ef-b9ff-e4c2d8ef8bd0', file_list=filenames)
-    d.check_imports()
-    d.read_data()
-    d._convert_netcdf()
+        self.update_payload(file_name=f'{self.mission}_{self.date_tag}_vis.nc',
+                            file_path=self.nc_filename_vis,
+                            file_type='netcdf',
+                            file_size=os.path.getsize(self.nc_filename_vis),
+                            file_status='converted')
+        self.update_file_status()
