@@ -29,3 +29,6 @@ local_git/*
 *.tiff
 *.tif
 /temp/
+*.png
+temp/*
+tmet_sdk/

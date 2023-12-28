@@ -11,10 +11,12 @@ import rasterio
 from satpy.utils import check_satpy
 import rasterio
 import rioxarray
+import datetime
 
 os.environ['XRIT_DECOMPRESS_PATH'] = '/opt/conda/pkgs/public-decomp-wt-2.8.1-h3fd9d12_1/bin/xRITDecompress'
+
+
 # os.environ['XRIT_DECOMPRESS_PATH'] = '/usr/local/bin/xRITDecompress'
-os.environ['TOKEN'] = '7620dd5174895ae5dd4b99817b9ff47225733913'
 
 
 class DataConverter(object):
@@ -73,16 +75,18 @@ class DataConverter(object):
 
     def convert(self):
         self.reader()
-        self.convert_data()
+        self.read_data()
+        if self.check_bands():
+            if self._convert_netcdf():
+                self.upload_to_mongodb()
+                print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:Uploaded to mongodb")
 
-        if self._convert_netcdf():
-            self.upload_to_mongodb()
-
-        if self._convert_png():
-            self.upload_to_mongodb()
-
-        if self._convert_tiff():
-            self.upload_to_mongodb()
+            if self._convert_png():
+                self.upload_to_mongodb()
+                print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:Uploaded to mongodb")
+            if self._convert_tiff():
+                self.upload_to_mongodb()
+                print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:Uploaded to mongodb")
 
     def remove_files(self):
         """Removes all files from the temp directory"""
@@ -97,16 +101,13 @@ class DataConverter(object):
         #
         pass
 
-    def convert_data(self):
+    def read_data(self):
 
         files_updated = [os.path.join(self.prefix, f[1:]) for f in self.filenames]
 
         self.scn = satpy.Scene(reader=self._reader, filenames=files_updated)
 
         self.scn.load(self.seviri_data_names)
-        if self.check_bands():
-            self._convert_netcdf()
-            self._convert_png()
 
     def check_bands(self):
         channels = [r for r in self.scn.available_dataset_names() if r not in self.seviri_data_names]
@@ -129,9 +130,14 @@ class DataConverter(object):
                                  json=self.file_payload,
                                  headers=headers)
         if response.status_code == 201:
-            print(f"File {self.file_payload['file_name']} uploaded successfully")
+            print(
+                f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:File {self.file_payload['file_name']} uploaded successfully")
+
+            return True
         else:
-            print(f"File {self.file_payload['file_name']} upload failed {response.status_code} {response.json()}")
+            print(
+                f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: File {self.file_payload['file_name']} upload failed {response.status_code} {response.json()}")
+            return False
 
     def _convert_netcdf(self):
         """Converts netcdf data to netcdf"""
@@ -156,7 +162,7 @@ class DataConverter(object):
                             file_type='netcdf',
                             file_size=os.path.getsize(self.nc_filename_vis),
                             file_status='converted')
-        self.update_file_status()
+        return self.update_file_status()
 
     def _convert_png(self):
         from satpy.composites import GenericCompositor
@@ -175,6 +181,7 @@ class DataConverter(object):
             self.update_file_status()
 
         self._create_overiew()
+        return True
 
     def _create_overiew(self):
         """ Create an overview image of the data"""

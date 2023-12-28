@@ -5,7 +5,7 @@ import json
 import requests
 
 from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
-from dataconverter.utils.data_checker import CheckProducts as checker
+
 
 from converter import DataConverter
 

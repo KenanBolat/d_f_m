@@ -100,6 +100,35 @@ services:
       - 5020:5000
 
 
+  mongodb:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: data
+    ports:
+      - 27017:27017
+
+  mongo-express:
+    # admin pass
+    image: mongo-express:latest
+    restart: always
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongodb
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_URL: mongodb://root:root@mongodb:27017
+
+  mailhog:
+    image: mailhog/mailhog
+    logging:
+      driver: 'none'  # disable saving logs
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
+
+
 #  gitserver:
 #    image: gitea/gitea:latest
 #    container_name: gitserver
@@ -138,6 +167,7 @@ services:
 #      - 3306:3306
 
 
+
 volumes:
   dev-static-data:
 
@@ -147,3 +177,4 @@ networks:
     driver: bridge
   gitea:
     external: false
+
