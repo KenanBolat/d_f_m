@@ -13,10 +13,10 @@ import rasterio
 import rioxarray
 import datetime
 
-os.environ['XRIT_DECOMPRESS_PATH'] = '/opt/conda/pkgs/public-decomp-wt-2.8.1-h3fd9d12_1/bin/xRITDecompress'
+# os.environ['XRIT_DECOMPRESS_PATH'] = '/opt/conda/pkgs/public-decomp-wt-2.8.1-h3fd9d12_1/bin/xRITDecompress'
 
 
-# os.environ['XRIT_DECOMPRESS_PATH'] = '/usr/local/bin/xRITDecompress'
+os.environ['XRIT_DECOMPRESS_PATH'] = '/usr/local/bin/xRITDecompress'
 
 
 class DataConverter(object):
@@ -41,9 +41,10 @@ class DataConverter(object):
             "is_active": True,
         }
 
-        # self.prefix = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/downloaded_files/'
-        self.prefix = r'/media/knn/New Volume/Test_Data/'
-        self.TEMP_DIR = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/temp/'
+        # self.prefix = r'/media/knn/New Volume/Test_Data/'
+        self.prefix = r'/app/downloaded_files/'
+        # self.TEMP_DIR = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/temp/'
+        self.TEMP_DIR = r'/app/temp/'
         self.TOKEN = os.environ.get('TOKEN')
         self.readers = {'MSG': 'seviri_l1b_hrit',
                         'IODC': 'seviri_l1b_hrit'}

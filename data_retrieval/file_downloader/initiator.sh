@@ -21,4 +21,7 @@ make install;
 
 
 cd /app/;
-python server.py ;
+python server.py &
+python consumer.py &
+tail -f /dev/null
+

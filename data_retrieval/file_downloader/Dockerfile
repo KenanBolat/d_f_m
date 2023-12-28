@@ -17,10 +17,14 @@ WORKDIR /app
 
 COPY ./requirements.txt /app
 COPY ./server.py ./server.py
+COPY ./converter.py ./converter.py
+COPY ./consumer.py ./consumer.py
+
 # COPY .temp/ /app/temp
 
-RUN pip install --no-cache-dir --requirement /app/requirements.txt
+
 ENV PATH=$CONDA_DIR/bin:$PATH
+RUN pip install --no-cache-dir --requirement /app/requirements.txt
 
 COPY ./initiator.sh ./initiator.sh
 
