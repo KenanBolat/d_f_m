@@ -1,22 +1,18 @@
 import os
 import glob
+import time
 
-import numpy as np
-import pandas as pd
-import xarray as xr
-import matplotlib.pyplot as plt
 import requests
 import satpy
-import rasterio
 from satpy.utils import check_satpy
-import rasterio
 import rioxarray
 import datetime
 
-# os.environ['XRIT_DECOMPRESS_PATH'] = '/opt/conda/pkgs/public-decomp-wt-2.8.1-h3fd9d12_1/bin/xRITDecompress'
+
+os.environ['XRIT_DECOMPRESS_PATH'] = '/opt/conda/pkgs/public-decomp-wt-2.8.1-h3fd9d12_1/bin/xRITDecompress'
 
 
-os.environ['XRIT_DECOMPRESS_PATH'] = '/usr/local/bin/xRITDecompress'
+# os.environ['XRIT_DECOMPRESS_PATH'] = '/usr/local/bin/xRITDecompress'
 
 
 class DataConverter(object):
@@ -41,10 +37,10 @@ class DataConverter(object):
             "is_active": True,
         }
 
-        # self.prefix = r'/media/knn/New Volume/Test_Data/'
-        self.prefix = r'/app/downloaded_files/'
-        # self.TEMP_DIR = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/temp/'
-        self.TEMP_DIR = r'/app/temp/'
+        self.prefix = r'/media/knn/New Volume/Test_Data/'
+        self.TEMP_DIR = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/temp/'
+        # self.prefix = r'/app/downloaded_files/'
+        # self.TEMP_DIR = r'/app/temp/'
         self.TOKEN = os.environ.get('TOKEN')
         self.readers = {'MSG': 'seviri_l1b_hrit',
                         'IODC': 'seviri_l1b_hrit'}
@@ -80,14 +76,11 @@ class DataConverter(object):
         if self.check_bands():
             if self._convert_netcdf():
                 self.upload_to_mongodb()
-                print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:Uploaded to mongodb")
-
             if self._convert_png():
                 self.upload_to_mongodb()
-                print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:Uploaded to mongodb")
             if self._convert_tiff():
                 self.upload_to_mongodb()
-                print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:Uploaded to mongodb")
+
 
     def remove_files(self):
         """Removes all files from the temp directory"""
@@ -99,7 +92,11 @@ class DataConverter(object):
         # TODO: Delete downloaded files
         # TODO: Delete netcdf files
         # TODO: Delete png files
-        #
+        print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: Uploading to mongodb")
+
+        time.sleep(5)
+        print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: Uploaded to mongodb")
+
         pass
 
     def read_data(self):
@@ -190,17 +187,20 @@ class DataConverter(object):
 
     def _convert_tiff(self):
         """Converts data to geotiff"""
-        rds = rioxarray.open_rasterio(self.nc_filename_vis)
-        for ch in [r for r in self.seviri_data_names if r is not 'HRV']:
-            rds[ch].rio.to_raster(os.path.join(self.TEMP_DIR, f"{self.mission}_{self.date_tag}_{ch}.tif"))
-        del rds
-        rds = rioxarray.open_rasterio(self.nc_filename_hrv)
-        for ch in ['HRV']:
-            rds[ch].rio.to_raster(os.path.join(self.TEMP_DIR, f"{self.mission}_{self.date_tag}_{ch}.tif"))
 
-        self.update_payload(file_name=f'{self.mission}_{self.date_tag}_vis.nc',
-                            file_path=self.nc_filename_vis,
-                            file_type='netcdf',
-                            file_size=os.path.getsize(self.nc_filename_vis),
-                            file_status='converted')
-        self.update_file_status()
+        # VIS
+        rds_vis = rioxarray.open_rasterio(self.nc_filename_vis)
+        rds_hrv = rioxarray.open_rasterio(self.nc_filename_hrv)
+        for ch in [r for r in self.seviri_data_names]:
+            f_name = f"{self.mission}_{self.date_tag}_{ch}.tif"
+            f_path = os.path.join(self.TEMP_DIR, f"{f_name}")
+            if ch is 'HRV':
+                rds_hrv[ch].rio.to_raster(f_path)
+            else:
+                rds_vis[ch].rio.to_raster(f_path)
+            self.update_payload(file_name=f_name, file_path=f_path, file_type='geo_tiff',
+                                file_size=os.path.getsize(f_path),
+                                file_status='converted')
+            self.update_file_status()
+        del rds_hrv, rds_vis
+        return True

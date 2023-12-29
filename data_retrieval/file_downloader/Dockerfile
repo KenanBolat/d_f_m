@@ -18,7 +18,7 @@ WORKDIR /app
 COPY ./requirements.txt /app
 COPY ./server.py ./server.py
 COPY ./converter.py ./converter.py
-COPY ./consumer.py ./consumer.py
+#COPY ./consumer.py ./consumer.py
 
 # COPY .temp/ /app/temp
 
