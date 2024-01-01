@@ -1,13 +1,12 @@
 import os
 import glob
 import time
-
+import uuid
 import requests
 import satpy
 from satpy.utils import check_satpy
 import rioxarray
 import datetime
-
 
 os.environ['XRIT_DECOMPRESS_PATH'] = '/opt/conda/pkgs/public-decomp-wt-2.8.1-h3fd9d12_1/bin/xRITDecompress'
 
@@ -57,6 +56,21 @@ class DataConverter(object):
                                   'VIS008',
                                   'WV_062',
                                   'WV_073']
+    @staticmethod
+    def custom_printer(func):
+        """Prints the time of the process"""
+        uniq_id = uuid.uuid4()
+        def inner(*args, **kwargs):
+            print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] [{uniq_id}] [Process has been initiated]")
+
+            # getting the returned value
+            returned_value = func(*args, **kwargs)
+            print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] [{uniq_id}] [Process has been finished]")
+
+            # returning the value to the original frame
+            return returned_value
+
+        return inner
 
     def reader(self):
         self._reader = self.readers[self.mission]
@@ -81,23 +95,18 @@ class DataConverter(object):
             if self._convert_tiff():
                 self.upload_to_mongodb()
 
-
     def remove_files(self):
         """Removes all files from the temp directory"""
         pass
-
+    @custom_printer
     def upload_to_mongodb(self):
         # TODO: Upload to mongodb
         # TODO: Delete temp files
         # TODO: Delete downloaded files
         # TODO: Delete netcdf files
         # TODO: Delete png files
-        print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: Uploading to mongodb")
 
         time.sleep(5)
-        print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: Uploaded to mongodb")
-
-        pass
 
     def read_data(self):
 
@@ -137,10 +146,12 @@ class DataConverter(object):
                 f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: File {self.file_payload['file_name']} upload failed {response.status_code} {response.json()}")
             return False
 
+    @custom_printer
     def _convert_netcdf(self):
         """Converts netcdf data to netcdf"""
-        vis_datasets = [r for r in self.seviri_data_names if r is not 'HRV']
-        hrv_datasets = [r for r in self.seviri_data_names if r is 'HRV']
+        hrv_datasets = ['HRV']
+        vis_datasets = [r for r in self.seviri_data_names if r != 'HRV']
+
         self.nc_filename_hrv = os.path.join(self.TEMP_DIR, f'{self.mission}_{self.date_tag}_hrv.nc')
         self.nc_filename_vis = os.path.join(self.TEMP_DIR, f'{self.mission}_{self.date_tag}_vis.nc')
 
@@ -162,6 +173,7 @@ class DataConverter(object):
                             file_status='converted')
         return self.update_file_status()
 
+    @custom_printer
     def _convert_png(self):
         from satpy.composites import GenericCompositor
         # compositor = GenericCompositor("overview")
@@ -181,10 +193,12 @@ class DataConverter(object):
         self._create_overiew()
         return True
 
+    @custom_printer
     def _create_overiew(self):
         """ Create an overview image of the data"""
         pass
 
+    @custom_printer
     def _convert_tiff(self):
         """Converts data to geotiff"""
 
@@ -194,7 +208,7 @@ class DataConverter(object):
         for ch in [r for r in self.seviri_data_names]:
             f_name = f"{self.mission}_{self.date_tag}_{ch}.tif"
             f_path = os.path.join(self.TEMP_DIR, f"{f_name}")
-            if ch is 'HRV':
+            if ch == 'HRV':
                 rds_hrv[ch].rio.to_raster(f_path)
             else:
                 rds_vis[ch].rio.to_raster(f_path)
