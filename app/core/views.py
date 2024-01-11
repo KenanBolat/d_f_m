@@ -19,6 +19,9 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
 
+from django.shortcuts import render
+
+from .models import File
 
 from rest_framework import serializers
 
@@ -91,3 +94,7 @@ def health_check(request):
     """Returns successful response."""
     return Response({'healthy': True})
 
+
+def file_list(request):
+    files = File.objects.filter(is_active=True).order_by('-created_at')
+    return render(request, 'core/file_list.html', {'files': files})

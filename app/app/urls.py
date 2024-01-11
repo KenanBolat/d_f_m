@@ -23,10 +23,14 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 from core import views as core_views
+from core.views import file_list
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/health-check', core_views.health_check, name='health-check'),
+
+    path('api/file_converted', file_list, name='file-list'),
+
     path('api/compare', core_views.compare_view, name='compare'),
     path('api/schema', SpectacularAPIView.as_view(), name='api-schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(

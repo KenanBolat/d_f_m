@@ -1,0 +1,39 @@
+
+
+{% extends "base.html" %}
+
+{% block content %}
+<br>
+<br>
+<br>
+
+<h2>File List</h2>
+
+<table class="content-table">
+  <tr>
+    <th>File Name</th>
+    <th>File Type</th>
+    <th>Satellite Mission</th>
+    <th>Download</th>
+  </tr>
+  {% for file in files %}
+  <tr>
+    <td>{{ file.file_name }}</td>
+    <td>{{ file.file_type }}</td>
+    <td>{{ file.data.satellite_mission }}</td>
+    <td>{{ file.created_at }}</td>
+    <td>
+      {% if file.mongo_id %}
+      <a href="{{ file.mongo_id }}">Download</a>
+      {% else %}
+      Not available
+      {% endif %}
+    </td>
+
+    <td>
+      <a href="{% url 'health-check' %}">Delete</a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
