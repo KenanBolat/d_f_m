@@ -23,7 +23,6 @@ services:
       - DEBUG=1
     depends_on:
       - db
-
   db:
     image: postgres:13-alpine
     volumes:
@@ -96,7 +95,7 @@ services:
       - DATA_DOWNLOADER_PORT=5000
       - CORE_APP=app
       - TOKEN=${TOKEN}
-      - MONGODB=mongodb
+      - MONGODB=localhost
 
     ports:
       - 5020:5000

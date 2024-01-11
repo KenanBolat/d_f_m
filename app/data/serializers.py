@@ -132,7 +132,18 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = File
-        fields = ['id', 'data', 'file_name', 'file_path', 'file_date', 'file_size', 'file_type', 'file_status', 'is_active', 'download_url', 'downloaded_at', ]
+        fields = ['id',
+                  'data',
+                  'file_name',
+                  'file_path',
+                  'file_date',
+                  'file_size',
+                  'file_type',
+                  'file_status',
+                  'is_active',
+                  'download_url',
+                  'downloaded_at',
+                  'mongo_id',]
         read_only_fields = ['id']
 
     def create(self, validated_data):

@@ -7,6 +7,14 @@ import satpy
 from satpy.utils import check_satpy
 import rioxarray
 import datetime
+import hashlib
+import gridfs
+import json
+from pymongo import MongoClient
+from gridfs import GridFS
+
+from bson.objectid import ObjectId
+from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
 
 os.environ['XRIT_DECOMPRESS_PATH'] = '/opt/conda/pkgs/public-decomp-wt-2.8.1-h3fd9d12_1/bin/xRITDecompress'
 
@@ -25,6 +33,8 @@ class DataConverter(object):
         self.expiration_date = 300  # 5 minutes
         self.nc_filename_hrv = None
         self.nc_filename_vis = None
+        self._rabbit = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', 'data')
+
         self.file_payload = {
             "data": self.data,
             "file_name": None,
@@ -34,6 +44,7 @@ class DataConverter(object):
             "file_type": None,
             "file_status": None,
             "is_active": True,
+            "mongo_id": None,
         }
 
         self.prefix = r'/media/knn/New Volume/Test_Data/'
@@ -56,10 +67,15 @@ class DataConverter(object):
                                   'VIS008',
                                   'WV_062',
                                   'WV_073']
+
+    def connect(self):
+        self._channel = self._rabbit.connect()
+
     @staticmethod
     def custom_printer(func):
         """Prints the time of the process"""
         uniq_id = uuid.uuid4()
+
         def inner(*args, **kwargs):
             print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] [{uniq_id}] [Process has been initiated]")
 
@@ -88,25 +104,60 @@ class DataConverter(object):
         self.reader()
         self.read_data()
         if self.check_bands():
-            if self._convert_netcdf():
-                self.upload_to_mongodb()
-            if self._convert_png():
-                self.upload_to_mongodb()
-            if self._convert_tiff():
-                self.upload_to_mongodb()
+            self._convert_netcdf()
+            self._convert_png()
+            self._convert_tiff()
+
+    @staticmethod
+    def calculate_hash(content):
+        md5 = hashlib.md5()
+        md5.update(content)
+        return md5.hexdigest()
 
     def remove_files(self):
         """Removes all files from the temp directory"""
         pass
+
     @custom_printer
-    def upload_to_mongodb(self):
-        # TODO: Upload to mongodb
+    def upload_to_mongodb(self, f, ftype="netcdf"):
+        """Uploads a file to the mongodb"""
+        client = MongoClient(f"mongodb://{os.environ.get('MONGODB','localhost')}:27017/")
+
+        if ftype == "netcdf":
+            fs = GridFS(client['netcdf'])
+        elif ftype == "png":
+            fs = GridFS(client['png'])
+        elif ftype == "geotiff":
+            fs = GridFS(client['geotiff'])
+        else:
+            return "internal server error", 500
+
+        try:
+            with open(f, "rb") as f_:
+                fid = fs.put(f_)
+            self.connect()
+            payload = {
+                "queue_name": "data",
+                "content": f"{self._rabbit.get_current_time()}",
+                "service_name": "Data Converter",
+                "producer_ip": f"{self._rabbit.get_ip()}",
+                "status": "Uploaded ",
+                "data_fid": str(fid),
+                "nc_fid": None,
+                "token": os.environ.get("TOKEN"),
+            }
+            self.update_payload(mongo_id=str(fid))
+            self._rabbit.send(message=json.dumps(payload))
+
+        except Exception as err:
+            print(err)
+            fs.delete(fid)
+            return "internal server error", 500
+
         # TODO: Delete temp files
         # TODO: Delete downloaded files
         # TODO: Delete netcdf files
         # TODO: Delete png files
-
-        time.sleep(5)
 
     def read_data(self):
 
@@ -130,7 +181,7 @@ class DataConverter(object):
         for key, value in kwargs.items():
             self.file_payload[key] = value
 
-    def update_file_status(self):
+    def insert_file(self):
         """Updates the file status"""
         headers = {'Content-Type': 'application/json'}
         response = requests.post(f"http://{os.environ.get('CORE_APP', 'localhost')}:8000/api/file/",
@@ -146,6 +197,7 @@ class DataConverter(object):
                 f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: File {self.file_payload['file_name']} upload failed {response.status_code} {response.json()}")
             return False
 
+
     @custom_printer
     def _convert_netcdf(self):
         """Converts netcdf data to netcdf"""
@@ -158,20 +210,23 @@ class DataConverter(object):
         self.scn.save_datasets(writer='cf', datasets=hrv_datasets, filename=self.nc_filename_hrv)
         self.scn.save_datasets(writer='cf', datasets=vis_datasets, filename=self.nc_filename_vis)
 
+        self.upload_to_mongodb(self.nc_filename_hrv, ftype="netcdf")
         self.update_payload(file_name=f'{self.mission}_{self.date_tag}_hrv.nc',
                             file_path=self.nc_filename_hrv,
                             file_type='netcdf',
                             file_size=os.path.getsize(self.nc_filename_hrv),
                             file_status='converted')
 
-        self.update_file_status()
+        self.insert_file()
 
+        self.upload_to_mongodb(self.nc_filename_vis, ftype="netcdf")
         self.update_payload(file_name=f'{self.mission}_{self.date_tag}_vis.nc',
                             file_path=self.nc_filename_vis,
                             file_type='netcdf',
                             file_size=os.path.getsize(self.nc_filename_vis),
                             file_status='converted')
-        return self.update_file_status()
+
+        return self.insert_file()
 
     @custom_printer
     def _convert_png(self):
@@ -183,12 +238,13 @@ class DataConverter(object):
         self.scn.save_datasets(writer='simple_image', filename=os.path.join(self.TEMP_DIR, tag + '_{name}.png'))
 
         for png in glob.glob(os.path.join(self.TEMP_DIR, tag + '_*.png')):
+            self.upload_to_mongodb(png, ftype="png")
             self.update_payload(file_name=f'{png.split("/")[-1]}',
                                 file_path=png,
                                 file_type='png',
                                 file_size=os.path.getsize(png),
                                 file_status='converted')
-            self.update_file_status()
+            self.insert_file()
 
         self._create_overiew()
         return True
@@ -215,6 +271,7 @@ class DataConverter(object):
             self.update_payload(file_name=f_name, file_path=f_path, file_type='geo_tiff',
                                 file_size=os.path.getsize(f_path),
                                 file_status='converted')
-            self.update_file_status()
+            self.upload_to_mongodb(f_path, ftype="geotiff")
+            self.insert_file()
         del rds_hrv, rds_vis
         return True

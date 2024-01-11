@@ -127,6 +127,7 @@ class DataTracking(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(null=True, blank=True)
 
+
     def __str__(self):
         return self.file_name
 
@@ -208,6 +209,7 @@ class File(models.Model):
     download_url = models.CharField(max_length=255, null=True, blank=True)
     downloaded = models.BooleanField(max_length=255, null=True, blank=True)
     downloaded_at = models.DateTimeField(null=True, blank=True)
+    mongo_id = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         unique_together = ('data', 'file_name')
