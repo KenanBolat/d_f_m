@@ -20,6 +20,7 @@ services:
       - DB_NAME=devdb
       - DB_USER=devuser
       - DB_PASS=kalman
+      - MONGO_HOST=mongodb
       - DEBUG=1
     depends_on:
       - db
@@ -107,6 +108,9 @@ services:
     restart: always
     environment:
       MONGO_INITDB_DATABASE: data
+      DATA_ROOT: /data/db
+    volumes:
+      - ./dev-mongo-data:/data/db
     ports:
       - 27017:27017
 

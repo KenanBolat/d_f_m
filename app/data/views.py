@@ -3,6 +3,11 @@ Views for the data APIs.
 """
 import os.path
 
+import gridfs
+import pymongo
+from bson import ObjectId
+from django.http import (HttpResponse)
+
 from drf_spectacular.utils import (
     extend_schema_view,
     extend_schema,
@@ -82,31 +87,14 @@ class DataViewSet(viewsets.ModelViewSet):
         profile = Data.objects.all()
         p = profile.filter(user=self.request.user).order_by('-id')
         s = ForeignerSerializer(p, many=True)
-        print("==" * 5)
         img1 = "/vol/web/media/uploads/data/" + s.data[0]['image'].split('/')[-1]
-        # imgRead1 = read_image(img1)
 
         print(img1)
         print("==" * 5)
-        # imgRead1 = read_image(img1.read())
-        # print(imgRead1)
         serializers = self.get_serializer(faceid, data=request.data)
 
         if serializers.is_valid():
             serializers.save()
-
-            print("==" * 3)
-            img2 = os.path.join("/vol/web/media/uploads/data/", serializers.data['image'].split('/')[-1])
-            # imgRead2 = read_image(img2)
-            # print(img2)
-            # print("==" * 3)
-            # preprocess1 = preprocess(imgRead1)
-            # preprocess2 = preprocess(imgRead2)
-            # model_name = 'VGG-Face'
-            # print(model_name)
-            # result = DeepFace.verify(img1_path=preprocess1, img2_path=preprocess2, model_name=model_name)
-            # print(str(result))
-            # return Response(result, status=status.HTTP_200_OK)
             return Response(None, status=status.HTTP_200_OK)
 
         return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -136,3 +124,37 @@ class EventViewSet(viewsets.ModelViewSet):
 class FileViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.FileSerializer
     queryset = File.objects.all()
+
+    @action(detail=True, methods=['get'], url_path='download')
+    def download(self, request, pk=None):
+        try:
+            """Download a file from MongoDB."""
+            file = self.get_object()
+            mongo_id = file.mongo_id
+            file_type = file.file_type
+
+            if not mongo_id:
+                return Response({"message": "No MongoDB ID provided for file."}, status=status.HTTP_400_BAD_REQUEST)
+
+            print(mongo_id)
+
+            # Connect to your MongoDB
+            # client = pymongo.MongoClient("mongodb://mongodb:27017")
+            client = pymongo.MongoClient(os.environ.get('MONGO_HOST', 'localhost'), 27017)
+            db = client[file_type]
+            fs = gridfs.GridFS(db)
+
+            # Retrieve the file data using mongo_id
+            # file_data = collection.find_one({'_id': ObjectId(mongo_id)})
+            file_data = fs.get(ObjectId(mongo_id))
+            if not file_data:
+                return Response({"message": "File not found in MongoDB"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Assuming the file's content is stored under a key 'content'
+            # response = FileResponse(file_data.read(), as_attachment=True, filename=file.file_name)
+            response = HttpResponse(file_data.read(), content_type='application/octet-stream')
+            response['Content-Disposition'] = f'attachment; filename="{file.file_name}"'
+            return response
+        except Exception as e:
+            # Log the error here if necessary
+            return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

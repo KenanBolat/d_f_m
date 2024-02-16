@@ -7,3 +7,4 @@ uwsgi>=2.0.20, <2.1
 numpy
 pillow
 uvicorn
+pymongo

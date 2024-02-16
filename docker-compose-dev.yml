@@ -108,6 +108,8 @@ services:
       MONGO_INITDB_DATABASE: data
     ports:
       - 27017:27017
+    volumes:
+        - ./dev-mongo-data:/data/db
 
   mongo-express:
     # admin pass
@@ -128,7 +130,6 @@ services:
     ports:
       - 1025:1025 # smtp server
       - 8025:8025 # web ui
-
 
 #  gitserver:
 #    image: gitea/gitea:latest
@@ -176,6 +177,7 @@ volumes:
 networks:
   ttmet-net:
     driver: bridge
+
   gitea:
     external: false
 
