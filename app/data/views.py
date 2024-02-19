@@ -6,7 +6,7 @@ import os.path
 import gridfs
 import pymongo
 from bson import ObjectId
-from django.http import (HttpResponse)
+from django.http import (HttpResponse, JsonResponse)
 
 from drf_spectacular.utils import (
     extend_schema_view,
@@ -158,3 +158,36 @@ class FileViewSet(viewsets.ModelViewSet):
         except Exception as e:
             # Log the error here if necessary
             return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['post'], url_path='delete')
+    def delete(self, request, pk=None):
+        """Delete a file from MongoDB."""
+        file = self.get_object()
+        mongo_id = file.mongo_id
+        file_type = file.file_type
+
+        if not mongo_id:
+
+            # return Response({"message": "No MongoDB ID provided for file."}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"message": "No MongoDB ID provided for file."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+        # Connect to your MongoDB
+        # client = pymongo.MongoClient("mongodb://mongodb:27017")
+        client = pymongo.MongoClient(os.environ.get('MONGO_HOST', 'localhost'), 27017)
+        db = client[file_type]
+        fs = gridfs.GridFS(db)
+
+        # Retrieve the file data using mongo_id
+        # file_data = collection.find_one({'_id': ObjectId(mongo_id)})
+        file_data = fs.get(ObjectId(mongo_id))
+        if not file_data:
+            return Response({"message": "File not found in MongoDB"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Delete the file from MongoDB
+        fs.delete(ObjectId(mongo_id))
+
+        # Delete the file from the database
+        file.delete()
+
+        return JsonResponse({'status': 'success', 'message': 'File deleted successfully.'})

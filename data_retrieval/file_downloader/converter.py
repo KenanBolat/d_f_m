@@ -268,7 +268,7 @@ class DataConverter(object):
                 rds_hrv[ch].rio.to_raster(f_path)
             else:
                 rds_vis[ch].rio.to_raster(f_path)
-            self.update_payload(file_name=f_name, file_path=f_path, file_type='geo_tiff',
+            self.update_payload(file_name=f_name, file_path=f_path, file_type='geotiff',
                                 file_size=os.path.getsize(f_path),
                                 file_status='converted')
             self.upload_to_mongodb(f_path, ftype="geotiff")
