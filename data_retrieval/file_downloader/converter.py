@@ -47,10 +47,10 @@ class DataConverter(object):
             "mongo_id": None,
         }
 
-        self.prefix = r'/media/knn/New Volume/Test_Data/'
-        self.TEMP_DIR = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/temp/'
-        # self.prefix = r'/app/downloaded_files/'
-        # self.TEMP_DIR = r'/app/temp/'
+        # self.prefix = r'/media/knn/New Volume/Test_Data/'
+        # self.TEMP_DIR = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/temp/'
+        self.prefix = r'/app/downloaded_files/'
+        self.TEMP_DIR = r'/app/temp/'
         self.TOKEN = os.environ.get('TOKEN')
         self.readers = {'MSG': 'seviri_l1b_hrit',
                         'IODC': 'seviri_l1b_hrit'}
