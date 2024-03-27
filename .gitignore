@@ -33,3 +33,7 @@ local_git/*
 *.png
 temp/*
 tmet_sdk/
+
+
+node_modules/
+

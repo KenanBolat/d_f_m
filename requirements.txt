@@ -8,3 +8,4 @@ numpy
 pillow
 uvicorn
 pymongo
+djangorestframework-simplejwt>=5.3.0, <5.4
