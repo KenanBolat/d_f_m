@@ -9,3 +9,4 @@ pillow
 uvicorn
 pymongo
 djangorestframework-simplejwt>=5.3.0, <5.4
+django-cors-headers>=4.3.0, <4.4
