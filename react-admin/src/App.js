@@ -7,12 +7,15 @@ function App() {
 
   return (
     <ColorModeContext.Provider value={colorMode}>
-      <ThemeProvider theme={theme}> </ThemeProvider> <CssBaseline />
-      <div className="app">
-        <main className="content">
-          <TopBar></TopBar>
-        </main>
-      </div>
+      <ThemeProvider theme={theme}>
+        {" "}
+        <CssBaseline />
+        <div className="app">
+          <main className="content">
+            <TopBar></TopBar>
+          </main>
+        </div>
+      </ThemeProvider>
     </ColorModeContext.Provider>
   );
 }
