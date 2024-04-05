@@ -11,8 +11,9 @@ function App() {
       <Header />
       <Routes>
         <Route path="/register" element={<Register></Register>} />
-        <Route path="/login" element={<div> asdasd sd asd</div>} />
-        <Route path="/logout" element={<Logout></Logout>} />
+        <Route path="/login" element={<Login></Login>} />
+        <Route path="/logout" element={<Logout />} />
+        <Route path="/dashboard" element={<div>DASHBOARD</div>} />
         <Route path="/" element={<App></App>} />
       </Routes>
     </Router>

@@ -6,17 +6,27 @@ import { useNavigate } from "react-router-dom";
 export default function Logout() {
     const navigate = useNavigate();
     useEffect(() => {
-        axiosInstance.post("user/logout/blacklist/", {
-            refresh_token: localStorage.getItem("refresh_token"),
-        });
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        axiosInstance.defaults.headers["Authorization"] = null;
-        navigate("/login");
-    }, []);
+       const refreshToken = localStorage.getItem("refresh_token");
+
+       if(refreshToken) {
+           axiosInstance
+           .post("token/blacklist/", {refresh: refreshToken,})
+           .catch((error) => {
+                console.log("Error blacklisting", error)}).finally(() => {
+                    localStorage.removeItem("access_token");
+                    localStorage.removeItem("refresh_token");
+                    axiosInstance.defaults.headers["Authorization"] = null;
+                    navigate("/login");
+                });
+            
+       } else {
+            // no refresh token
+            navigate("/login");
+       } 
+    }, [navigate]);
     return (
         <div>
-            Logout
+            <div> Logging out...</div>
         </div>
     );
 }
