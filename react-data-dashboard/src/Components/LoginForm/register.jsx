@@ -18,7 +18,7 @@ import Container from "@material-ui/core/Container";
 
 const useStyles = makeStyles((theme) => ({
     paper : {
-        marginTop: theme.spacing(8),
+        marginTop: theme.spacing(10),
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -81,8 +81,7 @@ export default function SignUp() {
                     Sign Up
                 </Typography>
                 <form className="wrapper" noValidate>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12}>
+                    <Grid container spacing={2} border={""}  >
                             <TextField className="input-box"
                                 autoComplete="email"
                                 name="email"
@@ -94,7 +93,6 @@ export default function SignUp() {
                                 autoFocus
                                 onChange={handleChange}
                             />
-                        </Grid>
                         <Grid item xs={12}>
                             <TextField className="input-box"
                                 variant="outlined"

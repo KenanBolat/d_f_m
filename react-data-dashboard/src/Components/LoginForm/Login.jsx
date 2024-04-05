@@ -45,6 +45,7 @@ const Login = () => {
         });
     }
   return (
+    <div className='container'>
     <div className='wrapper'>
         <form action=''>
             <h1> Login </h1>
@@ -67,6 +68,7 @@ const Login = () => {
             </div>
         </form>
       
+    </div>
     </div>
   )
 }
