@@ -23,6 +23,10 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+
 from core.models import (Data, Configuration, Mission, Consumed, Event, File)
 
 from . import serializers
@@ -34,6 +38,20 @@ from django.conf import settings
 # from .prediction import read_image, preprocess
 
 DOC_ROOT = settings.STATIC_ROOT
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super(MyTokenObtainPairSerializer, cls).get_token(user)
+
+        # Add custom claims
+        token['user_name'] = user.name
+        token['user_email'] = user.email
+        token['su'] = int(user.is_superuser)
+        return token
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 
 class DataViewSet(viewsets.ModelViewSet):

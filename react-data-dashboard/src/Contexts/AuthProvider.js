@@ -5,8 +5,9 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({
-    accessToken: localStorage.getItem('accessToken'),
-    refreshToken: localStorage.getItem('refreshToken'),
+    accessToken: localStorage.getItem('access_token'),
+    refreshToken: localStorage.getItem('refresh_token'),
+    user_name: localStorage.getItem('user_name'),
   });
 
   return (

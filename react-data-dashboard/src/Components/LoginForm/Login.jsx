@@ -1,7 +1,7 @@
 import React, {useState} from 'react'; 
 import axiosInstance from './axios';
 import { useAuth } from '../../Contexts/AuthProvider'; // Make sure this path is correct
-
+import {jwtDecode} from 'jwt-decode';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -15,6 +15,7 @@ import { FaUserShield, FaUnlockAlt, FaLock } from "react-icons/fa";
 const Login = () => {
     const navigate = useNavigate();
     const { setAuth } = useAuth();
+    
 
     const initialFormData = Object.freeze({
         email: "",
@@ -42,9 +43,15 @@ const Login = () => {
         .then((res) => {
             localStorage.setItem('access_token', res.data.access);
             localStorage.setItem('refresh_token', res.data.refresh);
+            localStorage.setItem('email', jwtDecode(res.data.access).user_email);
+            localStorage.setItem('user_name', jwtDecode(res.data.access).user_name);
+            console.log(jwtDecode(res.data.access));
             axiosInstance.defaults.headers['Authorization'] = 
                 'JWT ' + localStorage.getItem('access_token');
-            setAuth({ accessToken: res.data.access, refreshToken: res.data.refresh });
+            setAuth({ accessToken: res.data.access,
+                     refreshToken: res.data.refresh,
+                     email: jwtDecode(res.data.access).user_email,
+                     user_name: jwtDecode(res.data.access).user_name,});
             axiosInstance.defaults.headers['Authorization'] = `JWT ${res.data.access}`
             navigate('/dashboard');
             console.log(res);
