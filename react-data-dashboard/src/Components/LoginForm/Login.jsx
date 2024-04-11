@@ -1,5 +1,8 @@
 import React, {useState} from 'react'; 
 import axiosInstance from './axios';
+import { useAuth } from '../../Contexts/AuthProvider'; // Make sure this path is correct
+
+
 import { useNavigate } from 'react-router-dom';
 
 
@@ -11,6 +14,8 @@ import { FaUserShield, FaUnlockAlt, FaLock } from "react-icons/fa";
 
 const Login = () => {
     const navigate = useNavigate();
+    const { setAuth } = useAuth();
+
     const initialFormData = Object.freeze({
         email: "",
         password: "",
@@ -39,6 +44,8 @@ const Login = () => {
             localStorage.setItem('refresh_token', res.data.refresh);
             axiosInstance.defaults.headers['Authorization'] = 
                 'JWT ' + localStorage.getItem('access_token');
+            setAuth({ accessToken: res.data.access, refreshToken: res.data.refresh });
+            axiosInstance.defaults.headers['Authorization'] = `JWT ${res.data.access}`
             navigate('/dashboard');
             console.log(res);
             console.log(res.data);

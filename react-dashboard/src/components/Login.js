@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, BrowserRouter as Router, Routes } from "react-router-dom";
-
+import { useAuth } from "./context/AuthProvider";
 import axios from "axios";
 
 const Login = () => {
@@ -9,6 +9,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
+    const { setAuth } = useAuth();
+
     event.preventDefault();
     try {
       const response = await axios.post("http://localhost:8000/api/token/", {

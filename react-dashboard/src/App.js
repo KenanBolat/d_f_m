@@ -111,7 +111,8 @@ import React from 'react';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
+import { AuthProvider } from './components/context/AuthProvider';
+import ProtectedRoute from './components/ProtectedRoute';
 
 
 
@@ -120,7 +121,8 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <ProtectedRoute path="/dashboard" element={<Dashboard />} ></ProtectedRoute>
+          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
         </Routes>
       </Router>
     );
