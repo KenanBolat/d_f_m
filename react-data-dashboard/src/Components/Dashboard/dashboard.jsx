@@ -1,4 +1,6 @@
 import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import DataList from './datalist';
 
 const Dashboard = () => {
     return (

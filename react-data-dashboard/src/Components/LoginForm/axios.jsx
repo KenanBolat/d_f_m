@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
   timeout: 5000,
   headers: {
     Authorization: localStorage.getItem("access_token")
-      ? "JWT " + localStorage.getItem("access_token")
+      ? "Bearer " + localStorage.getItem("access_token")
       : null,
     "Content-Type": "application/json",
     accept: "application/json",
@@ -16,7 +16,7 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.response.use((config) => {
   const taken = localStorage.getItem("access_token");
-  config.headers.Authorization = taken ? `JWT ${taken}` : "";
+  config.headers.Authorization = taken ? `Bearer ${taken}` : "";
   return config;
 });
 

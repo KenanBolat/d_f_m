@@ -6,6 +6,7 @@ import Login from "./Components/LoginForm/Login";
 import Logout from "./Components/LoginForm/logout";
 import Dashboard from "./Components/Dashboard/dashboard";
 import Settings from './Components/Settings/settings';
+import DataList from './Components/Dashboard/datalist';
 import { AuthProvider } from './Contexts/AuthProvider';
 import  ProtectedRoute from './Components/ProtectedRoute';
 
@@ -23,6 +24,7 @@ function App() {
         <Route path="/logout" element={<Logout />} />
         <Route path="/dashboard"  element={<ProtectedRoute> <Dashboard /> </ProtectedRoute> } />
         <Route path="/settings"  element={<ProtectedRoute> <Settings /> </ProtectedRoute> } />
+        <Route path="/list"  element={<ProtectedRoute> <DataList /> </ProtectedRoute> } />
         <Route path="/" element={<Login />} /> {/* Updated this line */}
       </Routes>
     </Router>
