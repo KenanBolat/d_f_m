@@ -1,4 +1,4 @@
-import React, {useState} from 'react'; 
+import React, {useState, useEffect} from 'react'; 
 import axiosInstance from './axios';
 import { useAuth } from '../../Contexts/AuthProvider'; // Make sure this path is correct
 import {jwtDecode} from 'jwt-decode';
@@ -14,7 +14,7 @@ import { FaUserShield, FaUnlockAlt, FaLock } from "react-icons/fa";
 
 const Login = () => {
     const navigate = useNavigate();
-    const { setAuth } = useAuth();
+    const { auth, setAuth } = useAuth();
     
 
     const initialFormData = Object.freeze({
@@ -23,6 +23,13 @@ const Login = () => {
     });
 
     const [formData, updateFormData] = useState(initialFormData);
+
+    useEffect(() => {
+        if (auth.accessToken) {
+          navigate('/dashboard'); // Redirect to dashboard or another appropriate route
+        }
+      }, [auth, navigate]);
+    
 
     const handleChange = (e) => {
         // console.log(e.target.value);

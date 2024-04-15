@@ -9,6 +9,7 @@ from io import BytesIO
 # from deepface import DeepFace
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import (
     extend_schema_view,
     extend_schema,
@@ -25,6 +26,7 @@ from .models import File
 
 from rest_framework import serializers
 
+from .core.data.serializers import FileSerializer
 
 def faceid_image_file_path(filename):
     """Generate file path for new data image."""
@@ -98,3 +100,11 @@ def health_check(request):
 def file_list(request):
     files = File.objects.filter(is_active=True).order_by('-created_at')
     return render(request, 'core/file_list.html', {'files': files})
+
+
+@api_view(['GET'])
+@permisson_classes([IsAuthenticated])
+def file_list2(request):
+    files = File.objects.filter(is_active=True).order_by('-created_at')
+    serializers = FileSerializer(files, many=True)
+    return Response(serializers.data)
