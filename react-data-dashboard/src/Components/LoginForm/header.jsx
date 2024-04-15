@@ -66,6 +66,7 @@ function Header() {
 						Login
 					</Button>
 					)}
+					{auth.accessToken && ( 
 					<Button
 						href="#"
 						color="primary"
@@ -74,8 +75,9 @@ function Header() {
 						component={NavLink}
 						to="/logout"
 					>
-						Logout
+						Logout 
 					</Button>
+					)}
 				</Toolbar>
 			</AppBar>
 		</React.Fragment>
