@@ -54,6 +54,10 @@ const Login = () => {
                      user_name: jwtDecode(res.data.access).user_name,});
             axiosInstance.defaults.headers['Authorization'] = `JWT ${res.data.access}`
             navigate('/dashboard');
+            setAuth({
+                accessToken: res.data.access, // the JWT token
+                user_name: jwtDecode(res.data.access).user_name, // make sure this is set based on your login response
+              });
             console.log(res);
             console.log(res.data);
         });
