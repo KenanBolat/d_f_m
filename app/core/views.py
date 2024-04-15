@@ -7,9 +7,9 @@ import uuid
 from io import BytesIO
 
 # from deepface import DeepFace
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import (api_view,permission_classes)
+from rest_framework.response import Response
 from drf_spectacular.utils import (
     extend_schema_view,
     extend_schema,
@@ -26,7 +26,7 @@ from .models import File
 
 from rest_framework import serializers
 
-from .core.data.serializers import FileSerializer
+from data.serializers import FileSerializer
 
 def faceid_image_file_path(filename):
     """Generate file path for new data image."""
@@ -103,8 +103,10 @@ def file_list(request):
 
 
 @api_view(['GET'])
-@permisson_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def file_list2(request):
+    # user = request.user_id # get the user id
+    # files = user.files.filter(is_active=True).order_by('-created_at')
     files = File.objects.filter(is_active=True).order_by('-created_at')
     serializers = FileSerializer(files, many=True)
     return Response(serializers.data)

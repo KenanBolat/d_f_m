@@ -23,7 +23,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 from core import views as core_views
-from core.views import file_list
+from core.views import (file_list, file_list2)
 
 from data.views import MyTokenObtainPairView
 
@@ -45,6 +45,7 @@ urlpatterns = [
 
 
     path('api/file_converted', file_list, name='file-list'),
+    path('api/file_converted2', file_list2, name='file-list2'),
 
     path('api/compare', core_views.compare_view, name='compare'),
     path('api/schema', SpectacularAPIView.as_view(), name='api-schema'),
