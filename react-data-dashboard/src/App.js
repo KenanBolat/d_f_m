@@ -10,6 +10,7 @@ import DataList from "./Components/Dashboard/datalist";
 import Home from "./Components/Landing/home";
 import { AuthProvider } from "./Contexts/AuthProvider";
 import ProtectedRoute from "./Components/ProtectedRoute";
+import MissionDataList from "./Components/Landing/missonsdata";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/login" element={<Login></Login>} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/missions" element={<MissionDataList />} />
           <Route
             path="/dashboard"
             element={

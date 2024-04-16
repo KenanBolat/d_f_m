@@ -36,6 +36,10 @@ const Home = () => {
             <ListIcon />
             <span>Lists</span>
           </Link>
+          <Link to="/missions" className="icon-container">
+            <ListIcon />
+            <span>Mission</span>
+          </Link>
         </div>
       </div>
     );
