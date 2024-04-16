@@ -1,0 +1,55 @@
+/* Apply a similar background or use the one from your Login page */
+.home-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    /* background: url('path-to-your-background-image.jpg') center center no-repeat; */
+    background-size: cover;
+  }
+  
+  .icon-row {
+    display: flex;
+    justify-content: center;
+    margin: 40px 0;
+  }
+  
+  .icon-container {
+    background: rgba(255, 255, 255, 0.15); /* Glassmorphism effect */
+    backdrop-filter: blur(11px); /* Blur effect */
+    border-radius: 12px; /* Rounded corners */
+    padding: 20px;
+    margin: 0 15px;
+    text-decoration: none;
+    color: white; /* Text color */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+    text-align: center; /* Center text */
+    width: 180px; /* Set width */
+    height: 180px; /* Set height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Placeholder for icon */
+  .icon-placeholder {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+  }
+  
+  span {
+    display: block; /* Ensure span behaves like a block for proper spacing */
+  }
+  
+  /* This would be the equivalent of the button style in your Login form */
+  .icon-container:hover {
+    background: rgba(255, 255, 255, 0.2); /* Slight change on hover for interaction feedback */
+    cursor: pointer; /* Change cursor to signify clickable */
+  }
+
+  .icon {
+    font-size: 35px;
+    color: white;
+  }
