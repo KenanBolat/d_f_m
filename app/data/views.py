@@ -26,8 +26,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from django.db.models import (Count, Sum, FloatField, F, )
+from django.db.models.functions import Cast, Round
 
-from core.models import (Data, Configuration, Mission, Consumed, Event, File)
+from core.models import (Data,
+                         Configuration,
+                         Mission,
+                         Consumed,
+                         Event,
+                         File)
 
 from . import serializers
 # from .serializers import ForeignerSerializer
@@ -209,3 +216,20 @@ class FileViewSet(viewsets.ModelViewSet):
         file.delete()
 
         return JsonResponse({'status': 'success', 'message': 'File deleted successfully.'})
+
+    @action(detail=False, methods=['get'], url_path='summary')
+    def file_summary(self, request):
+        file_summary = (
+            File.objects
+            .annotate(satellite_mission=F('data__satellite_mission__satellite_mission'))
+            .values('satellite_mission', 'file_type')
+            .annotate(
+                total_count=Count('id'),
+                total_file_size=Round(Sum(Cast('file_size', FloatField())) / (1024.0 ** 3), precision=2)
+            )
+            .order_by('data__satellite_mission__satellite_mission', 'file_type')
+        )
+
+        # You can directly return the data, but using a serializer is a good practice
+        # if you want to ensure a consistent format or add additional processing
+        return Response(file_summary)

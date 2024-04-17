@@ -14,7 +14,7 @@ const Home = () => {
     return (
       <div className="home-page">
         <div className="icon-row">
-          <Link to="/analytics" className="icon-container">
+          <Link to="/dashboard" className="icon-container">
             <BarChartIcon />
             <span>Dashboard</span>
           </Link>
