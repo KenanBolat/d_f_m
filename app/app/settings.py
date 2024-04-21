@@ -179,3 +179,15 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 
 CORS_ALLOWED_ORIGINS = [ 'http://localhost:3000', 'http://localhost:8000']
+
+
+
+ASGI_APPLICATION = 'app.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [(os.environ.get('REDIS_HOST', 'localhost'), 6379)],
+        },
+    }
+}

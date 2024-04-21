@@ -46,7 +46,7 @@ const MissionDataList = () => {
         console.log(res.data);
         // setDataList(res.data);
         console.log('Data list Before 0 :', dataList);
-        setDataList(res.data, () => console.log(dataList));
+        setDataList([res.data[0]], () => console.log(dataList));
         console.log('Data list After 0:', dataList);
 
       });
@@ -71,8 +71,8 @@ const MissionDataList = () => {
     
     <TreeItem
       key={nodes.id}
-      nodeId={String(nodes.id)}
-      // label={`${nodes.satellite_mission} - ${nodes.date_tag} - ${nodes.status}`}
+      nodeId={String(nodes.id)} 
+      label={`${nodes.satellite_mission} - ${nodes.date_tag} - ${nodes.status}`}
     />
   );
   
