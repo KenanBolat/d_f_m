@@ -10,6 +10,8 @@ class SocketConsumers(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        print(text_data_json)
+        print(text_data_json['message'])
         message = text_data_json['message']
 
         await self.send(text_data=json.dumps({

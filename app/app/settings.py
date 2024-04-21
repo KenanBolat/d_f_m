@@ -26,7 +26,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'changeme')
 
 DEBUG = bool(int(os.environ.get('DEBUG', 0)))
 
-
 ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS.extend(
     filter(
@@ -53,6 +52,8 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
+    'channels',
+
 ]
 
 MIDDLEWARE = [
@@ -86,6 +87,17 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'app.wsgi.application'
+ASGI_APPLICATION = 'app.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('redis', 6379)],
+        },
+    }
+}
+
 #
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -133,7 +145,6 @@ USE_TZ = True
 
 APPEND_SLASH = False
 
-
 STATIC_URL = '/static/static/'
 MEDIA_URL = '/static/media/'
 
@@ -153,7 +164,6 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
-
 
 from datetime import timedelta
 
@@ -178,16 +188,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 
 
-CORS_ALLOWED_ORIGINS = [ 'http://localhost:3000', 'http://localhost:8000']
+CORS_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://localhost:8000']
 
 
-
-ASGI_APPLICATION = 'app.routing.application'
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [(os.environ.get('REDIS_HOST', 'localhost'), 6379)],
-        },
-    }
-}
