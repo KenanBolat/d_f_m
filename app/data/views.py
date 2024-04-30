@@ -8,6 +8,8 @@ import pymongo
 from bson import ObjectId
 from django.http import (HttpResponse, JsonResponse)
 
+from rest_framework.exceptions import NotFound
+
 from drf_spectacular.utils import (
     extend_schema_view,
     extend_schema,
@@ -34,7 +36,8 @@ from core.models import (Data,
                          Mission,
                          Consumed,
                          Event,
-                         File)
+                         File,
+                         Notification)
 
 from . import serializers
 # from .serializers import ForeignerSerializer
@@ -57,14 +60,17 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['user_email'] = user.email
         token['su'] = int(user.is_superuser)
         return token
+
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
 class DataViewSet(viewsets.ModelViewSet):
     """View from the manage data APIs."""
-    serializer_class = serializers.DataDetailSerializer
-    queryset = Data.objects.all()
+    # serializer_class = serializers.DataDetailSerializer
+    queryset = Data.objects.all().prefetch_related('converted_files')
+    serializer_class = serializers.DataSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -141,9 +147,23 @@ class ConsumedViewSet(viewsets.ModelViewSet):
     queryset = Consumed.objects.all()
 
 
+class NotificationViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.NotificationSerializer
+    queryset = Notification.objects.all()
+
+
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.EventSerializer
     queryset = Event.objects.all()
+    lookup_field = 'message_id'
+
+    def get_queryset(self):
+        """Retrieve data for authenticated user."""
+        queryset = Event.objects.all()
+        message_id = self.request.query_params.get('message_id', None)
+        if message_id:
+            queryset = queryset.filter(message_id=message_id).order_by('-id')
+        return queryset
 
 
 class FileViewSet(viewsets.ModelViewSet):
@@ -192,10 +212,8 @@ class FileViewSet(viewsets.ModelViewSet):
         file_type = file.file_type
 
         if not mongo_id:
-
             # return Response({"message": "No MongoDB ID provided for file."}, status=status.HTTP_400_BAD_REQUEST)
             return JsonResponse({"message": "No MongoDB ID provided for file."}, status=status.HTTP_400_BAD_REQUEST)
-
 
         # Connect to your MongoDB
         # client = pymongo.MongoClient("mongodb://mongodb:27017")

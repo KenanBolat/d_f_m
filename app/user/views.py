@@ -6,6 +6,8 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
 from .serializers import (UserSerializer, AuthTokenSerializer, )
 
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 class CreateUserView(generics.CreateAPIView):
     """Create a new user in the system."""
@@ -21,7 +23,7 @@ class CreateTokenView(ObtainAuthToken):
 class ManageUserView(generics.RetrieveUpdateAPIView):
     """Manage the authenticated user."""
     serializer_class = UserSerializer
-    authentication_classes = [authentication.TokenAuthentication]
+    authentication_classes = [authentication.TokenAuthentication, JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
@@ -30,7 +32,7 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
 
 class BlacklistTokenView(generics.CreateAPIView):
     """Blacklist a token."""
-    authentication_classes = [authentication.TokenAuthentication]
+    authentication_classes = [authentication.TokenAuthentication, JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):

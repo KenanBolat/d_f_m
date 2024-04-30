@@ -3,7 +3,7 @@ Serializers for FaceID API.
 """
 from rest_framework import serializers
 
-from core.models import (Data, Configuration, Mission, Event, Consumed, File)
+from core.models import (Data, Configuration, Mission, Event, Consumed, File, Notification, )
 
 
 class MissionField(serializers.Field):
@@ -13,39 +13,6 @@ class MissionField(serializers.Field):
     def to_internal_value(self, data):
         mission = Mission.objects.get(satellite_mission=data)
         return mission
-
-
-class DataSerializer(serializers.ModelSerializer):
-    """Serializer for data."""
-    satellite_mission = MissionField()
-
-    class Meta:
-        model = Data
-        fields = ['id',
-                  'date_tag',
-                  'status',
-                  'files',
-                  'satellite_mission']
-        read_only_fields = ['id']
-
-    def create(self, validated_data):
-        """Create a data."""
-        data = Data.objects.create(**validated_data)
-        return data
-
-    def update(self, instance, validated_data):
-        """Update data."""
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        return instance
-
-
-class DataDetailSerializer(DataSerializer):
-    """Serializer for data detail view."""
-
-    class Meta(DataSerializer.Meta):
-        fields = DataSerializer.Meta.fields + ['description', ]
 
 
 class FaceIDImageSerializer(serializers.ModelSerializer):
@@ -143,7 +110,7 @@ class FileSerializer(serializers.ModelSerializer):
                   'is_active',
                   'download_url',
                   'downloaded_at',
-                  'mongo_id',]
+                  'mongo_id', ]
         read_only_fields = ['id']
 
     def create(self, validated_data):
@@ -168,12 +135,67 @@ class ConsumedMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Consumed
-        fields = ['id', 'message_id', 'consumed_at', 'consumer_ip', 'consumer_name',  ]
+        fields = ['id', 'message_id', 'consumed_at', 'consumer_ip', 'consumer_name', ]
         read_only_fields = ['id']
 
     def create(self, validated_data):
         """Create a data."""
         return Consumed.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        """Update data."""
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
+class DataSerializer(serializers.ModelSerializer):
+    """Serializer for data."""
+    satellite_mission = MissionField()
+    converted_files = FileSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Data
+        fields = ['id',
+                  'date_tag',
+                  'status',
+                  'files',
+                  'satellite_mission',
+                  'converted_files', ]
+        read_only_fields = ['id']
+
+    def create(self, validated_data):
+        """Create a data."""
+        data = Data.objects.create(**validated_data)
+        return data
+
+    def update(self, instance, validated_data):
+        """Update data."""
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
+class DataDetailSerializer(DataSerializer):
+    """Serializer for data detail view."""
+
+    class Meta(DataSerializer.Meta):
+        fields = DataSerializer.Meta.fields + ['description', ]
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    """Serializer for notifications."""
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'message', 'created_at', 'is_read', 'user', ]
+        read_only_fields = ['id']
+
+    def create(self, validated_data):
+        """Create a data."""
+        return Notification.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         """Update data."""

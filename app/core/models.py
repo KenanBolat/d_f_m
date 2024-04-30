@@ -127,7 +127,6 @@ class DataTracking(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(null=True, blank=True)
 
-
     def __str__(self):
         return self.file_name
 
@@ -194,7 +193,7 @@ class Data(models.Model):
 
 
 class File(models.Model):
-    data = models.ForeignKey(Data, on_delete=models.CASCADE)
+    data = models.ForeignKey(Data, on_delete=models.CASCADE, related_name='converted_files')
     file_name = models.CharField(max_length=255)
     file_path = models.CharField(max_length=255)
     file_size = models.CharField(max_length=255)
@@ -216,3 +215,21 @@ class File(models.Model):
 
     def __str__(self):
         return self.file_name
+
+
+class Notification(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    icon = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    time = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
+    modified = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-time']
+        verbose_name = 'Notification'
+        verbose_name_plural = 'Notifications'

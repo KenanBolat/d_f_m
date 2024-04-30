@@ -22,6 +22,8 @@ make install;
 
 cd /app/;
 python server.py &
+python consumer.py &
+cron
 tail -f /dev/null
-#python consumer.py &
+
 

@@ -16,13 +16,30 @@ from gridfs import GridFS
 from bson.objectid import ObjectId
 from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
 
-os.environ['XRIT_DECOMPRESS_PATH'] = '/opt/conda/pkgs/public-decomp-wt-2.8.1-h3fd9d12_1/bin/xRITDecompress'
+# os.environ['XRIT_DECOMPRESS_PATH'] = '/opt/conda/pkgs/public-decomp-wt-2.8.1-h3fd9d12_1/bin/xRITDecompress'
 
 
-# os.environ['XRIT_DECOMPRESS_PATH'] = '/usr/local/bin/xRITDecompress'
+os.environ['XRIT_DECOMPRESS_PATH'] = '/usr/local/bin/xRITDecompress'
 
 
-class DataConverter(object):
+def custom_printer(func):
+    """Prints the time of the process"""
+    uniq_id = uuid.uuid4()
+
+    def inner(*args, **kwargs):
+        print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] [{uniq_id}] [Process has been initiated]")
+
+        # getting the returned value
+        returned_value = func(*args, **kwargs)
+        print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] [{uniq_id}] [Process has been finished]")
+
+        # returning the value to the original frame
+        return returned_value
+
+    return inner
+
+
+class DataConverter:
     def __init__(self, date_tag, mission, id, file_list):
         self.date_tag = date_tag
         self.mission = mission
@@ -71,23 +88,6 @@ class DataConverter(object):
     def connect(self):
         self._channel = self._rabbit.connect()
 
-    @staticmethod
-    def custom_printer(func):
-        """Prints the time of the process"""
-        uniq_id = uuid.uuid4()
-
-        def inner(*args, **kwargs):
-            print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] [{uniq_id}] [Process has been initiated]")
-
-            # getting the returned value
-            returned_value = func(*args, **kwargs)
-            print(f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] [{uniq_id}] [Process has been finished]")
-
-            # returning the value to the original frame
-            return returned_value
-
-        return inner
-
     def reader(self):
         self._reader = self.readers[self.mission]
 
@@ -121,7 +121,7 @@ class DataConverter(object):
     @custom_printer
     def upload_to_mongodb(self, f, ftype="netcdf"):
         """Uploads a file to the mongodb"""
-        client = MongoClient(f"mongodb://{os.environ.get('MONGODB','localhost')}:27017/")
+        client = MongoClient(f"mongodb://{os.environ.get('MONGODB', 'localhost')}:27017/")
 
         if ftype == "netcdf":
             fs = GridFS(client['netcdf'])
@@ -196,7 +196,6 @@ class DataConverter(object):
             print(
                 f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: File {self.file_payload['file_name']} upload failed {response.status_code} {response.json()}")
             return False
-
 
     @custom_printer
     def _convert_netcdf(self):

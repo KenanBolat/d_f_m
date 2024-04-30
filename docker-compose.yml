@@ -101,6 +101,7 @@ services:
       - CORE_APP=app
       - TOKEN=${TOKEN}
       - MONGODB=mongodb
+      - FILE_AGE_LIMIT=111 # minutes
 
     ports:
       - 5020:5000
