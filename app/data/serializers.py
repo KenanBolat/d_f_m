@@ -190,7 +190,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ['id', 'message', 'created_at', 'is_read', 'user', ]
+        fields = '__all__'
         read_only_fields = ['id']
 
     def create(self, validated_data):
