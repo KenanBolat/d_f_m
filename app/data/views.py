@@ -25,6 +25,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -71,7 +72,7 @@ class DataViewSet(viewsets.ModelViewSet):
     # serializer_class = serializers.DataDetailSerializer
     queryset = Data.objects.all().prefetch_related('converted_files')
     serializer_class = serializers.DataSerializer
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication, JWTAuthentication, ]
     permission_classes = [IsAuthenticated]
 
     # profile_serializer = serializers.ForeignerSerializer
