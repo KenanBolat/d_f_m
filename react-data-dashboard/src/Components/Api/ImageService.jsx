@@ -1,10 +1,10 @@
 import axios from '../LoginForm/axios';
 
-const baseUrl = 'http://localhost:8000/api/files';
+const baseUrl = 'http://localhost:8000/api/file';
 
 // Function to get the URL for an image stored in MongoDB
 export const getImageUrl = mongo_id => {
-    return `${baseUrl}/${mongo_id}/image`; // Adjust the URL as necessary
+    return `${baseUrl}/${mongo_id}/image/`; // Adjust the URL as necessary
 };
 
 // Function to fetch an image as a blob if needed for more direct control

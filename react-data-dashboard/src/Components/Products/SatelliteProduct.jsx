@@ -39,7 +39,7 @@ const SatelliteProduct = () => {
               <Card
                 key={Math.random()}
                 title={`${summary.satellite_mission} - ${summary.converted_files[2]?.file_type}`}
-                img={getImageUrl(`${summary.converted_files[2]?.mongo_id}`)}
+                img={getImageUrl(`${summary.converted_files[2]?.id}`)}
                 count={summary.total_count}
                 fileSize={summary.total_file_size}
               />
