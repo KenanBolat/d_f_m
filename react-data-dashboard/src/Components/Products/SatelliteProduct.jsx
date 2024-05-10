@@ -7,7 +7,8 @@ import { getImageUrl, fetchImageBlob } from './../Api/ImageService';
 
 const SatelliteProduct = () => {
     const [summaries, setSummaries] = useState([]);
-
+    const [sub_file_count, setSubFileCount] = useState(0);
+    
     useEffect(() => {
         // Fetch your summary data from the endpoint and then set it in state
         const fetchData = async () => {
@@ -20,26 +21,27 @@ const SatelliteProduct = () => {
         };
     
         fetchData();
-        debugger;
       }, []);
+    
+ 
     return (
-      //   <Grid container spacing={2}>
-      //   {summaries.map((summary) => (
-      //     <Grid item xs={6} sm={6} md={3} key={`${summary.satellite_mission}_${summary.file_type}`}>
-      //       <SummaryCard
-      //         title={`${summary.satellite_mission} - ${summary.file_type}`}
-      //         count={summary.total_count}
-      //         fileSize={summary.total_file_size}
-      //       />
-      //     </Grid>
-      //   ))}
-      // </Grid>
+
       <section className='card-container'>{summaries.map((summary) => (
-          
+            
               <Card
                 key={Math.random()}
-                title={`${summary.satellite_mission} - ${summary.converted_files[2]?.file_type}`}
+                
+                
+                // title={`${summary.satellite_mission} - ${sub_file_count} files`}
+                png={`PNG - ${summary.converted_files.filter(file=>file.file_type === 'png').length} files`}
+                netcdf_title={`NETCDF - ${summary.converted_files.filter(file=>file.file_type === 'netcdf').length} files`}
+                geotiff_title={`GEOTIFF - ${summary.converted_files.filter(file=>file.file_type === 'geotiff').length} files`}
+                
                 img={getImageUrl(`${summary.converted_files[2]?.id}`)}
+                img2={getImageUrl(`${summary.converted_files[4]?.id}`)}
+                img3={getImageUrl(`${summary.converted_files[6]?.id}`)}
+                img4={getImageUrl(`${summary.converted_files[8]?.id}`)}
+                
                 count={summary.total_count}
                 fileSize={summary.total_file_size}
               />

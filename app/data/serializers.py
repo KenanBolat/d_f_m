@@ -59,8 +59,9 @@ class MissionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Mission
-        fields = ['id', 'satellite_mission', 'is_active', 'created_at', 'updated_at', 'description', ]
-        read_only_fields = ['id']
+        # fields = ['id', 'satellite_mission', 'is_active', 'created_at', 'updated_at', 'description', ]
+        # read_only_fields = ['id']
+        fields = ['satellite_mission']
 
     def create(self, validated_data):
         """Create a data."""
@@ -157,6 +158,7 @@ class DataSerializer(serializers.ModelSerializer):
     #                                                  slug_field='satellite_mission',
     #                                                  many=False,
     #                                                  queryset=Mission.objects.all())
+    satellite_mission = MissionField()
     converted_files = FileSerializer(many=True, read_only=True)
 
     class Meta:
