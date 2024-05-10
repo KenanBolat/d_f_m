@@ -41,7 +41,6 @@ const MissionDataList = () => {
           Authorization: `Token ${token}`,
         },
       }).then((res) => {
-        debugger;
         console.log('Data fetched:', res.data);
         console.log(res.data);
         // setDataList(res.data);
@@ -56,7 +55,6 @@ const MissionDataList = () => {
   };
 
   useEffect(() => {
-    debugger;
     fetchDataList();
   }  , []);
 

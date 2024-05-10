@@ -1,9 +1,9 @@
 import axios from "axios";
 
-const baseUrl = "http://localhost:8000/api/";
-
+debugger;
+const baseUrl = {URL: process.env.VITE_APP_API_URL || 'http://localhost:8000/api/'}
 const axiosInstance = axios.create({
-  baseURL: baseUrl,
+  baseURL: baseUrl["URL"],
   timeout: 5000,
   headers: {
     Authorization: localStorage.getItem("access_token")
@@ -19,16 +19,24 @@ const axiosInstance = axios.create({
 
 // Request Interceptor
 axiosInstance.interceptors.request.use(request => {
+  debugger;
   const accessToken = localStorage.getItem("access_token");
   if (accessToken) {
     request.headers['Authorization'] = `Bearer ${accessToken}`;
+  } 
+  else {
+    delete axiosInstance.defaults.headers.common['Authorization'];
   }
+
+
   return request;
 });
 
 // Response Interceptor
 axiosInstance.interceptors.response.use(response => response, error => {
+  debugger;
   const originalRequest = error.config;
+  
   if (error.response.status === 401 && !originalRequest._retry) {
     originalRequest._retry = true; // mark the request to signify it has already been retried
     const refreshToken = localStorage.getItem("refresh_token");

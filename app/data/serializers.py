@@ -152,7 +152,11 @@ class ConsumedMessageSerializer(serializers.ModelSerializer):
 
 class DataSerializer(serializers.ModelSerializer):
     """Serializer for data."""
-    satellite_mission = MissionField()
+
+    # satellite_mission = serializers.SlugRelatedField(required=True,
+    #                                                  slug_field='satellite_mission',
+    #                                                  many=False,
+    #                                                  queryset=Mission.objects.all())
     converted_files = FileSerializer(many=True, read_only=True)
 
     class Meta:
@@ -163,6 +167,8 @@ class DataSerializer(serializers.ModelSerializer):
                   'files',
                   'satellite_mission',
                   'converted_files', ]
+        # lookup_field = 'satellite_mission__satellite_mission'
+        read_only_fields = ['satellite_mission', 'id']
         read_only_fields = ['id']
 
     def create(self, validated_data):

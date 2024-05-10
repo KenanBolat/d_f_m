@@ -69,12 +69,16 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 class DataViewSet(viewsets.ModelViewSet):
     """View from the manage data APIs."""
-    # serializer_class = serializers.DataDetailSerializer
     queryset = Data.objects.all().prefetch_related('converted_files')
     serializer_class = serializers.DataSerializer
-    authentication_classes = [TokenAuthentication, JWTAuthentication, ]
-    permission_classes = [IsAuthenticated]
+    # Authentication and permissions
 
+    # authentication_classes = [TokenAuthentication, JWTAuthentication, ]
+    # permission_classes = [IsAuthenticated]
+
+    # Trial and Error
+    # serializer_class = serializers.DataDetailSerializer
+    # lookup_field = 'satellite_mission__satellite_mission'
     # profile_serializer = serializers.ForeignerSerializer
 
     def _params_to_ints(self, qs):
@@ -171,6 +175,30 @@ class FileViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.FileSerializer
     queryset = File.objects.all()
 
+    from django.http import HttpResponse
+    import pymongo
+    import gridfs
+    from bson.objectid import ObjectId
+
+    @action(detail=True, methods=['get'], url_path='image')
+    def serve_image(self, request, pk=None):
+        """Serve an image file from MongoDB for display."""
+        file = self.get_object()
+        mongo_id = file.mongo_id
+        file_type = file.file_type  # This should ideally indicate a database or a collection
+
+        if not mongo_id:
+            return Response({"message": "No MongoDB ID provided for file."}, status=status.HTTP_400_BAD_REQUEST)
+
+        client = pymongo.MongoClient(os.environ.get('MONGO_HOST', 'localhost'), 27017)
+        db = client[file_type]
+        fs = gridfs.GridFS(db)
+
+        try:
+            file_data = fs.get(ObjectId(mongo_id))
+            return HttpResponse(file_data.read(), content_type='image/png')
+        except Exception as e:
+            return Response({"message": "File not found in MongoDB"}, status=status.HTTP_404_NOT_FOUND)
     @action(detail=True, methods=['get'], url_path='download')
     def download(self, request, pk=None):
         try:
