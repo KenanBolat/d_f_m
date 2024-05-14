@@ -1,0 +1,45 @@
+/* styles.css */
+.data-table-row {
+    padding: 15px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.data-table-row td {
+    padding: 15px;
+}
+
+.data-table-custom .p-datatable-tbody > tr > td {
+    padding: 10px 8px; /* Adjust as needed */
+}
+
+.orders-subtable .p-datatable-tbody > tr > td {
+    padding: 10px 8px; /* Adjust as needed */
+}
+
+.product-badge {
+    display: inline-block;
+    padding: .25em .4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+}
+
+.status-done {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.status-pending {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+
+.orders-subtable {
+    padding: 1rem;
+}

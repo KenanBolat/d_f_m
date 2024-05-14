@@ -32,6 +32,11 @@ import LoginSignup from "./Pages/LoginSignup";
 
 import SatelliteProduct from "./Components/Products/SatelliteProduct";
 
+import DataTable from "./Components/Products/DataTable";
+import "primereact/resources/themes/saga-blue/theme.css"; // Theme
+import "primereact/resources/primereact.min.css"; // Core CSS
+import "primeicons/primeicons.css";
+
 function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [query, setQuery] = useState("");
@@ -71,7 +76,6 @@ function App() {
   //-----------------Filtered Data ------------------------
   function filtereddata(data, selected, query) {
     let datafiltered = data;
-    debugger;
     if (query) {
       datafiltered = filteredProducts;
     }
@@ -99,11 +103,10 @@ function App() {
   }
 
   const result = filtereddata(filteredProducts, selectedCategory, query);
-  debugger;
   return (
     <AuthProvider>
       <Router>
-        <Sidebar handleChange={handleChange}></Sidebar>
+        {/* <Sidebar handleChange={handleChange}></Sidebar> */}
         <Header />
         <Nav />
         <Navbar />
@@ -121,6 +124,7 @@ function App() {
         </Routes>
         <Recommended handleClick={handleClick} />
         <SatelliteProduct result={result} />
+        <DataTable result={result} />
         <Products result={result} />
         <Category handleChange={handleChange} />
         <Routes>

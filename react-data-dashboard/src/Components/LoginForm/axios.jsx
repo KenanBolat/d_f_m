@@ -1,6 +1,5 @@
 import axios from "axios";
 
-debugger;
 const baseUrl = {URL: process.env.VITE_APP_API_URL || 'http://localhost:8000/api/'}
 const axiosInstance = axios.create({
   baseURL: baseUrl["URL"],
@@ -19,7 +18,6 @@ const axiosInstance = axios.create({
 
 // Request Interceptor
 axiosInstance.interceptors.request.use(request => {
-  debugger;
   const accessToken = localStorage.getItem("access_token");
   if (accessToken) {
     request.headers['Authorization'] = `Bearer ${accessToken}`;
@@ -34,7 +32,6 @@ axiosInstance.interceptors.request.use(request => {
 
 // Response Interceptor
 axiosInstance.interceptors.response.use(response => response, error => {
-  debugger;
   const originalRequest = error.config;
   
   if (error.response.status === 401 && !originalRequest._retry) {
