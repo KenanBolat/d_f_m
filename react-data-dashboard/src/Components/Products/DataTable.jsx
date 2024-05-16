@@ -60,8 +60,7 @@ const DataTableComponent = () => {
             const day = dateString.slice(6, 8);
             const hour = dateString.slice(8, 10);
             const minute = dateString.slice(10, 12);
-            const second = dateString.slice(12, 14);
-
+            const second = '00';
             const parsedDate = parse(
                 `${year}-${month}-${day} ${hour}:${minute}:${second}`,
                 'yyyy-MM-dd HH:mm:ss',

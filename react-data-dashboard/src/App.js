@@ -33,6 +33,9 @@ import LoginSignup from "./Pages/LoginSignup";
 import SatelliteProduct from "./Components/Products/SatelliteProduct";
 
 import DataTable from "./Components/Products/DataTable";
+import ProductPage from "./Components/Products/ProductPage";
+import GeoServerPage from "./Components/Products/GeoServerPage";
+
 import "primereact/resources/themes/saga-blue/theme.css"; // Theme
 import "primereact/resources/primereact.min.css"; // Core CSS
 import "primeicons/primeicons.css";
@@ -112,6 +115,7 @@ function App() {
         <Navbar />
 
         <Routes>
+          {/* Trial for product page with params */}
           <Route path="/shop" element={<Shop />} />
           <Route path="/men" element={<ShopCategory category="men" />} />
           <Route path="/women" element={<ShopCategory category="women" />} />
@@ -119,12 +123,24 @@ function App() {
           <Route path="/product" element={<Product />}>
             <Route path=":productId" element={<Product result={result} />} />
           </Route>
+          {/* from 4o */}
+          <Route
+            path="/x/:fileName"
+            // element={(props) => <ProductPage {...props} data={result} />}
+            element={<ProductPage data={result} />}
+          />
+          <Route
+            path="/geoserver/:fileName"
+            element={<GeoServerPage> </GeoServerPage>}
+          />{" "}
+          {/* from 4o */}
           <Route path="/cart" element={<Cart />} />
           <Route path="/login" element={<LoginSignup />} />
         </Routes>
         <Recommended handleClick={handleClick} />
         <SatelliteProduct result={result} />
         <DataTable result={result} />
+
         <Products result={result} />
         <Category handleChange={handleChange} />
         <Routes>

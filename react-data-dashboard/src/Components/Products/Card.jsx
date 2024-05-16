@@ -6,7 +6,7 @@ import { FaExternalLinkAlt } from "react-icons/fa";
 
 
 
-function Card({ img,img2,img3, img4, png, netcdf_title,geotiff_title, date_tag}) {
+function Card({ img,img2,img3, img4, png, netcdf_title,geotiff_title, date_tag, satellite_mission}) {
   return (
     <div>
       <section className='card'>
