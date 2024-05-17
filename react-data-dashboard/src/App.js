@@ -124,7 +124,7 @@ function App() {
           </Route>
           {/* from 4o */}
           <Route
-            path="/x/:fileName"
+            path="/productpage/:fileName"
             // element={(props) => <ProductPage {...props} data={result} />}
             element={<ProductPage data={result} />}
           />
