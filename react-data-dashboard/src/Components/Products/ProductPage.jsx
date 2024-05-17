@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import { saveAs } from 'file-saver';
 import './ProductPage.css'; // Ensure you create this CSS file for styling
 import { getImageUrl } from './../Api/ImageService';
-
+import { formatFileSize } from "./formatFileSize";
 const ProductPage = ({ data }) => {
     console.log(data);
     const { fileName } = useParams();
@@ -22,7 +22,7 @@ const ProductPage = ({ data }) => {
 
                 const filteredProducts = data.filter(data => data.id === parseInt(fileName));
                 if (filteredProducts.length > 0) {
-                    setCurrentLayer(filteredProducts[0]);
+                    setCurrentLayer(filteredProducts[0].converted_files.filter(data => data.file_type === 'png')[0]);
                 } else {
                     setError('File not found');
                 }
@@ -42,8 +42,6 @@ const ProductPage = ({ data }) => {
     if (!fileData) return <p>Loading...</p>;
 
     const filteredProducts = fileData.filter(data => data.id === parseInt(fileName));
-    
-    debugger;
 
     // if (!fileData) {
     //     return <div>File not found</div>;
@@ -51,8 +49,17 @@ const ProductPage = ({ data }) => {
     //     setCurrentLayer(filteredProducts[0]);
     // }
     
-    const handleDownload = () => {
-        saveAs(currentLayer.file_path, currentLayer.file_name);
+    const handleDownload = async () => {
+        try {
+            const response = await axios.get(`http://localhost:8000/api/file/${currentLayer.id}/download/`, {
+                responseType: 'blob',
+            });
+            debugger;
+            const blob = new Blob([response.data], { type: response.data.type });
+            saveAs(blob, currentLayer.file_name);
+        } catch (error) {
+            console.error('Error downloading file', error);
+        }
     };
 
     const handleLayerClick = (layer) => {
@@ -63,32 +70,34 @@ const ProductPage = ({ data }) => {
     const handleImageClick = () => {
         // Implement a modal or larger image view here
     };
-    debugger;
     return (
         <div className="product-page">
             <h1>{fileData.file_name}</h1>
+            <div className="main-content">
             <div className="image-section">
-                <img src={getImageUrl(419)} alt={currentLayer?.file_name} onClick={handleImageClick} />
+                <img src={getImageUrl(currentLayer?.id)} alt={filteredProducts[0]?.file_name} onClick={handleImageClick} />
                 <div className="icons">
-                    <a href={currentLayer?.file_path} download>
+                    <a href={filteredProducts[0]?.file_path} download>
                         <i className="pi pi-download" onClick={handleDownload}></i>
                     </a>
-                    <Link to={`/geoserver/${currentLayer?.file_name}`}>
-                        <i className="pi pi-layer"></i>
+                    <Link to={`/geoserver/${filteredProducts[0]?.file_name}`}>
+                        <i className="pi pi-map"></i>
                     </Link>
+                </div>
                 </div>
             </div>
             <div className="metadata">
                 <h3>Metadata Information</h3>
-                <p><strong>Date:</strong> {currentLayer?.file_date}</p>
-                <p><strong>Channel:</strong> {currentLayer?.channel}</p>
-                <p><strong>Satellite Mission:</strong> {currentLayer?.satellite_mission}</p>
-                <p><strong>Created Time:</strong> {currentLayer?.created_time}</p>
-                <p><strong>File Size:</strong> {currentLayer?.file_size}</p>
+                <p><strong>Date:</strong> {filteredProducts[0]?.date_tag}</p>
+                <p><strong>Channel Name:</strong> {currentLayer?.file_name}</p>
+                <p><strong>File Created:</strong> {currentLayer?.downloaded_at}</p>
+                <p><strong>Satellite Mission:</strong> {filteredProducts[0]?.satellite_mission}</p>
+                <p><strong>Status:</strong> {filteredProducts[0]?.status}</p>
+                <p><strong>File Size:</strong> {formatFileSize(currentLayer?.file_size)}</p>
             </div>
             <div className="layers">
                 <h3>Other Layers</h3>
-                {currentLayer.converted_files.map(layer => (
+                {filteredProducts[0]?.converted_files.map(layer => (
                     <div key={layer.id} onClick={() => handleLayerClick(layer)}>
                         {layer.file_name}
                     </div>

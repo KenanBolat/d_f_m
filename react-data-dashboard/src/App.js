@@ -26,7 +26,6 @@ import Navbar from "./Components/Navbar/Navbar";
 
 import Shop from "./Pages/Shop";
 import ShopCategory from "./Pages/ShopCategory";
-import Cart from "./Pages/Cart";
 import Product from "./Pages/Product";
 import LoginSignup from "./Pages/LoginSignup";
 
@@ -93,16 +92,16 @@ function App() {
           title === selected
       );
     }
-    return datafiltered.map(({ img, title, star, reviews, newPrice }) => (
-      <Card
-        key={Math.random()}
-        img={img}
-        title={title}
-        star={star}
-        reviews={reviews}
-        newPrice={newPrice}
-      ></Card>
-    ));
+    // return datafiltered.map(({ img, title, star, reviews, newPrice }) => (
+    //   <Card
+    //     key={Math.random()}
+    //     img={img}
+    //     title={title}
+    //     star={star}
+    //     reviews={reviews}
+    //     newPrice={newPrice}
+    //   ></Card>
+    // ));
   }
 
   const result = filtereddata(filteredProducts, selectedCategory, query);
@@ -134,7 +133,6 @@ function App() {
             element={<GeoServerPage> </GeoServerPage>}
           />{" "}
           {/* from 4o */}
-          <Route path="/cart" element={<Cart />} />
           <Route path="/login" element={<LoginSignup />} />
         </Routes>
         <Recommended handleClick={handleClick} />
