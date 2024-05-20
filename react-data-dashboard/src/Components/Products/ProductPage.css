@@ -65,3 +65,24 @@
 .layers div:hover {
     background-color: #e0e0e0;
 }
+
+
+/* ImageAnimation styles */
+.image-animation {
+    position: relative;
+}
+
+.image-animation img {
+    width: 100%;
+    height: auto;
+}
+
+.image-label {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+}

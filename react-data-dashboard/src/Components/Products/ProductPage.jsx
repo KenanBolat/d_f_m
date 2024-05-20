@@ -5,12 +5,15 @@ import { saveAs } from 'file-saver';
 import './ProductPage.css'; // Ensure you create this CSS file for styling
 import { getImageUrl } from './../Api/ImageService';
 import { formatFileSize } from "./formatFileSize";
+import  ImageAnimation from './imageAnimation';
+
 const ProductPage = ({ data }) => {
     console.log(data);
     const { fileName } = useParams();
     const [fileData, setFileData] = useState(null);
     const [error, setError] = useState(null);
     const [currentLayer, setCurrentLayer] = useState(null);
+    const [pngFiles, setpngFiles] = useState(null);
     
     
     useEffect(() => {
@@ -21,8 +24,10 @@ const ProductPage = ({ data }) => {
                 const data = response.data;
 
                 const filteredProducts = data.filter(data => data.id === parseInt(fileName));
+              
                 if (filteredProducts.length > 0) {
                     setCurrentLayer(filteredProducts[0].converted_files.filter(data => data.file_type === 'png')[0]);
+                    setpngFiles(filteredProducts[0].converted_files.filter(data => data.file_type === 'png'));
                 } else {
                     setError('File not found');
                 }
@@ -70,6 +75,7 @@ const ProductPage = ({ data }) => {
     const handleImageClick = () => {
         // Implement a modal or larger image view here
     };
+    debugger
     return (
         <div className="product-page">
             <h1>{fileData.file_name}</h1>
@@ -84,8 +90,20 @@ const ProductPage = ({ data }) => {
                         <i className="pi pi-map"></i>
                     </Link>
                 </div>
+                
+                </div>
+                <div className="image-section">
+                <ImageAnimation images={pngFiles} />
+                    <div className="icons">
+                        <i className="pi pi-download" onClick={handleDownload}></i>
+                        <Link to={`/geoserver/${currentLayer.file_name}`}>
+                            <i className="pi pi-layer"></i>
+                        </Link>
+                    </div>
                 </div>
             </div>
+
+            
             <div className="metadata">
                 <h3>Metadata Information</h3>
                 <p><strong>Date:</strong> {filteredProducts[0]?.date_tag}</p>

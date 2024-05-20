@@ -164,7 +164,7 @@ class DataSerializer(serializers.ModelSerializer):
     class Meta:
         model = Data
         fields = ['id',
-                  'date_tag',
+                  'date_tag', 
                   'status',
                   'files',
                   'satellite_mission',
