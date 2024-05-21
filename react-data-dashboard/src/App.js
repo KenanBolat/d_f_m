@@ -33,6 +33,7 @@ import SatelliteProduct from "./Components/Products/SatelliteProduct";
 
 import DataTable from "./Components/Products/DataTable";
 import ProductPage from "./Components/Products/ProductPage";
+import ChannelAnimation from "./Components/Products/ChannelAnimation";
 import GeoServerPage from "./Components/Products/GeoServerPage";
 
 import "primereact/resources/themes/saga-blue/theme.css"; // Theme
@@ -134,6 +135,7 @@ function App() {
           />{" "}
           {/* from 4o */}
           <Route path="/login" element={<LoginSignup />} />
+          <Route path="/channels" element={<ChannelAnimation />} />
         </Routes>
         <Recommended handleClick={handleClick} />
         <SatelliteProduct result={result} />

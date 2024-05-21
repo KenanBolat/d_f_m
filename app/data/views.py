@@ -7,8 +7,10 @@ import gridfs
 import pymongo
 from bson import ObjectId
 from django.http import (HttpResponse, JsonResponse)
-
+from datetime import datetime
 from rest_framework.exceptions import NotFound
+
+from django.db.models import Func, Value
 
 from drf_spectacular.utils import (
     extend_schema_view,
@@ -16,6 +18,10 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiTypes
 )
+
+from dateutil.parser import parse as parse_datetime
+
+from .serializers import FileSerializer
 
 from rest_framework import (viewsets, mixins, status)
 # mixins is required to add additional functionalities to views
@@ -29,7 +35,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from django.db.models import (Count, Sum, FloatField, F, )
+from django.db.models import (Count, Sum, FloatField, F, Q)
 from django.db.models.functions import Cast, Round
 
 from core.models import (Data,
@@ -180,6 +186,10 @@ class FileViewSet(viewsets.ModelViewSet):
     import gridfs
     from bson.objectid import ObjectId
 
+    class ToTimestamp(Func):
+        function = 'TO_TIMESTAMP'
+        template = "%(function)s(%(expressions)s, 'YYYYMMDDHHMI')"
+
     @action(detail=True, methods=['get'], url_path='image')
     def serve_image(self, request, pk=None):
         """Serve an image file from MongoDB for display."""
@@ -279,4 +289,36 @@ class FileViewSet(viewsets.ModelViewSet):
 
         # You can directly return the data, but using a serializer is a good practice
         # if you want to ensure a consistent format or add additional processing
+        print(file_summary)
         return Response(file_summary)
+
+    @action(detail=False, methods=['get'], url_path='special-query')
+    def special_query(self, request):
+        satellite_mission = request.query_params.get('satellite_mission', '')
+        # channel = request.query_params.get('channel', 'IR_120')
+        channel = request.query_params.get('channel', '')
+        file_type = request.query_params.get('file_type', '.png')
+        start_date = request.query_params.get('start_date', '2000-05-21T19:49:44.034Z')
+        end_date = request.query_params.get('end_date', datetime.max)  # '9999-12-31 23:59:59'
+
+        # Ensure dates are in the correct format
+        try:
+            start_date = parse_datetime(start_date)
+            # end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            return Response({'error': 'Invalid date format. Use YYYY-MM-DD HH:MM:SS'}, status=400)
+
+        files = ((File.objects
+                 .annotate(file_datetime=self.ToTimestamp(F('file_date'))))
+                 .filter(
+            Q(file_name__contains=satellite_mission) &
+            Q(file_name__contains=channel) &
+            Q(file_name__endswith=file_type) &
+            Q(file_datetime__range=[start_date, end_date])
+        ).order_by('file_date'))
+        print(files)
+        print(f"{satellite_mission}")
+        print(start_date.strftime('%Y%m%d%H%M'))
+        serializer = FileSerializer(files, many=True)
+
+        return Response(serializer.data)
