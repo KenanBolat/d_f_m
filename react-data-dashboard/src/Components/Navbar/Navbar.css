@@ -4,14 +4,21 @@
     justify-content: space-around;
     padding: 16px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: white;
 }
 
 .nav-logo {
     display: flex;
     align-items: center;
     gap: 10px;
+    size: 40px;
 
 }   
+
+.logo {
+    height: 100px; /* Adjust the height as needed */
+    margin-right: 10px;
+  }
 
 .nav-logo p {
     color: #171717;

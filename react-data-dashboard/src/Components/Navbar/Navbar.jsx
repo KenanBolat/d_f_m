@@ -10,9 +10,8 @@ const Navbar = () => {
   return (
     <div className='navbar'>
         <div className="nav-logo">
-            <img src="https://www.flaticon.com/svg/vstatic/svg/174/174857.svg?token=exp=1619780004~hmac=" alt="logo" className="logo"/>
+            <img src="./tmet_logo.png" alt="logo" className="logo"/>
         </div>
-        <p>LOGO</p>
         <ul className="nav-menu">
           <li onClick={()=>{setMenu("mgs")}}><Link to="mgs">MGS</Link>{menu==="mgs"?<hr/>:<></>}</li>
           <li onClick={()=>{setMenu("iodc")}}><Link to="iodc">IODC</Link>{menu==="iodc"?<hr/>:<></>}</li>

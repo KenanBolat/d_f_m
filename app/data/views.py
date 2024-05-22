@@ -298,7 +298,7 @@ class FileViewSet(viewsets.ModelViewSet):
         # channel = request.query_params.get('channel', 'IR_120')
         channel = request.query_params.get('channel', '')
         file_type = request.query_params.get('file_type', '.png')
-        start_date = request.query_params.get('start_date', '2000-05-21T19:49:44.034Z')
+        start_date = request.query_params.get('start_date', '2000-05-21T19:49:44.034Z') # '2000-12-31 23:59:59'
         end_date = request.query_params.get('end_date', datetime.max)  # '9999-12-31 23:59:59'
 
         # Ensure dates are in the correct format
