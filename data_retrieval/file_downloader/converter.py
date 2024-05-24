@@ -13,6 +13,8 @@ import json
 from pymongo import MongoClient
 from gridfs import GridFS
 
+from pyresample import create_area_def
+
 from bson.objectid import ObjectId
 from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
 
@@ -107,6 +109,7 @@ class DataConverter:
             self._convert_netcdf()
             self._convert_png()
             self._convert_tiff()
+            self._convert_tiff_aoi()
 
     @staticmethod
     def calculate_hash(content):
@@ -273,4 +276,32 @@ class DataConverter:
             self.upload_to_mongodb(f_path, ftype="geotiff")
             self.insert_file()
         del rds_hrv, rds_vis
+        return True
+
+    @custom_printer
+    def _convert_tiff_aoi(self):
+        """Converts data to geotiff"""
+        aoi = create_area_def('aoi', {'proj': 'longlat', 'datum': 'WGS84'},
+                              area_extent=[22, 30, 45, 45],
+                              resolution=0.01,
+                              units='degrees',
+                              description='Global 0.01x0.01 degree lat-lon grid')
+
+        scn_aoi = self.scn.resample(aoi)
+        print("="*100)
+
+        for ch in [r for r in self.seviri_data_names]:
+            f_name = f"{self.mission}_{self.date_tag}_{ch}_aoi.tif"
+            print(f_name)
+            f_path = os.path.join(self.TEMP_DIR, f"{f_name}")
+            scn_aoi.save_datasets(writer='geotiff', datasets=[ch], filename=f_path)
+            scn_aoi.save_datasets(writer='geotiff', datasets=[ch], filename=f_path)
+            self.update_payload(file_name=f_name, file_path=f_path, file_type='geotiff',
+                                file_size=os.path.getsize(f_path),
+                                file_status='converted')
+            self.upload_to_mongodb(f_path, ftype="geotiff")
+            self.insert_file()
+
+        print("="*100)
+        del scn_aoi
         return True
