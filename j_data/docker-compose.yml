@@ -19,11 +19,4 @@ services:
       - ./geoserver_data:/opt/geoserver_data
       - ./additional_libs:/opt/additional_libs # by mounting this we can install libs from host on startup
 
-  ftp_server:
-    build: ./ftp/
-    ports:
-      - '200-201:20-21/tcp'
-      - '40000-40009:40000-40009/tcp'
-    volumes:
-      - '/home/knn/Desktop/Test_Data/:/data/'
 

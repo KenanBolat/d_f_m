@@ -184,6 +184,26 @@ class DataConverter:
         for key, value in kwargs.items():
             self.file_payload[key] = value
 
+    def check_file_exists(self, file_name_to_check):
+        """Checks if the file is already uploaded"""
+        headers = {'Content-Type': 'application/json'}
+        response = requests.get(f"http://{os.environ.get('CORE_APP', 'localhost')}:8000/api/file/",
+                                params=self.file_payload,
+                                headers=headers)
+        if response.status_code == 200:
+            files = response.json()
+            for file in files:
+                if file['file_name'] == file_name_to_check:
+                    return True
+                    print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:File {file_name_to_check} already uploaded")
+                else:
+                    False
+        else:
+            print(
+                f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: File {file_name_to_check} "
+                f"check failed {response.status_code} {response.json()}")
+            return False
+
     def insert_file(self):
         """Updates the file status"""
         headers = {'Content-Type': 'application/json'}
@@ -209,47 +229,50 @@ class DataConverter:
         self.nc_filename_hrv = os.path.join(self.TEMP_DIR, f'{self.mission}_{self.date_tag}_hrv.nc')
         self.nc_filename_vis = os.path.join(self.TEMP_DIR, f'{self.mission}_{self.date_tag}_vis.nc')
 
-        self.scn.save_datasets(writer='cf', datasets=hrv_datasets, filename=self.nc_filename_hrv)
-        self.scn.save_datasets(writer='cf', datasets=vis_datasets, filename=self.nc_filename_vis)
+        if self.check_file_exists(self.nc_filename_hrv) or self.check_file_exists(self.nc_filename_vis):
+            print("="*100, "File already exists", "="*100)
+        else:
+            self.scn.save_datasets(writer='cf', datasets=hrv_datasets, filename=self.nc_filename_hrv)
+            self.scn.save_datasets(writer='cf', datasets=vis_datasets, filename=self.nc_filename_vis)
 
-        self.upload_to_mongodb(self.nc_filename_hrv, ftype="netcdf")
-        self.update_payload(file_name=f'{self.mission}_{self.date_tag}_hrv.nc',
-                            file_path=self.nc_filename_hrv,
-                            file_type='netcdf',
-                            file_size=os.path.getsize(self.nc_filename_hrv),
-                            file_status='converted')
+            self.upload_to_mongodb(self.nc_filename_hrv, ftype="netcdf")
+            self.update_payload(file_name=f'{self.mission}_{self.date_tag}_hrv.nc',
+                                file_path=self.nc_filename_hrv,
+                                file_type='netcdf',
+                                file_size=os.path.getsize(self.nc_filename_hrv),
+                                file_status='converted')
 
-        self.insert_file()
+            self.insert_file()
 
-        self.upload_to_mongodb(self.nc_filename_vis, ftype="netcdf")
-        self.update_payload(file_name=f'{self.mission}_{self.date_tag}_vis.nc',
-                            file_path=self.nc_filename_vis,
-                            file_type='netcdf',
-                            file_size=os.path.getsize(self.nc_filename_vis),
-                            file_status='converted')
+            self.upload_to_mongodb(self.nc_filename_vis, ftype="netcdf")
+            self.update_payload(file_name=f'{self.mission}_{self.date_tag}_vis.nc',
+                                file_path=self.nc_filename_vis,
+                                file_type='netcdf',
+                                file_size=os.path.getsize(self.nc_filename_vis),
+                                file_status='converted')
 
-        return self.insert_file()
+            return self.insert_file()
 
     @custom_printer
     def _convert_png(self):
-        from satpy.composites import GenericCompositor
-        # compositor = GenericCompositor("overview")
-        # compositor = GenericCompositor(['IR_108', 'IR_087', 'IR_120'])
-        # rgb_composite = satpy.composits.GenericCompositor(['IR_108', 'IR_087', 'IR_120'])
-        tag = f'{self.mission}_{self.date_tag}'
-        self.scn.save_datasets(writer='simple_image', filename=os.path.join(self.TEMP_DIR, tag + '_{name}.png'))
+        if self.check_file_exists(self.nc_filename_hrv) or self.check_file_exists(self.nc_filename_vis):
+            print("=" * 100, "File already exists", "=" * 100)
+        else:
 
-        for png in glob.glob(os.path.join(self.TEMP_DIR, tag + '_*.png')):
-            self.upload_to_mongodb(png, ftype="png")
-            self.update_payload(file_name=f'{png.split("/")[-1]}',
-                                file_path=png,
-                                file_type='png',
-                                file_size=os.path.getsize(png),
-                                file_status='converted')
-            self.insert_file()
+            tag = f'{self.mission}_{self.date_tag}'
+            self.scn.save_datasets(writer='simple_image', filename=os.path.join(self.TEMP_DIR, tag + '_{name}.png'))
 
-        self._create_overiew()
-        return True
+            for png in glob.glob(os.path.join(self.TEMP_DIR, tag + '_*.png')):
+                self.upload_to_mongodb(png, ftype="png")
+                self.update_payload(file_name=f'{png.split("/")[-1]}',
+                                    file_path=png,
+                                    file_type='png',
+                                    file_size=os.path.getsize(png),
+                                    file_status='converted')
+                self.insert_file()
+
+            self._create_overiew()
+            return True
 
     @custom_printer
     def _create_overiew(self):
@@ -260,21 +283,24 @@ class DataConverter:
     def _convert_tiff(self):
         """Converts data to geotiff"""
 
-        # VIS
         rds_vis = rioxarray.open_rasterio(self.nc_filename_vis)
         rds_hrv = rioxarray.open_rasterio(self.nc_filename_hrv)
         for ch in [r for r in self.seviri_data_names]:
             f_name = f"{self.mission}_{self.date_tag}_{ch}.tif"
             f_path = os.path.join(self.TEMP_DIR, f"{f_name}")
-            if ch == 'HRV':
-                rds_hrv[ch].rio.to_raster(f_path)
+            if self.check_file_exists(f_name):
+                print("=" * 100, "File already exists", "=" * 100)
             else:
-                rds_vis[ch].rio.to_raster(f_path)
-            self.update_payload(file_name=f_name, file_path=f_path, file_type='geotiff',
-                                file_size=os.path.getsize(f_path),
-                                file_status='converted')
-            self.upload_to_mongodb(f_path, ftype="geotiff")
-            self.insert_file()
+
+                if ch == 'HRV':
+                    rds_hrv[ch].rio.to_raster(f_path)
+                else:
+                    rds_vis[ch].rio.to_raster(f_path)
+                self.update_payload(file_name=f_name, file_path=f_path, file_type='geotiff',
+                                    file_size=os.path.getsize(f_path),
+                                    file_status='converted')
+                self.upload_to_mongodb(f_path, ftype="geotiff")
+                self.insert_file()
         del rds_hrv, rds_vis
         return True
 
@@ -292,15 +318,18 @@ class DataConverter:
 
         for ch in [r for r in self.seviri_data_names]:
             f_name = f"{self.mission}_{self.date_tag}_{ch}_aoi.tif"
-            print(f_name)
             f_path = os.path.join(self.TEMP_DIR, f"{f_name}")
-            scn_aoi.save_datasets(writer='geotiff', datasets=[ch], filename=f_path)
-            scn_aoi.save_datasets(writer='geotiff', datasets=[ch], filename=f_path)
-            self.update_payload(file_name=f_name, file_path=f_path, file_type='geotiff',
-                                file_size=os.path.getsize(f_path),
-                                file_status='converted')
-            self.upload_to_mongodb(f_path, ftype="geotiff")
-            self.insert_file()
+
+            if self.check_file_exists(f_name):
+                print("=" * 100, "File already exists", "=" * 100)
+            else:
+                scn_aoi.save_datasets(writer='geotiff', datasets=[ch], filename=f_path)
+                scn_aoi.save_datasets(writer='geotiff', datasets=[ch], filename=f_path)
+                self.update_payload(file_name=f_name, file_path=f_path, file_type='geotiff',
+                                    file_size=os.path.getsize(f_path),
+                                    file_status='converted')
+                self.upload_to_mongodb(f_path, ftype="geotiff")
+                self.insert_file()
 
         print("="*100)
         del scn_aoi
