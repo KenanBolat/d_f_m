@@ -1,7 +1,7 @@
 #FROM ubuntu:22.04 as tomcat
 FROM ghcr.io/osgeo/gdal:ubuntu-full-3.8.0 as tomcat
 ARG TOMCAT_VERSION=9.0.75
-ARG CORS_ENABLED=false
+ARG CORS_ENABLED=true
 ARG CORS_ALLOWED_ORIGINS=*
 ARG CORS_ALLOWED_METHODS=GET,POST,PUT,DELETE,HEAD,OPTIONS
 ARG CORS_ALLOWED_HEADERS=*
@@ -29,7 +29,7 @@ ENV CATALINA_OPTS="\$EXTRA_JAVA_OPTS \
 # init
 RUN apt update \
 && apt -y upgrade \
-&& apt install -y --no-install-recommends openssl unzip gdal-bin wget curl openjdk-11-jdk \
+&& apt install -y --no-install-recommends openssl unzip gdal-bin wget curl openjdk-11-jdk vim \
 && apt clean \
 && rm -rf /var/cache/apt/* \
 && rm -rf /var/lib/apt/lists/*

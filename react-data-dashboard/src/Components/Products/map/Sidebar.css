@@ -1,0 +1,46 @@
+/* Sidebar.css */
+.leaflet-sidebar {
+  position: absolute;
+  top: 0;
+  left: -30%;
+  width: 30%;
+  max-width: 400px;
+  height: 100%;
+  transition: left 0.3s;
+  z-index: 1000;
+  background: #fff;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.leaflet-sidebar.collapsed {
+  left: 0;
+}
+
+.leaflet-sidebar .leaflet-sidebar-tabs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: #f7f7f7;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.leaflet-sidebar .leaflet-sidebar-tabs li {
+  display: inline-block;
+}
+
+.leaflet-sidebar .leaflet-sidebar-tabs li a {
+  display: block;
+  padding: 10px;
+  color: #333;
+  text-decoration: none;
+}
+
+.leaflet-sidebar .leaflet-sidebar-tabs li a:hover {
+  background: #ddd;
+}
+
+.leaflet-sidebar .leaflet-sidebar-content {
+  padding: 10px;
+}

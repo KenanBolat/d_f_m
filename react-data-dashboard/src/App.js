@@ -34,7 +34,7 @@ import SatelliteProduct from "./Components/Products/SatelliteProduct";
 import DataTable from "./Components/Products/DataTable";
 import ProductPage from "./Components/Products/ProductPage";
 import ChannelAnimation from "./Components/Products/ChannelAnimation";
-import GeoServerPage from "./Components/Products/GeoServerPage";
+import MapComponent from "./Components/Products/map/MapComponent";
 
 import "primereact/resources/themes/saga-blue/theme.css"; // Theme
 import "primereact/resources/primereact.min.css"; // Core CSS
@@ -129,13 +129,11 @@ function App() {
             // element={(props) => <ProductPage {...props} data={result} />}
             element={<ProductPage data={result} />}
           />
-          <Route
-            path="/geoserver/:fileName"
-            element={<GeoServerPage> </GeoServerPage>}
-          />{" "}
+
           {/* from 4o */}
           <Route path="/login" element={<LoginSignup />} />
           <Route path="/channels" element={<ChannelAnimation />} />
+          <Route path="/map" element={<MapComponent />} />
         </Routes>
         <Recommended handleClick={handleClick} />
         <SatelliteProduct result={result} />
