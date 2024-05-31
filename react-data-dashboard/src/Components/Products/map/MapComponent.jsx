@@ -4,12 +4,13 @@ import SidebarComponent from './SidebarComponent';
 import 'leaflet/dist/leaflet.css';
 import './Sidebar.css';
 
+
 const MapComponent = () => {
   const [layers, setLayers] = useState([
     {
       name: 'IODC',
       layers: [
-        { name: 'IODC_202308140845_WV_073_aoi', active: false },
+        { name: 'IODC_202308140845_WV_073_aoi', active: true },
         { name: 'IODC_202308140845_WV_062_aoi', active: false },
         { name: 'IODC_202308140845_VIS008_aoi', active: false },
         { name: 'IODC_202308140845_VIS006_aoi', active: false },

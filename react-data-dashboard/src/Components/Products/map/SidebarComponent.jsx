@@ -1,39 +1,38 @@
-import React from 'react';
-import { Sidebar, Tab } from 'react-leaflet-sidebarv2';
+import React, { useState } from 'react';
+import { ProSidebarProvider, Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
 import './Sidebar.css';
 
 const SidebarComponent = ({ layers, onToggleLayer }) => {
+  const [collapsed, setCollapsed] = useState(false);
+
+  const handleToggleSidebar = () => {
+    setCollapsed(!collapsed);
+  };
+
   return (
-    <Sidebar
-      id="sidebar"
-      collapsed={false}
-      position="left"
-      selected="home"
-      closeIcon={<span>&times;</span>}
-      openIcon={<span>&#9776;</span>}
-    >
-      <Tab id="home" header="Layers" icon="fa fa-list">
-        <ul>
+    <ProSidebarProvider>
+      <Sidebar collapsed={collapsed}>
+        <Menu iconShape="circle">
+          <MenuItem onClick={handleToggleSidebar}>
+            {collapsed ? <span>&#9776;</span> : <span>Toggle Sidebar</span>}
+          </MenuItem>
           {layers.map((layerGroup, idx) => (
-            <li key={idx}>
-              <strong>{layerGroup.name}</strong>
-              <ul>
-                {layerGroup.layers.map((layer, layerIdx) => (
-                  <li key={layerIdx}>
-                    <input
-                      type="checkbox"
-                      checked={layer.active}
-                      onChange={() => onToggleLayer(layerGroup.name, layer.name)}
-                    />
-                    {layer.name}
-                  </li>
-                ))}
-              </ul>
-            </li>
+            <SubMenu key={idx} title={layerGroup.name}>
+              {layerGroup.layers.map((layer, layerIdx) => (
+                <MenuItem key={layerIdx}>
+                  <input
+                    type="checkbox"
+                    checked={layer.active}
+                    onChange={() => onToggleLayer(layerGroup.name, layer.name)}
+                  />
+                  {layer.name}
+                </MenuItem>
+              ))}
+            </SubMenu>
           ))}
-        </ul>
-      </Tab>
-    </Sidebar>
+        </Menu>
+      </Sidebar>
+    </ProSidebarProvider>
   );
 };
 

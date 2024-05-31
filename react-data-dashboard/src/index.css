@@ -40,9 +40,9 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: url('./Components/Assets/bg.jpg') no-repeat center center/cover;
+  /* background: url('./Components/Assets/bg.jpg') no-repeat center center/cover;
   background-size: cover;
-  background-position: center;
+  background-position: center; */
   
 
 }
