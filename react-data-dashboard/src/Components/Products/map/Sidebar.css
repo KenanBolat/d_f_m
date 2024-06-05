@@ -17,7 +17,6 @@
 }
 
 .sidebar {
-  width: 250px;
   background-color: #333;
   color: #fff;
   position: relative;
@@ -41,7 +40,9 @@
   background-color: #444;
 }
 
-
+[data-testid="ps-sidebar-root-test-id"] {
+  width: 800px !important;
+}
 
 
 .ps-sidebar-root .css-1wvake5 {
@@ -53,6 +54,7 @@
   height: 100%;
   transition: width 0.3s ease-in-out;
   width: 500px;
+  
 } 
 
 
