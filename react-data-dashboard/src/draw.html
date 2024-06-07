@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet Draw Example</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <style>
+        #map { height: 500px; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([51.505, -0.09], 13);
+    
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+    
+        // Initialize the FeatureGroup to store editable layers
+        var drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+    
+        // Initialize the draw control and pass it the FeatureGroup of editable layers
+        var drawControl = new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems
+            },
+            draw: {
+                polygon: false,
+                polyline: false,
+                circle: false,
+                marker: false,
+                circlemarker: false,
+                rectangle: true  // Enable rectangle drawing tool
+            }
+        });
+        map.addControl(drawControl);
+    
+        // Handle the creation of new shapes
+        map.on(L.Draw.Event.CREATED, function (event) {
+            var layer = event.layer;
+    
+            // Add the drawn shape to the editable layer
+            drawnItems.addLayer(layer);
+    
+            // Get the coordinates of the drawn bounding box
+            var bounds = layer.getBounds();
+            var aoi = {
+                northEast: bounds.getNorthEast(),
+                southWest: bounds.getSouthWest()
+            };
+    
+            // Log the coordinates to the console (or update your configuration)
+            console.log('AOI Coordinates:', aoi);
+    
+            // Here you can update your configuration with the new AOI
+            // updateConfiguration(aoi);
+        });
+    </script>
+</body>
+</html>
