@@ -70,10 +70,15 @@ const Login = () => {
         });
     }
   return (
-    <div className='container'>
-    <div className='wrapper'>
-        <form action=''>
-            <h1> Login </h1>
+    <div className='login-container'>
+      <div className='login-left'>
+        <img src='/path/to/your/image.png' alt='Data Management' /> {/* Replace with the actual path to your image */}
+      </div>
+      <div className='login-right'>
+        <div className='wrapper'>
+          <form onSubmit={handleSubmit}>
+            <h1> Welcome to TMET Satellite Data Handling System </h1>
+            <p>Sign in to your account and enjoy unlimited perks.</p>
             
             <div className="input-box">
                 <input type='text' name='email' placeholder='Email' required onChange={handleChange} />
@@ -81,21 +86,21 @@ const Login = () => {
             </div>
 
             <div className="input-box">
-                <input type='password' name='password' placeholder='Password' onChange={handleChange}  required /> <FaLock className='icon'/>
+                <input type='password' name='password' placeholder='Password' onChange={handleChange} required /> <FaLock className='icon'/>
             </div>
             <div className="remember-forgot">
-                <label><input type='checkbox' /> Remember me</label> <br />
-                <a href='#'>Forgot Password</a>
+                <label><input type='checkbox' /> Keep me logged in</label> <br />
+                <a href='#'>Forgot Password?</a>
             </div>
-            <button type='submit' onClick={handleSubmit}>Login</button>
+            <button type='submit'>Login</button>
             <div className="register-link">
-                <p>Don't have an account? <a href='/register'>Register</a></p>
+                <p>Do you have an account yet? <a href='/register'>Sign Up</a></p>
             </div>
-        </form>
-      
+          </form>
+        </div>
+      </div>
     </div>
-    </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-// import AuthService from "./services/auth.service";
 import { useState } from "react";
 import Register from "./Components/LoginForm/register";
 import Header from "./Components/LoginForm/header";
@@ -41,112 +40,19 @@ import "primereact/resources/primereact.min.css"; // Core CSS
 import "primeicons/primeicons.css";
 
 function App() {
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [query, setQuery] = useState("");
-
-  const [datarange, setDatarange] = useState("");
-
-  //-----------------Input Filter ---------------------
-  const handleInputChange = (e) => {
-    setQuery(e.target.value);
-  };
-
-  const filteredProducts = data.filter(
-    (data) =>
-      // if (selectedCategory === "All") {
-      //   return product.name.toLowerCase().includes(query.toLowerCase());
-      // } else {
-      //   return (
-      //     product.category === selectedCategory &&
-      //     product.name.toLowerCase().includes(query.toLowerCase())
-      //   );
-      // }
-      data.title.toLocaleLowerCase().indexOf(query.toLocaleLowerCase()) !== -1
-  );
-  // );
-
-  //-----------------Category Filter ---------------------
-  const handleChange = (e) => {
-    setSelectedCategory(e.target.value);
-    console.log(e.target.value);
-  };
-
-  //-----------------DataRange Filter ---------------------
-  const handleClick = (e) => {
-    setSelectedCategory(e.target.value);
-  };
-
-  //-----------------Filtered Data ------------------------
-  function filtereddata(data, selected, query) {
-    let datafiltered = data;
-    if (query) {
-      datafiltered = filteredProducts;
-    }
-    // Filtering input items
-    if (selected) {
-      datafiltered = data.filter(
-        ({ category, color, company, newPrice, title }) =>
-          category === selected ||
-          color === selected ||
-          company === selected ||
-          newPrice === selected ||
-          title === selected
-      );
-    }
-    // return datafiltered.map(({ img, title, star, reviews, newPrice }) => (
-    //   <Card
-    //     key={Math.random()}
-    //     img={img}
-    //     title={title}
-    //     star={star}
-    //     reviews={reviews}
-    //     newPrice={newPrice}
-    //   ></Card>
-    // ));
-  }
-
-  const result = filtereddata(filteredProducts, selectedCategory, query);
+  
   return (
     <AuthProvider>
       <Router>
-        {/* <Sidebar handleChange={handleChange}></Sidebar> */}
-        <Header />
+       <Header />
         <Nav />
         <Navbar />
 
-        <Routes>
-          {/* Trial for product page with params */}
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/men" element={<ShopCategory category="men" />} />
-          <Route path="/women" element={<ShopCategory category="women" />} />
-          <Route path="/kids" element={<ShopCategory category="kids" />} />
-          <Route path="/product" element={<Product />}>
-            <Route path=":productId" element={<Product result={result} />} />
-          </Route>
-          {/* from 4o */}
-          <Route
-            path="/productpage/:fileName"
-            // element={(props) => <ProductPage {...props} data={result} />}
-            element={<ProductPage data={result} />}
-          />
-
-          {/* from 4o */}
-          <Route path="/login" element={<LoginSignup />} />
-          <Route path="/channels" element={<ChannelAnimation />} />
-          <Route path="/map" element={<MapComponent />} />
-        </Routes>
-        <Recommended handleClick={handleClick} />
-        <SatelliteProduct result={result} />
-        {/* <DataTable result={result} /> */}
-
-        <Products result={result} />
-        <Category handleChange={handleChange} />
         <Routes>
           <Route path="/register" element={<Register></Register>} />
           <Route path="/login" element={<Login></Login>} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/missions" element={<MissionDataList />} />
           <Route path="/ws" element={<WebSocketComponent />} />
           <Route
             path="/dashboard"
