@@ -6,6 +6,7 @@ import './Sidebar.css';
 
 
 const MapComponent = () => {
+  console.log('MapComponent');
   const [layers, setLayers] = useState([
     {
       name: 'IODC',

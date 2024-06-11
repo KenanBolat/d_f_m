@@ -53,3 +53,40 @@
     font-size: 35px;
     color: white;
   }
+
+  /* Card container styles */
+.card-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 20px;
+}
+
+/* Card styles */
+.card-small {
+  background-color: #d3d3d3; /* White background */
+  color: #333333; /* Dark grey text */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 20px;
+  text-align: center;
+  width: 150px; 
+  /* Adjusted width */
+}
+
+.card-small img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.card-small-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 15px 0;
+}
+
+.card-small-text {
+  font-size: 12px;
+  color: #666666;
+}

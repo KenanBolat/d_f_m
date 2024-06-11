@@ -43,7 +43,9 @@ body {
   /* background: url('./Components/Assets/bg.jpg') no-repeat center center/cover;
   background-size: cover;
   background-position: center; */
-  
+  background-color: #f0f2f5;
+  margin: 0;
+  padding: 0;
 
 }
 
@@ -59,4 +61,14 @@ code {
     monospace;
 
     
+}
+
+header {
+  background-color: #ffffff; /* White background for header */
+  color: #333333; /* Dark grey text */
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e0e0e0;
 }

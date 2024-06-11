@@ -137,7 +137,7 @@ function App() {
         </Routes>
         <Recommended handleClick={handleClick} />
         <SatelliteProduct result={result} />
-        {/* <DataTable result={result} /> */}
+        <DataTable result={result} />
 
         <Products result={result} />
         <Category handleChange={handleChange} />

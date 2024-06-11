@@ -38,6 +38,7 @@ import MapComponent from "./Components/Products/map/MapComponent";
 import "primereact/resources/themes/saga-blue/theme.css"; // Theme
 import "primereact/resources/primereact.min.css"; // Core CSS
 import "primeicons/primeicons.css";
+import { Map } from "leaflet";
 
 function App() {
   
@@ -54,6 +55,9 @@ function App() {
           <Route path="/logout" element={<Logout />} />
           <Route path="/home" element={<Home />} />
           <Route path="/ws" element={<WebSocketComponent />} />
+          <Route path="/map" element={<MapComponent />} />
+          <Route path="/datalist" element={<DataList />} />
+          <Route path="/datatable" element={<DataTable />} />
           <Route
             path="/dashboard"
             element={
