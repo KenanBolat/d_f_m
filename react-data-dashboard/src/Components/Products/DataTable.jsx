@@ -6,6 +6,9 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { format, parse } from 'date-fns';
+import styles from './DataTable.css';
+import { useNavigate } from 'react-router-dom';
+
 
 
 const DataTableComponent = () => {
@@ -13,6 +16,8 @@ const DataTableComponent = () => {
     const [expandedRows, setExpandedRows] = useState(null);
     const [sortField, setSortField] = useState(null);
     const [sortOrder, setSortOrder] = useState(null);
+    const navigate = useNavigate();
+
     useEffect(() => {
         // Fetch your summary data from the endpoint and then set it in state
         const fetchData = async () => {
@@ -78,6 +83,17 @@ const DataTableComponent = () => {
         return formatDate(rowData.date_tag);
     };
 
+    const idBodyTemplate = (rowData) => {
+        return (
+          <span
+            onClick={() => navigate(`/productpage/${rowData.id}`)}
+            className={styles.clickableId}
+          >
+            {rowData.id}
+          </span>
+        );
+      };
+
     return (
         <div>
             <h1>Data Table</h1>
@@ -88,7 +104,7 @@ const DataTableComponent = () => {
                        sortField={sortField} sortOrder={sortOrder}
                        onSort={(e) => { setSortField(e.sortField); setSortOrder(e.sortOrder); }}>
                 <Column expander={(rowData) => rowData.converted_files.length > 0} style={{ width: '3em' }} />
-                <Column field="id" header="ID" sortable />
+                <Column field="id"  body={idBodyTemplate} header="ID" sortable />
                 <Column field="date_tag" header="Date" body={dateBodyTemplate} sortable />
                 <Column field="satellite_mission" header="Satellite Mission" sortable />
                 <Column field="converted_files" header="Converted Files" body={(rowData) => rowData.converted_files.length} sortable />

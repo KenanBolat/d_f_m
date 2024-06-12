@@ -18,8 +18,28 @@ const channelOptions = [
     // Add more channel options as needed
 ];
 
+
+useEffect(() => {
+    // Fetch satellite missions from the API
+    const fetchSatelliteMissions = async () => {
+        try {
+            const response = await axios.get('http://localhost:8000/api/missions/');
+            const options = response.data.map(mission => ({
+                value: mission.satellite_mission,
+                label: mission.satellite_mission,
+            }));
+            setSatelliteOptions(options);
+            setSatellite(options[0]); // Set default selection to the first option
+        } catch (error) {
+            console.error('Error fetching satellite missions', error);
+        }
+    };
+
+    fetchSatelliteMissions();
+}, []);
+
 const ChannelAnimation = () => {
-    const [satellite, setSatellite] = useState(SatelliteOptions[0]);
+    const [satelliteOptions, setSatelliteOptions] = useState([]);
     const [channel, setChannel] = useState(channelOptions[0]);
     // const [startDate, setStartDate] = useState(new Date());
     const [startDate, setStartDate] = useState(null);

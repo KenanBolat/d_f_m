@@ -68,7 +68,7 @@ const ProductPage = ({ data }) => {
     };
 
     const handleLayerClick = (layer) => {
-        setCurrentLayer(filteredProducts[0].converted_files.filter(data => data.id === layer)[0])
+        setCurrentLayer(layer);
         console.log(layer);
     };
 
@@ -76,7 +76,7 @@ const ProductPage = ({ data }) => {
         // Implement a modal or larger image view here
     };
     debugger
-     return (
+    return (
         <div className="product-page">
             <h1>{fileData.file_name}</h1>
             <div className="main-content">
@@ -114,7 +114,7 @@ const ProductPage = ({ data }) => {
                         <label htmlFor="layers">Other Layers:</label>
                         <select id="layers" onChange={(e) => handleLayerClick(e.target.value)}>
                             {filteredProducts[0]?.converted_files.map(layer => (
-                                <option key={layer.id} value={layer.id}>{layer.file_name} </option>
+                                <option key={layer.id} value={layer.id}>{layer.file_name}</option>
                             ))}
                         </select>
                     </div>

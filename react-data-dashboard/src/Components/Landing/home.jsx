@@ -14,36 +14,40 @@ const ListIcon = () => <FaListUl className="icon" />;
 const Home = () => {
     return (
       <div className="card-container">
+        
         <Card 
             imgSrc="  "
             title="Statistics"
             description="Statistics of the latest produced products."
             IconComponent={BarChartIcon}
+            link="/datatable"
           />
-          
+          <Card 
+            IconComponent={ListIcon}            
+            title="Data List"
+            description="Lisf of the Products ."
+            link="/datatable"
+          />
+           <Card 
+            IconComponent={MapIcon}            
+            title="Maps "
+            description="Map of the data ."
+            link="/map"
+          />
+         
+          <Card 
+            IconComponent={SingleGearIcon}
+            title="Setting"
+            description="Setting ."
+            link="/"
+          />
            <Card 
             imgSrc="  "
             IconComponent={GearIcon}
             title="Settings"
             description="Settings of the."
           />
-           <Card 
-            IconComponent={SingleGearIcon}
-            title="Single Gear Icon"
-            description="SingleGearIcon."
-          />
-           <Card 
-            IconComponent={MapIcon}            
-            title="Maps "
-            description="Map of the data ."
-            link="/products/maps"
-          />
-           <Card 
-            link="/ws"
-            IconComponent={ListIcon}            
-            title="Product List "
-            description="Lisf of the Products ."
-          />
+        
         <div className="icon-row">
           
 {/* 

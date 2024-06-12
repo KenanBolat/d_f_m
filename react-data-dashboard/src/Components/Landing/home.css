@@ -68,9 +68,9 @@
   color: #333333; /* Dark grey text */
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin: 20px;
-  text-align: center;
+  padding: 10px 40px;
+  margin: 10px 20px;
+  text-align: left;
   width: 150px; 
   /* Adjusted width */
 }

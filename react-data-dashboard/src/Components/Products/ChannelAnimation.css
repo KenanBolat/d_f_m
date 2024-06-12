@@ -18,18 +18,20 @@
 }
 
 .control-group label {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     position: center;
+
 }
 
-.image-animation-section {
+
+
+.image-animation {
     display: flex;
     justify-content: center;
-    width: 100%;
+    width: auto;
     height: 400px; /* Adjust as needed */
     position: relative;
 }
-
 button {
     padding: 10px 20px;
     background-color: #4CAF50;

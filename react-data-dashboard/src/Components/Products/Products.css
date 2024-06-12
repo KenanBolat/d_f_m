@@ -6,7 +6,7 @@
   z-index: -2 ;
 
 }
-
+/* 
 .card {
   margin: 1rem;
   border: 2px solid #ededed;
@@ -19,7 +19,7 @@
   transition: 0.3s;
   background-color: white;
   cursor: pointer;
-}
+} */
 
 
 .card-img {

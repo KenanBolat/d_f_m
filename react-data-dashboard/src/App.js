@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useState } from "react";
 import Register from "./Components/LoginForm/register";
 import Header from "./Components/LoginForm/header";
 import Login from "./Components/LoginForm/Login";
@@ -10,25 +9,11 @@ import DataList from "./Components/Dashboard/datalist";
 import Home from "./Components/Landing/home";
 import { AuthProvider } from "./Contexts/AuthProvider";
 import ProtectedRoute from "./Components/ProtectedRoute";
-import MissionDataList from "./Components/Landing/missonsdata";
 import WebSocketComponent from "./Components/Landing/WebSocketComponent";
 
-import Nav from "./Components/Navigation/Nav";
-import Products from "./Components/Products/Products";
-import Recommended from "./Recommended/Recommended";
-import Sidebar from "./Sidebar/Sidebar";
 
-import data from "./db/db";
-import Category from "./Sidebar/Category/Category";
-import Card from "./Components/Products/Card";
 import Navbar from "./Components/Navbar/Navbar";
 
-import Shop from "./Pages/Shop";
-import ShopCategory from "./Pages/ShopCategory";
-import Product from "./Pages/Product";
-import LoginSignup from "./Pages/LoginSignup";
-
-import SatelliteProduct from "./Components/Products/SatelliteProduct";
 
 import DataTable from "./Components/Products/DataTable";
 import ProductPage from "./Components/Products/ProductPage";
@@ -38,7 +23,6 @@ import MapComponent from "./Components/Products/map/MapComponent";
 import "primereact/resources/themes/saga-blue/theme.css"; // Theme
 import "primereact/resources/primereact.min.css"; // Core CSS
 import "primeicons/primeicons.css";
-import { Map } from "leaflet";
 
 function App() {
   
@@ -46,7 +30,6 @@ function App() {
     <AuthProvider>
       <Router>
        <Header />
-        <Nav />
         <Navbar />
 
         <Routes>
@@ -58,6 +41,12 @@ function App() {
           <Route path="/map" element={<MapComponent />} />
           <Route path="/datalist" element={<DataList />} />
           <Route path="/datatable" element={<DataTable />} />
+          <Route path="/channels" element={<ChannelAnimation />} />
+          <Route
+            path="/productpage/:fileName"
+            // element={(props) => <ProductPage {...props} data={result} />}
+            element={<ProductPage />}
+          />
           <Route
             path="/dashboard"
             element={
