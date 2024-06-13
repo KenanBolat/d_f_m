@@ -20,6 +20,9 @@ import ProductPage from "./Components/Products/ProductPage";
 import ChannelAnimation from "./Components/Products/ChannelAnimation";
 import MapComponent from "./Components/Products/map/MapComponent";
 
+
+import ConfigurationPage from "./Components/Configuration/ConfigurationPage";
+
 import "primereact/resources/themes/saga-blue/theme.css"; // Theme
 import "primereact/resources/primereact.min.css"; // Core CSS
 import "primeicons/primeicons.css";
@@ -42,11 +45,8 @@ function App() {
           <Route path="/datalist" element={<DataList />} />
           <Route path="/datatable" element={<DataTable />} />
           <Route path="/channels" element={<ChannelAnimation />} />
-          <Route
-            path="/productpage/:fileName"
-            // element={(props) => <ProductPage {...props} data={result} />}
-            element={<ProductPage />}
-          />
+          <Route path="/configuration" element={<ConfigurationPage />} />
+          
           <Route
             path="/dashboard"
             element={

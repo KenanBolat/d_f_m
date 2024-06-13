@@ -1,35 +1,69 @@
-import React, { useState } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
 import ImageAnimation from './imageAnimation';
 import 'react-datepicker/dist/react-datepicker.css';
 import './ChannelAnimation.css';
+import React, { useState, useEffect} from 'react';
 
-const SatelliteOptions = [
-    { value: 'MSG', label: 'MSG' },
-    { value: 'IODC', label: 'IODC' },
-    // Add more satellite options as needed
-];
 
-const channelOptions = [
-    { value: 'VIS006', label: 'VIS006' },
-    { value: 'IR_120', label: 'IR_120' },
-    // Add more channel options as needed
-];
+// const satelliteOptions = [
+//     // Add more satellite options as needed
+// // ];
+
+// const channelOptions = [
+//     { value: 'VIS006', label: 'VIS006' },
+//     { value: 'IR_120', label: 'IR_120' },
+//     // Add more channel options as needed
+// ];
+
+
+
+const ChannelAnimation = () => {
+
+    const [satelliteOptions, setSatelliteOptions] = useState([]);
+    const [satellite, setSatellite] = useState(null);
+
+    const [channelOptions, setChannelOptions] = useState([]);
+    const [channel, setChannel] = useState(null);
+
+    // const [startDate, setStartDate] = useState(new Date());
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [images, setImages] = useState([]);
+
+
 
 
 useEffect(() => {
     // Fetch satellite missions from the API
     const fetchSatelliteMissions = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/missions/');
-            const options = response.data.map(mission => ({
-                value: mission.satellite_mission,
-                label: mission.satellite_mission,
+            const response = await axios.get('http://localhost:8000/api/configuration/');
+            const configurations = response.data;
+            const satelliteOptions = configurations.map(configuration => ({
+                value: configuration.satellite_mission,
+                label: configuration.satellite_mission,
             }));
-            setSatelliteOptions(options);
-            setSatellite(options[0]); // Set default selection to the first option
+            setSatelliteOptions(satelliteOptions);
+            debugger;
+            setSatellite(satelliteOptions[0]); // Set default selection to the first option
+            const channels = configurations.reduce((acc, configuration) => {
+                Object.values(configuration.folder_locations).forEach(channel => {
+                    
+                    if (!acc.includes(channel.slice(0,6)) && channel.slice(0,6) !== '______') {
+                        acc.push(channel.slice(0,6).replace('___', ''));
+                    }
+                });
+                return acc;
+            }, []).map(channel => ({
+                value: channel,
+                label: channel,
+            }));
+            debugger;
+            setChannelOptions(channels);
+            setChannel(channels[0]); 
+
         } catch (error) {
             console.error('Error fetching satellite missions', error);
         }
@@ -38,13 +72,8 @@ useEffect(() => {
     fetchSatelliteMissions();
 }, []);
 
-const ChannelAnimation = () => {
-    const [satelliteOptions, setSatelliteOptions] = useState([]);
-    const [channel, setChannel] = useState(channelOptions[0]);
-    // const [startDate, setStartDate] = useState(new Date());
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
-    const [images, setImages] = useState([]);
+
+
 
     const handleSearch = async () => {
         try {
@@ -70,7 +99,7 @@ const ChannelAnimation = () => {
                 <div className="control-group">
                     <label>Satellite Missions</label>
                     <Select
-                        options={SatelliteOptions}
+                        options={satelliteOptions}
                         value={satellite}
                         onChange={setSatellite}
                     />
