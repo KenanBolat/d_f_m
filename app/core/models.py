@@ -87,7 +87,7 @@ class Configuration(models.Model):
         'chanel 06': 'IR_097___',
         'chanel 07': 'IR_108___',
         'chanel 08': 'IR_120___',
-        'chanel 09': 'IR_134___',
+        'chanel 09': 'IR_134___',   
         'chanel 10': 'VIS006___',
         'chanel 11': 'VIS008___',
         'chanel 12': 'WV_062___',
@@ -101,6 +101,11 @@ class Configuration(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(null=True, blank=True)
+    ## bbox = left,bottom,right,top
+    ## bbox = min Longitude , min Latitude , max Longitude , max Latitude
+    bbox = models.CharField(max_length=255, null=True, blank=True, default={
+        '23.115234375, 32.694865977875075, 48.076171875, 44.5278427984555'
+    })
 
     def __str__(self):
         return f"{self.satellite_mission}"

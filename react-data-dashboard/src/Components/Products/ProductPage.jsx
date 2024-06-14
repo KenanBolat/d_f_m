@@ -5,19 +5,16 @@ import { saveAs } from 'file-saver';
 import './ProductPage.css'; // Ensure you create this CSS file for styling
 import { getImageUrl } from './../Api/ImageService';
 import { formatFileSize } from "./formatFileSize";
-import  ImageAnimation from './imageAnimation';
+import ImageAnimation from './imageAnimation';
 
 const ProductPage = ({ data }) => {
-    console.log(data);
     const { fileName } = useParams();
     const [fileData, setFileData] = useState(null);
     const [error, setError] = useState(null);
     const [currentLayer, setCurrentLayer] = useState(null);
     const [pngFiles, setpngFiles] = useState(null);
-    
-    
+
     useEffect(() => {
-        // Fetch your summary data from the endpoint and then set it in state
         const fetchData = async () => {
             try {
                 const response = await axios.get('http://localhost:8000/api/data/');
@@ -35,31 +32,23 @@ const ProductPage = ({ data }) => {
                 setError(null);
                 
             } catch (error) {
-                
                 console.error('Error fetching summary data', error);
             }
         };
         
         fetchData();
-    }, []);
-    
+    }, [fileName]);
+
     if (error) return <p>Error loading data!</p>;
     if (!fileData) return <p>Loading...</p>;
 
     const filteredProducts = fileData.filter(data => data.id === parseInt(fileName));
 
-    // if (!fileData) {
-    //     return <div>File not found</div>;
-    // } else {
-    //     setCurrentLayer(filteredProducts[0]);
-    // }
-    
     const handleDownload = async () => {
         try {
             const response = await axios.get(`http://localhost:8000/api/file/${currentLayer.id}/download/`, {
                 responseType: 'blob',
             });
-            debugger;
             const blob = new Blob([response.data], { type: response.data.type });
             saveAs(blob, currentLayer.file_name);
         } catch (error) {
@@ -67,31 +56,49 @@ const ProductPage = ({ data }) => {
         }
     };
 
+    const handleDelete = async () => {
+        try {
+            await axios.delete(`http://localhost:8000/api/file/${currentLayer.id}/`);
+            alert('File deleted successfully');
+            // Optionally, update the state to remove the deleted file from the list
+        } catch (error) {
+            console.error('Error deleting file', error);
+        }
+    };
+
     const handleLayerClick = (layer) => {
-        setCurrentLayer(filteredProducts[0].converted_files.filter(data => data.id === layer)[0])
-        console.log(layer);
+        const selectedLayer = filteredProducts[0].converted_files.find(data => data.id === parseInt(layer));
+        setCurrentLayer(selectedLayer);
     };
 
     const handleImageClick = () => {
         // Implement a modal or larger image view here
     };
-    debugger
-     return (
+
+    return (
         <div className="product-page">
             <h1>{fileData.file_name}</h1>
             <div className="main-content">
                 <div className="card-container">
-                    <div className="image-card">
-                        <img src={getImageUrl(currentLayer?.id)} alt={filteredProducts[0]?.file_name} onClick={handleImageClick} />
-                        <div className="icons">
-                            <a href={filteredProducts[0]?.file_path} download>
-                                <i className="pi pi-download" onClick={handleDownload}></i>
-                            </a>
-                            <Link to={`/geoserver/${filteredProducts[0]?.file_name}`}>
-                                <i className="pi pi-map"></i>
-                            </Link>
+                    {currentLayer?.file_type === 'png' ? (
+                        <div className="image-card">
+                            <img src={getImageUrl(currentLayer?.id)} alt={filteredProducts[0]?.file_name} onClick={handleImageClick} />
+                            <div className="icons">
+                                <a href={filteredProducts[0]?.file_path} download>
+                                    <i className="pi pi-download" onClick={handleDownload}></i>
+                                </a>
+                                <Link to={`/geoserver/${filteredProducts[0]?.file_name}`}>
+                                    <i className="pi pi-map"></i>
+                                </Link>
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="image-card placeholder">
+                            <div className="file-type-info">
+                                <span>{currentLayer?.file_type.toUpperCase()}</span>
+                            </div>
+                        </div>
+                    )}
                     <div className="image-card">
                         <ImageAnimation images={pngFiles} />
                         <div className="icons">
@@ -114,9 +121,13 @@ const ProductPage = ({ data }) => {
                         <label htmlFor="layers">Other Layers:</label>
                         <select id="layers" onChange={(e) => handleLayerClick(e.target.value)}>
                             {filteredProducts[0]?.converted_files.map(layer => (
-                                <option key={layer.id} value={layer.id}>{layer.file_name} </option>
+                                <option key={layer.id} value={layer.id}>{layer.file_name}</option>
                             ))}
                         </select>
+                    </div>
+                    <div className="action-buttons">
+                        <button onClick={handleDownload} className="download-button">Download</button>
+                        <button onClick={handleDelete} className="delete-button">Delete</button>
                     </div>
                 </div>
             </div>

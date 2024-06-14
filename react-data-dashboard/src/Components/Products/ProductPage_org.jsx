@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import { saveAs } from 'file-saver';
 import './ProductPage.css'; // Ensure you create this CSS file for styling
-import { getImageUrl } from './../Api/ImageService';
+import { getImageUrl } from '../Api/ImageService';
 import { formatFileSize } from "./formatFileSize";
 import  ImageAnimation from './imageAnimation';
 

@@ -39,7 +39,9 @@ class ConfigurationSerializer(serializers.ModelSerializer):
                   'ftp_server',
                   'ftp_user_name',
                   'ftp_password',
-                  'ftp_port', ]
+                  'ftp_port',
+                  'bbox',
+                  ]
         lookup_field = 'satellite_mission__satellite_mission'
         read_only_fields = ['satellite_mission', 'id']
         # extra_kwargs = {

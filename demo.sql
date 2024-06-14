@@ -12,3 +12,6 @@ INSERT INTO public.core_configuration (folder_locations,ftp_server,ftp_user_name
          ('{"chanel 01": "_________", "chanel 02": "HRV______", "chanel 03": "IR_016___", "chanel 04": "IR_039___", "chanel 05": "IR_087___", "chanel 06": "IR_097___", "chanel 07": "IR_108___", "chanel 08": "IR_120___", "chanel 09": "IR_134___", "chanel 10": "VIS006___", "chanel 11": "VIS008___", "chanel 12": "WV_062___", "chanel 13": "WV_073___"}','ftp_server','foo','bar',21,'On development','2023-12-28 22:05:18.152947+03','2023-12-28 22:05:18.152975+03',true,2);
 
 INSERT INTO public.authtoken_token ("key",created,user_id) VALUES ('40af0014c54cc99c0c11ff606b74d3d5a106ce14','2023-12-28 22:06:22.22059+03',2);
+
+
+select * from core_configuration;

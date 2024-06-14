@@ -99,3 +99,123 @@
     position: absolute;
 
 }
+
+.product-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.main-content {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.card-container {
+    display: flex;
+    gap: 20px;
+    width: 65%;
+}
+
+.image-card {
+    position: relative;
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.image-card img {
+    width: 100%;
+    height: auto;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.image-card.placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+}
+
+.file-type-info {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+.icons {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.icons .pi {
+    font-size: 24px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.metadata-card {
+    width: 30%;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.metadata-card h3 {
+    margin-top: 0;
+}
+
+.layers-dropdown {
+    margin-top: 20px;
+}
+
+.layers-dropdown label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.layers-dropdown select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.action-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.download-button,
+.delete-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.download-button {
+    background-color: #4caf50;
+    color: white;
+}
+
+.delete-button {
+    background-color: #f44336;
+    color: white;
+}

@@ -4,7 +4,7 @@
     <option name="pathToExecutable" value="/usr/bin/black" />
     <option name="sdkName" value="Remote Python 3.9.17 Docker Compose (data_downloader)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 (d_f_m)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 (d_f_m) (2)" project-jdk-type="Python SDK" />
   <component name="PythonCompatibilityInspectionAdvertiser">
     <option name="version" value="3" />
   </component>

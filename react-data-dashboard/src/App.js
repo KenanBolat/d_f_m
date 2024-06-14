@@ -46,6 +46,12 @@ function App() {
           <Route path="/datatable" element={<DataTable />} />
           <Route path="/channels" element={<ChannelAnimation />} />
           <Route path="/configuration" element={<ConfigurationPage />} />
+          <Route
+            path="/productpage/:fileName"
+            // element={(props) => <ProductPage {...props} data={result} />}
+            element={<ProductPage />}
+          />
+
           
           <Route
             path="/dashboard"
