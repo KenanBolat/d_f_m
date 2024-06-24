@@ -45,7 +45,7 @@ const MapComponent = () => {
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
       <SidebarComponent layers={layers} onToggleLayer={handleToggleLayer} />
-      <Map center={[0, 0]} zoom={2} style={{ flex: 1 }}>
+      <Map center={[35,35]} zoom={6} style={{ flex: 1 }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
