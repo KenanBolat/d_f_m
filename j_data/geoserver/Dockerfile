@@ -14,6 +14,7 @@ ENV CORS_ALLOWED_ORIGINS=$CORS_ALLOWED_ORIGINS
 ENV CORS_ALLOWED_METHODS=$CORS_ALLOWED_METHODS
 ENV CORS_ALLOWED_HEADERS=$CORS_ALLOWED_HEADERS
 ENV DEBIAN_FRONTEND=noninteractive
+ENV DGEOSERVER_CSRF_DISABLED=true 
 
 # see https://docs.geoserver.org/stable/en/user/production/container.html
 ENV CATALINA_OPTS="\$EXTRA_JAVA_OPTS \
@@ -29,7 +30,7 @@ ENV CATALINA_OPTS="\$EXTRA_JAVA_OPTS \
 # init
 RUN apt update \
 && apt -y upgrade \
-&& apt install -y --no-install-recommends openssl unzip gdal-bin wget curl openjdk-11-jdk vim \
+&& apt install -y --no-install-recommends openssl unzip gdal-bin wget curl openjdk-11-jdk vim iputils-ping \
 && apt clean \
 && rm -rf /var/cache/apt/* \
 && rm -rf /var/lib/apt/lists/*

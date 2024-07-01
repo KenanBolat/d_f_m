@@ -1,0 +1,25 @@
+- coastline 
+- city name 
+- others 
+
+dd
+
+
+curl -v -u admin:geoserver -XPOST -H "Content-type: text/plain" \
+ -d "file:////home/knn/Desktop/d_f_m/j_data/geoserver_data/data/aoi/" \
+ "http://localhost:8080/geoserver/rest/workspaces/tmet/coveragestores/tmet/external.imagemosaic"
+
+
+ curl -v -u admin:geoserver -XPOST -H "Content-type: text/plain" -d "file:///opt/geoserver_data/data/aoi" "http://localhost:8080/geoserver/rest/workspaces/tmet/coveragestores/tmet/external.imagemosaic"
+
+
+
+
+http://localhost:8080/geoserver/tmet/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&LAYERS=tmet%3Aaoi&QUERY_LAYERS=tmet%3Aaoi&INFO_FORMAT=application%2Fjson&FEATURE_COUNT=5&X=524&Y=548&SRS=EPSG%3A4326&WIDTH=952&HEIGHT=1437&BBOX=23.049316406250004%2C23.98625259984181%2C43.96728515625001%2C48.951366470947725&TIME=2023-08-15T08%3A45%3A00.000Z
+
+
+time=2023-08-15T08:45:00.000Z&mission=MSG&channel=WV_062
+
+
+
+curl -v -u admin:geoserver -XPOST -H "Content-type: text/plain" -d "file:///opt/geoserver_data/data/aoi/" "http://localhost:8080/geoserver/rest/workspaces/tmet/coveragestores/tmet/external.imagemosaic" 
