@@ -11,11 +11,12 @@ document.addEventListener("DOMContentLoaded", function () {
       layers: 'tmet:tmet',
       format: 'image/png',
       transparent: true,
-      time: '2023-08-15T08:45:00.000Z', // Example time, change as needed
+      time: '2023-08-14T08:45:00.000Z', // Example time, change as needed
   };
 
   L.tileLayer.wms(imageMosaicLayerUrl, params).addTo(map);
 
+  
   const infoDiv = document.getElementById('info');
 
   map.on('click', function (e) {
@@ -24,6 +25,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const size = map.getSize();
       const bbox = map.getBounds().toBBoxString();
       const crs = map.options.crs.code;
+
+      let mosaicData = null;
+      let postgisData = null;
 
       // GetFeatureInfo request for ImageMosaic layer
       const mosaicUrl = new URL(imageMosaicLayerUrl);
@@ -36,14 +40,14 @@ document.addEventListener("DOMContentLoaded", function () {
       mosaicUrl.searchParams.set('FEATURE_COUNT', '1');
       mosaicUrl.searchParams.set('X', Math.floor(containerPoint.x));
       mosaicUrl.searchParams.set('Y', Math.floor(containerPoint.y));
-      mosaicUrl.searchParams.set('SRS', crs);
+      mosaicUrl.searchParams.set('SRS', 'EPSG:4326');
       mosaicUrl.searchParams.set('WIDTH', size.x);
       mosaicUrl.searchParams.set('HEIGHT', size.y);
       mosaicUrl.searchParams.set('BBOX', bbox);
       mosaicUrl.searchParams.set('TIME', params.time);
 
       axios.get(mosaicUrl.toString()).then(mosaicResponse => {
-        const mosaicData = mosaicResponse.data;
+         mosaicData = mosaicResponse.data;
 
         // WFS GetFeature request for PostGIS layer with CQL_FILTER
         const postgisUrl = new URL(postgisLayerUrl);
@@ -56,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         return axios.get(postgisUrl.toString());
     }).then(postgisResponse => {
-        const postgisData = postgisResponse.data;
+        postgisData = postgisResponse.data;
         console.log('PostGIS Data:', postgisData);
         debugger
 
