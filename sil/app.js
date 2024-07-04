@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   L.tileLayer.wms(imageMosaicLayerUrl, params).addTo(map);
+  L.tileLayer.wms(postgisLayerUrl, {layers:'tmet:border', transparent: true, format: 'image/png',}).addTo(map);
 
   
   const infoDiv = document.getElementById('info');
@@ -61,7 +62,11 @@ document.addEventListener("DOMContentLoaded", function () {
         postgisUrl.searchParams.set('typeName', 'tmet:aoi_fs');
         postgisUrl.searchParams.set('outputFormat', 'application/json');
         //ingestion='2023-08-14 08:45:00.000' 
-        postgisUrl.searchParams.set('CQL_FILTER', `mission like '${params.dim_mission}' AND ingestion='${params.time.replace('T', ' ').replace('Z', '')}' AND channel='${params.dim_channel}' AND Intersects(the_geom, POINT(${latlng.lng} ${latlng.lat }))`);
+        postgisUrl.searchParams.set('CQL_FILTER', 
+                                                    `mission like '${params.dim_mission}' 
+                                                    AND ingestion='${params.time.replace('T', ' ').replace('Z', '')}' 
+                                                    AND channel='${params.dim_channel}' 
+                                                    AND Intersects(the_geom, POINT(${latlng.lng} ${latlng.lat }))`);
 
         return axios.get(postgisUrl.toString());
     }).then(postgisResponse => {
