@@ -8,10 +8,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const imageMosaicLayerUrl = 'http://localhost:8080/geoserver/tmet/wms';
   const postgisLayerUrl = 'http://localhost:8080/geoserver/tmet/wms';
   const params = {
-      layers: 'tmet:tmet',
+      layers: 'tmet:aoi',
       format: 'image/png',
       transparent: true,
-      time: '2023-08-14T08:45:00.000Z', // Example time, change as needed
+      time: '2023-08-16T08:45:00.000Z',
+      dim_mission: 'XYZ',
+      dim_channel: 'WV_062'
   };
 
   L.tileLayer.wms(imageMosaicLayerUrl, params).addTo(map);
@@ -34,8 +36,8 @@ document.addEventListener("DOMContentLoaded", function () {
       mosaicUrl.searchParams.set('SERVICE', 'WMS');
       mosaicUrl.searchParams.set('VERSION', '1.1.1');
       mosaicUrl.searchParams.set('REQUEST', 'GetFeatureInfo');
-      mosaicUrl.searchParams.set('LAYERS', 'tmet:tmet');
-      mosaicUrl.searchParams.set('QUERY_LAYERS', 'tmet:tmet');
+      mosaicUrl.searchParams.set('LAYERS', 'tmet:aoi');
+      mosaicUrl.searchParams.set('QUERY_LAYERS', 'tmet:aoi');
       mosaicUrl.searchParams.set('INFO_FORMAT', 'application/json');
       mosaicUrl.searchParams.set('FEATURE_COUNT', '1');
       mosaicUrl.searchParams.set('X', Math.floor(containerPoint.x));
@@ -45,6 +47,8 @@ document.addEventListener("DOMContentLoaded", function () {
       mosaicUrl.searchParams.set('HEIGHT', size.y);
       mosaicUrl.searchParams.set('BBOX', bbox);
       mosaicUrl.searchParams.set('TIME', params.time);
+      mosaicUrl.searchParams.set('DIM_MISSION', params.dim_mission);
+      mosaicUrl.searchParams.set('DIM_CHANNEL', params.dim_channel);
 
       axios.get(mosaicUrl.toString()).then(mosaicResponse => {
          mosaicData = mosaicResponse.data;
@@ -54,9 +58,10 @@ document.addEventListener("DOMContentLoaded", function () {
         postgisUrl.searchParams.set('service', 'WFS');
         postgisUrl.searchParams.set('version', '1.0.0');
         postgisUrl.searchParams.set('request', 'GetFeature');
-        postgisUrl.searchParams.set('typeName', 'tmet:tmet_fs');
+        postgisUrl.searchParams.set('typeName', 'tmet:aoi_fs');
         postgisUrl.searchParams.set('outputFormat', 'application/json');
-        postgisUrl.searchParams.set('CQL_FILTER', "mission like 'MSG' AND ingestion='2023-08-14T08:45:00'");
+        //ingestion='2023-08-14 08:45:00.000' 
+        postgisUrl.searchParams.set('CQL_FILTER', `mission like '${params.dim_mission}' AND ingestion='${params.time.replace('T', ' ').replace('Z', '')}' AND channel='${params.dim_channel}' AND Intersects(the_geom, POINT(${latlng.lng} ${latlng.lat }))`);
 
         return axios.get(postgisUrl.toString());
     }).then(postgisResponse => {
