@@ -5,37 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Satellite Data Viewer</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
-        #map { margin-top: 200px; height: 500px; width: 100%; }
+        #map { height: 500px; width: 100%; }
         #info { margin-top: 20px; }
         #controls { margin-bottom: 20px; }
+        #legend { margin-top: 20px; }
     </style>
 </head>
 <body>
     <div id="controls">
         <label for="mission-select">Satellite Missions</label>
         <select id="mission-select">
-            <option value="">Select...</option>
-            <!-- Populate with satellite missions -->
+            <option value="MSG">MSG</option>
+            <option value="IODC">IODC</option>
+            <option value="XYZ">XYZ</option>
         </select>
 
         <label for="channel-select">Channels</label>
         <select id="channel-select">
-            <option value="">Select...</option>
-            <!-- Populate with channels -->
+            <option value="HRV">HRV</option>
+            <option value="IR_016">IR_016</option>
+            <option value="IR_039">IR_039</option>
+            <option value="IR_087">IR_087</option>
+            <option value="IR_097">IR_097</option>
+            <option value="IR_108">IR_108</option>
+            <option value="IR_120">IR_120</option>
+            <option value="IR_134">IR_134</option>
+            <option value="VIS006">VIS006</option>
+            <option value="VIS008">VIS008</option>
+            <option value="WV_062">WV_062</option>
+            <option value="WV_073">WV_073</option>
         </select>
 
         <label for="start-date">Start Date</label>
-        <input type="text" id="start-date" class="datetimepicker-input" data-toggle="datetimepicker" data-target="#start-date" placeholder="Start Date">
+        <input type="text" id="start-date" placeholder="Start Date">
 
         <label for="end-date">End Date</label>
-        <input type="text" id="end-date" class="datetimepicker-input" data-toggle="datetimepicker" data-target="#end-date" placeholder="End Date">
+        <input type="text" id="end-date" placeholder="End Date">
 
         <button id="search-button">Search</button>
     </div>
 
     <div id="map"></div>
+
+    <div id="legend">
+        <h4>Legend</h4>
+        <img id="legend-image" src="" alt="Legend">
+    </div>
 
     <div id="info">
         <button id="prev-day">Prev Day</button>
@@ -50,9 +67,9 @@
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/all.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
