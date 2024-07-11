@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const map = L.map('map').setView([37.5, 33.5], 6);
+    const map = L.map('map').setView([42, 33.5], 6);
 
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -67,7 +67,8 @@ googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
     
     const updateLegend = () => {
         const legendUrl = `${imageMosaicLayerUrl}?SERVICE=WMS&VERSION=1.1.0&REQUEST=GetLegendGraphic&LAYER=${params.layers[0]}&format=image/png&STYLE=&DIM_MISSION=${params.dim_mission}&DIM_CHANNEL=${params.dim_channel}`;
-        legendImage.src = legendUrl;
+        document.getElementById('legend-image').src = legendUrl;
+
     };
 
     const updateMap = () => {
@@ -244,11 +245,13 @@ params.layers.forEach(layer => {
 // Show the sidebar initially
 sidebar.open('home');
 const legendControl = L.control({ position: 'topright' });
-legendControl.onAdd = function (map) {
-    const div = L.DomUtil.create('div', 'legend');
-    div.innerHTML = '<h4>Legend</h4><img id="legend-image" src="" alt="Legend">';
-    return div;
-};
-legendControl.addTo(map);
+    legendControl.onAdd = function (map) {
+        const div = L.DomUtil.create('div', 'legend');
+        div.innerHTML = '<h4>Legend</h4><img id="legend-image" src="" alt="Legend">';
+        return div;
+    };
+    legendControl.addTo(map);
+    updateLegend();
+
 
 });
