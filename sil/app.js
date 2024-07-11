@@ -1,12 +1,38 @@
 document.addEventListener("DOMContentLoaded", function () {
     const map = L.map('map').setView([37.5, 33.5], 6);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+
+
+    googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3']
+    });
+
+    googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3']
+});
+
+const noBasemapLayer = L.layerGroup();
+
+googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3']
+});
+
+
+    googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3']
+});
+
     const imageMosaicLayerUrl = 'http://localhost:8080/geoserver/tmet/wms';
-    const postgisLayerUrl = 'http://localhost:8080/geoserver/tmet/ows';
+    const postgisLayerUrl = 'http://localhost:8080/geoserver/tmet/wms';
     let currentLayers = [];
     const params = {
         layers: ['tmet:aoi'],  // Add all the layers you need
@@ -29,13 +55,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 DIM_CHANNEL: params.dim_channel
             }).addTo(map);
         });
+
     };
 
-    L.tileLayer.wms(postgisLayerUrl, {
-        layers: 'tmet:border',
-        transparent: true,
-        format: 'image/png',
-    }).addTo(map);
+    
 
     const infoDiv = document.getElementById('info');
     const legendImage = document.getElementById('legend-image');
@@ -143,16 +166,89 @@ document.addEventListener("DOMContentLoaded", function () {
             postgisData = postgisResponse.data;
 
             // Display results
-            infoDiv.innerHTML = `<h4>Clicked Point: ${latlng.lat}, ${latlng.lng}</h4>`;
+            document.getElementById('clicked-point').innerText = `${latlng.lat}, ${latlng.lng}`;
+
+            const rasterTableBody = document.getElementById('raster-table-body');
+            rasterTableBody.innerHTML = '';
             mosaicData.forEach((data, index) => {
-                infoDiv.innerHTML += `<h4>ImageMosaic Data (Layer ${params.layers[index]}):</h4><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                Object.entries(data.features[0].properties).forEach(([key, value]) => {
+                    const row = rasterTableBody.insertRow();
+                    row.insertCell(0).innerText = key;
+                    row.insertCell(1).innerText = value;
+                });
             });
-            infoDiv.innerHTML += `<h4>PostGIS Data:</h4><pre>${JSON.stringify(postgisData, null, 2)}</pre>`;
+
+            const postgisTableBody = document.getElementById('postgis-table-body');
+            postgisTableBody.innerHTML = '';
+            postgisData.features.forEach((feature, index) => {
+                Object.entries(feature.properties).forEach(([key, value]) => {
+                    const row = postgisTableBody.insertRow();
+                    row.insertCell(0).innerText = key;
+                    row.insertCell(1).innerText = value;
+                });
+            });
+
+            $('#raster-table').DataTable();
+            $('#postgis-table').DataTable();
         }).catch(error => {
             console.error('Error fetching data:', error);
         });
     });
 
+
+    const baseMaps = {
+        "Open Street Map": osmLayer, 
+        "Google Streets": googleStreets,
+        "Google Terrain": googleTerrain,
+        "Google Satellite": googleSat,
+        "Google Hybrid": googleHybrid, 
+        "Empty": noBasemapLayer
+
+    };
+
+    const overlayMaps = {
+        "Border": L.tileLayer.wms(postgisLayerUrl, {
+            layers: 'tmet:border',
+            transparent: true,
+            format: 'image/png',
+        })
+    };
+
+     // Add layer control to the map
+     L.control.layers(baseMaps, overlayMaps).addTo(map);
+
     // Initialize the map layers
     updateMap();
+  // Initialize Leaflet Sidebar
+  const sidebar = L.control.sidebar('sidebar', {
+    closeButton: true,
+    position: 'left'
+}).addTo(map);
+
+// Add AOI layer control to the sidebar
+const layerControlDiv = document.getElementById('layer-control');
+params.layers.forEach(layer => {
+    const layerItem = document.createElement('div');
+    layerItem.innerHTML = `<input type="checkbox" id="${layer}" checked> <label for="${layer}">${layer}</label>`;
+    layerControlDiv.appendChild(layerItem);
+
+    document.getElementById(layer).addEventListener('change', function (e) {
+        if (e.target.checked) {
+            currentLayers.find(l => l.wmsParams.layers === layer).addTo(map);
+        } else {
+            map.removeLayer(currentLayers.find(l => l.wmsParams.layers === layer));
+        }
+    });
+});
+
+// Show the sidebar initially
+sidebar.open('home');
+const legendControl = L.control({ position: 'topright' });
+legendControl.onAdd = function (map) {
+    const div = L.DomUtil.create('div', 'legend');
+    div.innerHTML = '<h4>Legend</h4><img id="legend-image" src="" alt="Legend">';
+    return div;
+};
+legendControl.addTo(map);
+
 });
