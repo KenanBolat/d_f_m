@@ -42,6 +42,7 @@ googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
         dim_mission: 'XYZ',
         dim_channel: 'WV_062'
     };
+    
 
     const initializeMapLayers = () => {
         currentLayers.forEach(layer => map.removeLayer(layer));
@@ -68,6 +69,10 @@ googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
     const updateLegend = () => {
         const legendUrl = `${imageMosaicLayerUrl}?SERVICE=WMS&VERSION=1.1.0&REQUEST=GetLegendGraphic&LAYER=${params.layers[0]}&format=image/png&STYLE=&DIM_MISSION=${params.dim_mission}&DIM_CHANNEL=${params.dim_channel}`;
         document.getElementById('legend-image').src = legendUrl;
+        debugger;
+        const legendLabel = document.getElementById('legend-label');
+        legendLabel.innerText = `Mission: ${params.dim_mission}, Channel: ${params.dim_channel}, Date: ${params.time}`;
+
 
     };
 
@@ -112,6 +117,38 @@ googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
         }
         updateMap();
     });
+
+    const animateMap = (startDate, endDate, interval = 1000) => {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        let currentTime = start;
+
+        const animationInterval = setInterval(() => {
+            if (currentTime > end) {
+                clearInterval(animationInterval);
+                return;
+            }
+
+            params.time = formatDateToLocalISO(currentTime);
+            initializeMapLayers();
+        
+            endDatePicker.setDate(currentTime);
+
+            currentTime.setMinutes(currentTime.getMinutes() + 15); // Update time by 15 minutes
+        }, interval);
+    };
+
+    document.getElementById('start-animation').addEventListener('click', function () {
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
+        params.dim_mission = document.getElementById('mission-select').value;
+        params.dim_channel = document.getElementById('channel-select').value;
+
+        if (startDate && endDate) {
+            animateMap(startDate, endDate);
+        }
+    });
+
 
     map.on('click', function (e) {
         const latlng = e.latlng;
