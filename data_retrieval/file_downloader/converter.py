@@ -85,7 +85,9 @@ class DataConverter:
                                   'VIS006',
                                   'VIS008',
                                   'WV_062',
-                                  'WV_073']
+                                  'WV_073',
+                                  'natural_color',
+                                  'ir_cloud_day']
 
     def connect(self):
         self._channel = self._rabbit.connect()
@@ -167,8 +169,9 @@ class DataConverter:
         files_updated = [os.path.join(self.prefix, f[1:]) for f in self.filenames]
 
         self.scn = satpy.Scene(reader=self._reader, filenames=files_updated)
-
+        print(self.seviri_data_names)
         self.scn.load(self.seviri_data_names)
+        print("="*1500)
 
     def check_bands(self):
         channels = [r for r in self.scn.available_dataset_names() if r not in self.seviri_data_names]
