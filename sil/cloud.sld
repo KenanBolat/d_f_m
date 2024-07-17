@@ -5,7 +5,7 @@
       <sld:FeatureTypeConstraint/>
     </sld:LayerFeatureConstraints>
     <sld:UserStyle>
-      <sld:Name>IODC_202308140845_HRV_aoi</sld:Name>
+      <sld:Name>MSG_202308140600_ir_cloud_day_aoi</sld:Name>
       <sld:FeatureTypeStyle>
         <sld:Rule>
           <sld:RasterSymbolizer>
@@ -15,14 +15,15 @@
                 <sld:ContrastEnhancement>
                   <sld:Normalize>
                     <sld:VendorOption name="algorithm">StretchToMinimumMaximum</sld:VendorOption>
-                    <sld:VendorOption name="minValue">27</sld:VendorOption>
-                    <sld:VendorOption name="maxValue">200</sld:VendorOption>
+                    <sld:VendorOption name="minValue">0</sld:VendorOption>
+                    <sld:VendorOption name="maxValue">255</sld:VendorOption>
                   </sld:Normalize>
                 </sld:ContrastEnhancement>
               </sld:GrayChannel>
             </sld:ChannelSelection>
             <sld:ColorMap>
-              <sld:ColorMapEntry quantity="0" color="#000000"/>
+              <sld:ColorMapEntry quantity="0" color="#000000" opacity="0"/>
+              <sld:ColorMapEntry quantity="5" color="#000000" opacity="0"/>
               <sld:ColorMapEntry quantity="255" color="#ffffff"/>
             </sld:ColorMap>
           </sld:RasterSymbolizer>

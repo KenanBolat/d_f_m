@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let pauseTime = null;
 
     const params = {
-        layers: ['tmet:aoi'],  // Add all the layers you need
+        layers: ['tmet:aoi', 'tmet:rgb', 'tmet:cloud'],  // Add all the layers you need
         format: 'image/png',
         transparent: true,
         time: '',
@@ -46,9 +46,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const initializeMapLayers = () => {
         currentLayers.forEach(layer => map.removeLayer(layer));
+
+        let selectedLayer = "";  
+        if (params.dim_channel === 'natural_color') 
+             selectedLayer = 'tmet:rgb';
+        else if (params.dim_channel === 'ir_cloud_day')
+            selectedLayer = 'tmet:cloud';
+        else 
+            selectedLayer = 'tmet:aoi';
+        debugger;
         currentLayers = params.layers.map(layer => {
             return L.tileLayer.wms(imageMosaicLayerUrl, {
-                layers: layer,
+                layers: selectedLayer,
                 format: params.format,
                 transparent: params.transparent,
                 time: params.time,
@@ -261,6 +270,16 @@ document.addEventListener("DOMContentLoaded", function () {
             layers: 'tmet:border',
             transparent: true,
             format: 'image/png',
+        }),
+        "RGB": L.tileLayer.wms(imageMosaicLayerUrl, {
+            layers: 'tmet:rgb',
+            transparent: true,
+            format: 'image/png',
+        }),
+        "Cloud": L.tileLayer.wms(imageMosaicLayerUrl, {
+            layers: 'tmet:cloud',
+            transparent: true,
+            format: 'image/png',
         })
     };
 
@@ -281,6 +300,7 @@ document.addEventListener("DOMContentLoaded", function () {
     params.layers.forEach(layer => {
         const layerItem = document.createElement('div');
         layerItem.innerHTML = `<input type="checkbox" id="${layer}" checked> <label for="${layer}">${layer}</label>`;
+        debugger
         layerControlDiv.appendChild(layerItem);
 
         document.getElementById(layer).addEventListener('change', function (e) {
