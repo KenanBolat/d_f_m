@@ -20,6 +20,22 @@ http://localhost:8080/geoserver/tmet/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFe
 
 time=2023-08-15T08:45:00.000Z&mission=MSG&channel=WV_062
 
+time=2023-08-14T06:00:00.000Z&mission=MSG&channel=ir_cloud_day
+
 
 
 curl -v -u admin:geoserver -XPOST -H "Content-type: text/plain" -d "file:///opt/geoserver_data/data/aoi/" "http://localhost:8080/geoserver/rest/workspaces/tmet/coveragestores/tmet/external.imagemosaic" 
+
+
+Todo:
+  - natural color, ir_cloud_day 
+  
+  - refresh mechanism 
+  - Area of interest selection 
+  - Area of interest pipeline
+  - Animation pipeline
+  - kml -> kmz
+  - reactify
+  - Update the test 
+  - Scratch test from the start   
+  - swipe 
