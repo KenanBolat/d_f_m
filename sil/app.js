@@ -6,37 +6,37 @@ document.addEventListener("DOMContentLoaded", function () {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+    const googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
         maxZoom: 20,
         subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     });
 
-    googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+    const googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
         maxZoom: 20,
         subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     });
 
     const noBasemapLayer = L.layerGroup();
 
-    googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+    const googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
         maxZoom: 20,
         subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     });
 
-    googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+    const googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
         maxZoom: 20,
         subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     });
 
     const imageMosaicLayerUrl = 'http://localhost:8080/geoserver/tmet/wms';
     const postgisLayerUrl = 'http://localhost:8080/geoserver/tmet/wms';
-    let currentLayers = [];
+    let currentLayers = {};
     let animationInterval = null;
     let isPaused = false;
     let pauseTime = null;
 
     const params = {
-        layers: ['tmet:aoi', 'tmet:rgb', 'tmet:cloud'],  // Add all the layers you need
+        layers: [],  // Start with no layers
         format: 'image/png',
         transparent: true,
         time: '',
@@ -44,37 +44,69 @@ document.addEventListener("DOMContentLoaded", function () {
         dim_channel: 'WV_062'
     };
 
-    const initializeMapLayers = () => {
-        currentLayers.forEach(layer => map.removeLayer(layer));
+    const aoiLayers = ['HRV', 'IR_016', 'IR_039', 'IR_087', 'IR_097', 'IR_108', 'IR_120', 'IR_134', 'VIS006', 'VIS008', 'WV_062', 'WV_073'];
+    const cloudLayers = ['ir_cloud_day'];
+    const rgbLayers = ['natural_color'];
 
-        let selectedLayer = "";  
-        if (params.dim_channel === 'natural_color') 
-             selectedLayer = 'tmet:rgb';
-        else if (params.dim_channel === 'ir_cloud_day')
-            selectedLayer = 'tmet:cloud';
-        else 
-            selectedLayer = 'tmet:aoi';
-        debugger;
-        currentLayers = params.layers.map(layer => {
-            return L.tileLayer.wms(imageMosaicLayerUrl, {
-                layers: selectedLayer,
-                format: params.format,
-                transparent: params.transparent,
-                time: params.time,
-                DIM_MISSION: params.dim_mission,
-                DIM_CHANNEL: params.dim_channel
-            }).addTo(map);
+    const initializeMapLayers = () => {
+        const newLayers = {};
+
+        params.layers.forEach(layer => {
+            if (layer.startsWith('tmet:aoi') && aoiLayers.includes(params.dim_channel)) {
+                newLayers['tmet:aoi'] = L.tileLayer.wms(imageMosaicLayerUrl, {
+                    layers: 'tmet:aoi',
+                    format: params.format,
+                    transparent: params.transparent,
+                    time: params.time,
+                    DIM_MISSION: params.dim_mission,
+                    DIM_CHANNEL: params.dim_channel
+                }).addTo(map);
+            }
+            if (layer.startsWith('tmet:cloud') && cloudLayers.includes(params.dim_channel)) {
+                newLayers['tmet:cloud'] = L.tileLayer.wms(imageMosaicLayerUrl, {
+                    layers: 'tmet:cloud',
+                    format: params.format,
+                    transparent: params.transparent,
+                    time: params.time,
+                    DIM_MISSION: params.dim_mission,
+                    DIM_CHANNEL: params.dim_channel
+                }).addTo(map);
+            }
+            if (layer.startsWith('tmet:rgb') && rgbLayers.includes(params.dim_channel)) {
+                newLayers['tmet:rgb'] = L.tileLayer.wms(imageMosaicLayerUrl, {
+                    layers: 'tmet:rgb',
+                    format: params.format,
+                    transparent: params.transparent,
+                    time: params.time,
+                    DIM_MISSION: params.dim_mission,
+                    DIM_CHANNEL: params.dim_channel
+                }).addTo(map);
+            }
         });
+
+        // Remove layers that are no longer needed
+        Object.keys(currentLayers).forEach(key => {
+            if (!newLayers[key]) {
+                map.removeLayer(currentLayers[key]);
+            }
+        });
+
+        currentLayers = newLayers;
     };
 
     const infoDiv = document.getElementById('info');
     const legendImage = document.getElementById('legend-image');
 
     const updateLegend = () => {
-        const legendUrl = `${imageMosaicLayerUrl}?SERVICE=WMS&VERSION=1.1.0&REQUEST=GetLegendGraphic&LAYER=${params.layers[0]}&format=image/png&STYLE=&DIM_MISSION=${params.dim_mission}&DIM_CHANNEL=${params.dim_channel}`;
-        document.getElementById('legend-image').src = legendUrl;
-        const legendLabel = document.getElementById('legend-label');
-        legendLabel.innerText = `Mission: ${params.dim_mission},  Channel: ${params.dim_channel}, Date: ${params.time}`;
+        if (params.layers.length > 0) {
+            const legendUrl = `${imageMosaicLayerUrl}?SERVICE=WMS&VERSION=1.1.0&REQUEST=GetLegendGraphic&LAYER=${params.layers[0]}&format=image/png&STYLE=&DIM_MISSION=${params.dim_mission}&DIM_CHANNEL=${params.dim_channel}`;
+            document.getElementById('legend-image').src = legendUrl;
+            const legendLabel = document.getElementById('legend-label');
+            legendLabel.innerText = `Mission: ${params.dim_mission}, Channel: ${params.dim_channel}, Date: ${params.time}`;
+        } else {
+            document.getElementById('legend-image').src = '';
+            document.getElementById('legend-label').innerText = '';
+        }
     };
 
     const updateMap = () => {
@@ -265,26 +297,8 @@ document.addEventListener("DOMContentLoaded", function () {
         "Empty": noBasemapLayer
     };
 
-    const overlayMaps = {
-        "Border": L.tileLayer.wms(postgisLayerUrl, {
-            layers: 'tmet:border',
-            transparent: true,
-            format: 'image/png',
-        }),
-        "RGB": L.tileLayer.wms(imageMosaicLayerUrl, {
-            layers: 'tmet:rgb',
-            transparent: true,
-            format: 'image/png',
-        }),
-        "Cloud": L.tileLayer.wms(imageMosaicLayerUrl, {
-            layers: 'tmet:cloud',
-            transparent: true,
-            format: 'image/png',
-        })
-    };
-
     // Add layer control to the map
-    L.control.layers(baseMaps, overlayMaps).addTo(map);
+    L.control.layers(baseMaps).addTo(map);
 
     // Initialize the map layers
     updateMap();
@@ -297,18 +311,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Add AOI layer control to the sidebar
     const layerControlDiv = document.getElementById('layer-control');
-    params.layers.forEach(layer => {
+    const allLayers = ['tmet:aoi', 'tmet:rgb', 'tmet:cloud'];
+
+    allLayers.forEach(layer => {
         const layerItem = document.createElement('div');
-        layerItem.innerHTML = `<input type="checkbox" id="${layer}" checked> <label for="${layer}">${layer}</label>`;
-        debugger
+        layerItem.innerHTML = `<input type="checkbox" id="${layer}" data-layer="${layer}"> <label for="${layer}">${layer}</label>`;
         layerControlDiv.appendChild(layerItem);
 
         document.getElementById(layer).addEventListener('change', function (e) {
+            const selectedLayer = e.target.getAttribute('data-layer');
             if (e.target.checked) {
-                currentLayers.find(l => l.wmsParams.layers === layer).addTo(map);
+                params.layers.push(selectedLayer);
             } else {
-                map.removeLayer(currentLayers.find(l => l.wmsParams.layers === layer));
+                params.layers = params.layers.filter(l => l !== selectedLayer);
             }
+            updateMap();
         });
     });
 
