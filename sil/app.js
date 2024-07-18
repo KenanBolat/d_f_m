@@ -48,9 +48,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const cloudLayers = ['ir_cloud_day'];
     const rgbLayers = ['natural_color'];
 
+    // L.control.sidebySide().addTo(map);
+
     const initializeMapLayers = () => {
         const newLayers = {};
-
+        // const sideBySide = L.control.sideBySide().addTo(map);
         params.layers.forEach(layer => {
             if (layer.startsWith('tmet:aoi') && aoiLayers.includes(params.dim_channel)) {
                 newLayers['tmet:aoi'] = L.tileLayer.wms(imageMosaicLayerUrl, {
@@ -93,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         currentLayers = newLayers;
     };
-
+    // L.control.sidebySide().addTo(map);
     const infoDiv = document.getElementById('info');
     const legendImage = document.getElementById('legend-image');
 
@@ -339,4 +341,16 @@ document.addEventListener("DOMContentLoaded", function () {
     };
     legendControl.addTo(map);
     updateLegend();
+
+
+    const sideBySide = L.control.sideBySide();
+
+    // Add button to toggle side-by-side control
+    document.getElementById('toggle-side-by-side').addEventListener('click', function () {
+        if (map.hasLayer(sideBySide)) {
+            map.removeControl(sideBySide);
+        } else {
+            sideBySide.addTo(map);
+        }
+    });
 });

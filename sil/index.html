@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/brands.min.css" integrity="sha512-DJLNx+VLY4aEiEQFjiawXaiceujj5GA7lIY8CHCIGQCBPfsEG0nGz1edb4Jvw1LR7q031zS5PpPqFuPA8ihlRA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/fontawesome.min.css" integrity="sha512-UuQ/zJlbMVAw/UU8vVBhnI4op+/tFOpQZVT+FormmIEhRSCnJWyHiBbEVgM4Uztsht41f3FzVWgLuwzUqOObKw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/leaflet-side-by-side@2.2.0/layout.min.css" rel="stylesheet">
     <style>
         #map { height: 800px; width: 100%; }
         #info { margin-top: 20px; }
@@ -86,7 +87,10 @@
         <button id="start-animation"><i class="fa fa-play"></i></button>
         <button id="pause-button"><i class="fa fa-pause"></i></button>
         <button id="stop-button"><i class="fa fa-stop"></i></button>
+        <button id="toggle-side-by-side"><i class="fa fa-exchange-alt"></i></button>
+
     </div>
+
 
     <div id="map"></div>
 
@@ -131,6 +135,7 @@
     <script src="https://unpkg.com/leaflet-sidebar-v2@3.1.0/js/leaflet-sidebar.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script src="leaflet-side-by-side.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
