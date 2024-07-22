@@ -39,3 +39,47 @@ Todo:
   - Update the test 
   - Scratch test from the start   
   - swipe 
+
+
+ssh-keygen -t rsa -b 2048
+db.fs.files.find({}).forEach(function(doc) {
+  var filename = doc._id.str + ".tif";  // Convert ObjectId to string and append ".tif"
+  print(filename)
+  
+});
+
+
+
+/etc/systemd/system/watch_directory@.service
+
+[Unit]
+Description=Watch directory %I and update GeoServer
+After=network.target
+
+[Service]
+ExecStart=/home/knn/Desktop/d_f_m/scripts/watch_and_update.sh -%i
+Restart=on-failure
+User=knn
+Group=knn
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+sudo systemctl enable watch_directory@a.service
+sudo systemctl start watch_directory@a.service
+sudo systemctl status watch_directory@a.service
+
+
+
+sudo systemctl enable watch_directory@r.service
+sudo systemctl start watch_directory@r.service
+sudo systemctl status watch_directory@r.service
+
+
+sudo systemctl enable watch_directory@c.service
+sudo systemctl start watch_directory@c.service
+sudo systemctl status watch_directory@c.service
+
+
