@@ -23,12 +23,24 @@ def download_file(file_id):
 
     fs = gridfs.GridFS(db)
     file_data = fs.get(ObjectId(file_id))
-    destination_path = os.path.join(DOWNLOAD_FOLDER, file_data.filename)
+    scope = None
 
-    with open(destination_path, 'wb') as file:
-        file.write(file_data.read())
 
-    print(f"File {file_data.filename} downloaded to {destination_path}")
+    if file_data.filename.__contains__("aoi.tif"):
+        scope = "aoi"
+        if file_data.filename.__contains__("natural_color"):
+            scope = "rgb"
+        if file_data.filename.__contains__("ir_cloud_day"):
+            scope = "cloud"
+    if scope is not None:
+        destination_path = os.path.join(DOWNLOAD_FOLDER, scope, file_data.filename)
+
+        with open(destination_path, 'wb') as file:
+            file.write(file_data.read())
+
+        print(f"File {file_data.filename} downloaded to {destination_path}")
+    else:
+        print(f"File {file_data.filename} is not going to be geoserverted.")
 
 
 def poll_collection():

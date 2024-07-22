@@ -113,6 +113,7 @@ class DataConverter:
             self._convert_tiff()
             self._convert_tiff_aoi()
 
+
     @staticmethod
     def calculate_hash(content):
         md5 = hashlib.md5()
@@ -138,8 +139,17 @@ class DataConverter:
             return "internal server error", 500
 
         try:
-            with open(f, "rb") as f_:
-                fid = fs.put(f_)
+            fname = f.split("/")[-1]
+            existing_file = fs.find_one({"filename": fname})
+
+            if existing_file:
+                print("="*100, "File already exists", "="*100)
+                fid = existing_file._id
+                # fs.delete(existing_file._id)
+                # print("="*100, "File deleted", "="*100)
+            else:
+                with open(f, "rb") as f_:
+                    fid = fs.put(f_, filename=fname)
             self.connect()
             payload = {
                 "queue_name": "data",
@@ -310,6 +320,7 @@ class DataConverter:
     @custom_printer
     def _convert_tiff_aoi(self):
         """Converts data to geotiff"""
+        print("**"*100)
         aoi = create_area_def('aoi', {'proj': 'longlat', 'datum': 'WGS84'},
                               area_extent=[22, 30, 45, 45],
                               resolution=0.01,
