@@ -80,8 +80,8 @@ class DataViewSet(viewsets.ModelViewSet):
     # Authentication and permissions
 
     # In order to download the file, the user must be authenticated and have the permission to download the file
-    # authentication_classes = [TokenAuthentication, JWTAuthentication, ]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication, JWTAuthentication, ]
+    permission_classes = [IsAuthenticated]
 
     # Trial and Error
     # serializer_class = serializers.DataDetailSerializer
