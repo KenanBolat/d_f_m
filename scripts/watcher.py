@@ -7,6 +7,38 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 import pandas as pd
 import glob
+import json
+import logging
+import logging.handlers
+
+from logstash_formatter import LogstashFormatterV1
+
+
+class JSONLogstashHandler(logging.handlers.SocketHandler):
+    def makePickle(self, record):
+        extra_record_fields = ['mission',
+                               'timestamp',
+                               'channel',
+                               'file_name', 'xyz']
+
+        log_record = {
+            'appname': 'wathcer',
+            'timestamp': datetime.now().isoformat(),
+            'loglevel': record.levelname,
+            'message': record.getMessage()
+
+        }
+        # Include additional fields from the extra dictionary
+
+        log_record.update(record.__dict__)
+        return (json.dumps(log_record) + '\n').encode('utf-8')
+
+
+logger = logging.getLogger('python-logstash-logger')
+logger.setLevel(logging.INFO)
+logstash_handler = JSONLogstashHandler(os.environ.get('LOGSTASH_HOST', 'localhost'), 5044)  # Logstash service in Docker
+logstash_handler.setFormatter(LogstashFormatterV1())
+logger.addHandler(logstash_handler)
 
 # Configure logging
 import logging
@@ -32,6 +64,7 @@ class FileHandler(FileSystemEventHandler):
 
     def log_event(self, message):
         logging.info(message)
+
     def process(self, file_path):
         file_name = os.path.basename(file_path)
         parts = file_name.split('-')
@@ -61,7 +94,8 @@ class FileHandler(FileSystemEventHandler):
         # Move the file to temp location
         shutil.move(file_path, os.path.join(channel_dir, file_name))
         print(f"Moved {file_name} to temporary location {os.path.join(channel_dir, file_name)}")
-
+        logger.info(f"Moved {file_name} to temporary location {os.path.join(channel_dir, file_name)}",
+                    extra={'mission': mission, 'timestamp': timestamp, 'channel': channel, 'file_name': file_name})
         # Track files collected and update last modification time
 
         # Update DataFrame
@@ -107,6 +141,7 @@ class FileHandler(FileSystemEventHandler):
         for data in data_ready:
             try:
                 print(data)
+                logger.info(data)
                 mission, timestamp = data[0], data[1]
                 temp_channel_dir = os.path.join(self.temp_dir, mission, timestamp)
                 final_channel_dir = os.path.join(self.final_dir, mission)
@@ -114,10 +149,12 @@ class FileHandler(FileSystemEventHandler):
                     os.makedirs(final_channel_dir)
                 dest = shutil.move(temp_channel_dir, final_channel_dir)
                 print(f"Moved {temp_channel_dir} to final location {final_channel_dir}")
+                logger.info(f"Moved {temp_channel_dir} to final location {final_channel_dir}")
                 if dest:
                     self.df = self.df[~((self.df['mission'] == mission) & (self.df['timestamp'] == timestamp))]
             except Exception as e:
                 print(f"Error occurred: {e}")
+                logger.error(f"Error occurred: {e}")
 
 
 def monitor_directory(watch_dir, temp_dir, final_dir):
@@ -127,12 +164,14 @@ def monitor_directory(watch_dir, temp_dir, final_dir):
     observer.schedule(event_handler, watch_dir, recursive=False)
     observer.start()
     print(f"Monitoring {watch_dir} for changes...")
+    logger.info(f"Monitoring {watch_dir} for changes...")
 
     try:
         while True:
             time.sleep(30)
             event_handler.move_to_final()  # Check and move collected files to final destination
     except KeyboardInterrupt:
+        logger.error("Monitoring Stopped. Exiting...")
         observer.stop()
     observer.join()
 
@@ -141,6 +180,5 @@ if __name__ == "__main__":
     watch_directory = r"/media/knn/New Volume/Test_Data"  # Directory to monitor
     temp_directory = "/media/knn/New Volume/Test_Data/.temp"  # Temporary directory for organizing files
     final_directory = "/media/knn/New Volume/Test_Data"  # Final destination directory
-
 
     monitor_directory(watch_directory, temp_directory, final_directory)

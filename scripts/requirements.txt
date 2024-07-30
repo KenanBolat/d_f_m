@@ -1,0 +1,4 @@
+# Requirements matched with local and docker environment for python 3.9.18  and Django 4.0.1
+pandas>=2.2.2, <2.3
+logstash_formatter>=0.5.25, <0.6
+watchdog>=2.1.6, <2.2
