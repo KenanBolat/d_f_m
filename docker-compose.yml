@@ -36,7 +36,7 @@ services:
         - CORS_ENABLED=true
         - CORS_ALLOWED_METHODS=GET,POST,PUT,HEAD,OPTIONS
     ports:
-      - 8080:8080
+      - "8080:8080"
     environment:
       - INSTALL_EXTENSIONS=true
       - STABLE_EXTENSIONS=wps,csw
@@ -74,7 +74,7 @@ services:
     depends_on:
       - db
     ports:
-      - 5050:80
+      - "5050:80"
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -83,8 +83,8 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "5672:5672"
+      - "15672:15672"
 
   ftp_checker:
     build:
@@ -106,7 +106,7 @@ services:
     command: >
       sh -c "bash /app/initiator.sh"
     ports:
-      - 5021:5000
+      - "5021:5000"
 
   # dummy ftp server to create a demo
   ftp_server:
@@ -140,7 +140,7 @@ services:
       - FILE_AGE_LIMIT=111 # minutes
 
     ports:
-      - 5020:5000
+      - "5020:5000"
 
   mongodb:
     image: mongo:latest
@@ -151,14 +151,14 @@ services:
     volumes:
       - ./dev-mongo-data:/data/db
     ports:
-      - 27017:27017
+      - "27017:27017"
 
   mongo-express:
     # admin pass
     image: mongo-express:latest
     restart: always
     ports:
-      - 8081:8081
+      - "8081:8081"
     depends_on:
       - mongodb
     environment:
@@ -170,13 +170,13 @@ services:
     logging:
       driver: 'none'  # disable saving logs
     ports:
-      - 1025:1025 # smtp server
-      - 8025:8025 # web ui
+      - "1025:1025" # smtp server
+      - "8025:8025" # web ui
 
   redis:
     image: redis:latest
     ports:
-      - 6379:6379
+      - "6379:6379"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
