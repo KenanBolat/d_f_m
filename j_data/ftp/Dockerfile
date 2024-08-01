@@ -1,11 +1,18 @@
-FROM alpine:3.18.4
+FROM ubuntu:24.04
 ENV FTP_USER=foo \
-	FTP_PASS=bar \
-	GID=1000 \
-	UID=1000
+        FTP_PASS=bar \
+        GID=1000 \
+        UID=1000
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apk add --no-cache --update \
-	vsftpd==3.0.5-r2
+RUN apt-get update && apt-get install -y vsftpd \
+    && apt-get install -y openssl \
+    && apt-get install -y vim
+
+RUN useradd -m foo && echo "foo:bar" | chpasswd
+
+RUN mkdir -p /home/foo/ftp && chown nobody:nogroup /home/foo/ftp && chmod a-w /home/foo/ftp \
+    && mkdir -p /home/foo/ftp/files && chown foo:foo /home/foo/ftp/files
 
 COPY [ "/src/vsftpd.conf", "/etc" ]
 COPY [ "/src/docker-entrypoint.sh", "/" ]

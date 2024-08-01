@@ -11,6 +11,7 @@ import json
 import logging
 import logging.handlers
 
+
 from logstash_formatter import LogstashFormatterV1
 
 
@@ -41,7 +42,6 @@ logstash_handler.setFormatter(LogstashFormatterV1())
 logger.addHandler(logstash_handler)
 
 # Configure logging
-import logging
 
 logging.basicConfig(
     filename='.app.log',

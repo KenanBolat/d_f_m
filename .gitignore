@@ -3,7 +3,6 @@ venv/
 dev-db-data/
 
 venv/*
-db/*
 mysql/*
 mysql/
 *.tif
