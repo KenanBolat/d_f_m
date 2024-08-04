@@ -170,6 +170,8 @@ services:
     environment:
       ME_CONFIG_MONGODB_SERVER: mongodb
       ME_CONFIG_MONGODB_URL: mongodb://root:root@mongodb:27017
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin123
 
   mailhog:
     image: mailhog/mailhog
@@ -207,8 +209,79 @@ services:
     depends_on:
       - elasticsearch
 
+  health-checker:
+    build: ./management-dashboard/ws-server
+    ports:
+      - "4000:4000"
+    environment:
+      PGADMIN_URL: 'http://db_admin:80/misc/ping'
+      MONGOEXPRESS_URL: 'http://mongo-express:8081'
+      ELASTICSEARCH_URL: 'http://elasticsearch:9200/_cluster/health'
+      GEOSERVER_URL: 'http://geoserver:8080/geoserver/rest/about/status'
+      RABBITMQ_URL: 'http://rabbitmq:15672/api/overview'
+#    depends_on:
+#      - db_admin
+#      - mongo-express
+#      - elasticsearch
+#      - geoserver
+#      - rabbitmq
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+  node-exporter:
+    image: prom/node-exporter
+    ports:
+      - "9100:9100"
+
+  elasticsearch-exporter:
+    image: justwatch/elasticsearch_exporter:latest
+    ports:
+      - "9114:9114"
+    environment:
+      - ES_URI=http://elasticsearch:9200
+
+  rabbitmq-exporter:
+    image: kbudde/rabbitmq-exporter
+    ports:
+      - "9419:9419"
+    environment:
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      RABBIT_URL: http://rabbitmq:15672
+
+  pgadmin-exporter:
+    build:
+        context: ./prometheus/pgadmin-exporter
+        dockerfile: Dockerfile
+    ports:
+      - "9101:9101"
+  mongodb-exporter:
+    image: bitnami/mongodb-exporter
+    ports:
+      - "9102:9102"
+    environment:
+      - MONGODB_URI=mongodb://root:root@mongodb:27017
+
+
+
 volumes:
   dev-static-data:
+  grafana-storage:
 
 # define network if necessary
 networks:
