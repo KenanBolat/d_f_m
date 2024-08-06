@@ -6,7 +6,7 @@ ENV FTP_USER=foo \
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y vsftpd \
-    && apt-get install -y openssl \
+    && apt-get install -y openssl python3 \
     && apt-get install -y vim
 
 RUN useradd -m foo && echo "foo:bar" | chpasswd

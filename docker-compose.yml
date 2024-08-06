@@ -16,7 +16,7 @@ services:
              python manage.py migrate && 
              python manage.py runserver 0.0.0.0:8000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/file_converted"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health-check"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -117,6 +117,8 @@ services:
   # dummy ftp server to create a demo
   ftp_server:
     build: j_data/ftp/
+    environment:
+      - LOGSTASH_HOST=logstash
     ports:
       - '20-21:20-21/tcp'
       - '40000-40009:40000-40009/tcp'
@@ -171,7 +173,7 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongodb
       ME_CONFIG_MONGODB_URL: mongodb://root:root@mongodb:27017
       ME_CONFIG_BASICAUTH_USERNAME: admin
-      ME_CONFIG_BASICAUTH_PASSWORD: admin123
+      ME_CONFIG_BASICAUTH_PASSWORD: pass
 
   mailhog:
     image: mailhog/mailhog
@@ -208,7 +210,6 @@ services:
       - "5601:5601"
     depends_on:
       - elasticsearch
-
   health-checker:
     build: ./management-dashboard/ws-server
     ports:
@@ -270,12 +271,30 @@ services:
         dockerfile: Dockerfile
     ports:
       - "9101:9101"
+
   mongodb-exporter:
     image: bitnami/mongodb-exporter
     ports:
-      - "9102:9102"
+      - "9216:9216"
     environment:
-      - MONGODB_URI=mongodb://root:root@mongodb:27017
+      - MONGODB_ROOT_PASSWORD=root
+      - MONGODB_USERNAME=root
+      - MONGODB_URI=mongodb://root:root@mongodb:27017/admin
+    depends_on:
+      - mongodb
+
+  geoserver-exporter:
+    build: ./prometheus/geoserver-exporter
+    ports:
+      - "9103:9103"
+
+  mongoexpress-exporter:
+    build: ./prometheus/mongoexpress-exporter
+    ports:
+      - "9104:9104"
+
+
+
 
 
 
