@@ -14,6 +14,7 @@ adduser \
         $FTP_USER
 
 mkdir -p /home/$FTP_USER
+mkdir -p /var/run/vsftpd/empty
 chown -R $FTP_USER:$FTP_USER /home/$FTP_USER
 chown -R $FTP_USER:$FTP_USER /data
 chmod -R 777 /data
@@ -26,5 +27,5 @@ tail -f /var/log/vsftpd.log | tee /dev/stdout &
 touch /var/log/xferlog
 tail -f /var/log/xferlog | tee /dev/stdout &
 
-/py/bin/python3 /src/watcher.py
+/py/bin/python3 /src/watcher.py &
 /usr/sbin/vsftpd
