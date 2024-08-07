@@ -26,4 +26,5 @@ tail -f /var/log/vsftpd.log | tee /dev/stdout &
 touch /var/log/xferlog
 tail -f /var/log/xferlog | tee /dev/stdout &
 
+/py/bin/python3 /src/watcher.py
 /usr/sbin/vsftpd

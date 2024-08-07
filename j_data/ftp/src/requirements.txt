@@ -1,0 +1,4 @@
+numpy==1.26.4
+pandas==1.4.3
+watchdog==2.1.6
+logstash-formatter==0.5.17

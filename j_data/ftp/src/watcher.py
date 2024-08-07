@@ -66,51 +66,55 @@ class FileHandler(FileSystemEventHandler):
         logging.info(message)
 
     def process(self, file_path):
-        file_name = os.path.basename(file_path)
-        parts = file_name.split('-')
-        timestamp = parts[-2]
-        channel = parts[-4]
+        try:
+            file_name = os.path.basename(file_path)
+            parts = file_name.split('-')
+            timestamp = parts[-2]
+            channel = parts[-4]
 
-        mission = None
+            mission = None
 
-        if parts[-5] == 'MSG3________':
-            mission = 'MSG'
-        elif parts[-5] == 'MSG2_IODC___':
-            mission = 'IODC'
-        elif parts[-5] == 'MSG4_RSS____':
-            mission = 'RSS'
-        else:
-            mission = 'Unknown'
-            raise ValueError(f"Unknown mission: {parts[-5]}")
+            if parts[-5] == 'MSG3________':
+                mission = 'MSG'
+            elif parts[-5] == 'MSG2_IODC___':
+                mission = 'IODC'
+            elif parts[-5] == 'MSG4_RSS____':
+                mission = 'RSS'
+            else:
+                mission = 'Unknown'
+                raise ValueError(f"Unknown mission: {parts[-5]}")
 
-        # Create temp directories
-        mission_dir = os.path.join(self.temp_dir, mission)
-        date_dir = os.path.join(mission_dir, timestamp)
-        channel_dir = os.path.join(date_dir, channel)
+            # Create temp directories
+            mission_dir = os.path.join(self.temp_dir, mission)
+            date_dir = os.path.join(mission_dir, timestamp)
+            channel_dir = os.path.join(date_dir, channel)
 
-        if not os.path.exists(channel_dir):
-            os.makedirs(channel_dir)
+            if not os.path.exists(channel_dir):
+                os.makedirs(channel_dir)
 
-        # Move the file to temp location
-        shutil.move(file_path, os.path.join(channel_dir, file_name))
-        print(f"Moved {file_name} to temporary location {os.path.join(channel_dir, file_name)}")
-        logger.info(f"Moved {file_name} to temporary location {os.path.join(channel_dir, file_name)}",
-                    extra={'mission': mission, 'timestamp': timestamp, 'channel': channel, 'file_name': file_name})
-        # Track files collected and update last modification time
+            # Move the file to temp location
+            shutil.move(file_path, os.path.join(channel_dir, file_name))
+            print(f"Moved {file_name} to temporary location {os.path.join(channel_dir, file_name)}")
+            logger.info(f"Moved {file_name} to temporary location {os.path.join(channel_dir, file_name)}",
+                        extra={'mission': mission, 'timestamp': timestamp, 'channel': channel, 'file_name': file_name})
+            # Track files collected and update last modification time
 
-        # Update DataFrame
-        new_entry = pd.DataFrame({
-            'mission': [mission],
-            'timestamp': [timestamp],
-            'channel': [channel],
-            'file_name': [file_name],
-            'last_modified': [datetime.now()]
-        })
-        self.df = pd.concat([self.df, new_entry], ignore_index=True)
-        self.last_modification[timestamp] = datetime.now()
+            # Update DataFrame
+            new_entry = pd.DataFrame({
+                'mission': [mission],
+                'timestamp': [timestamp],
+                'channel': [channel],
+                'file_name': [file_name],
+                'last_modified': [datetime.now()]
+            })
+            self.df = pd.concat([self.df, new_entry], ignore_index=True)
+            self.last_modification[timestamp] = datetime.now()
+        except BaseException as e:
+            print(f"Error occurred: {e}")
+            logger.error(f"Error occurred: {e} while processing {file_path}")
 
     def on_created(self, event):
-        if event.src_path.endswith('.TEMP'):
+        if event.src_path.endswith(('.TEMP', '.temp')) or event.is_directory:
             return
         self.process(event.src_path)
 
@@ -177,8 +181,10 @@ def monitor_directory(watch_dir, temp_dir, final_dir):
 
 
 if __name__ == "__main__":
-    watch_directory = r"/media/knn/New Volume/Test_Data"  # Directory to monitor
-    temp_directory = "/media/knn/New Volume/Test_Data/.temp"  # Temporary directory for organizing files
-    final_directory = "/media/knn/New Volume/Test_Data"  # Final destination directory
+
+    watch_directory = r"/data"  # Directory to monitor
+    # watch_directory = r"/media/knn/New Volume/Test_Data"  # Directory to monitor
+    temp_directory = os.path.join(watch_directory, ".temp")  # Temporary directory for organizing files
+    final_directory = watch_directory  # Final destination directory
 
     monitor_directory(watch_directory, temp_directory, final_directory)

@@ -16,7 +16,7 @@ services:
              python manage.py migrate && 
              python manage.py runserver 0.0.0.0:8000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health-check"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/api/health-check" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -220,12 +220,12 @@ services:
       ELASTICSEARCH_URL: 'http://elasticsearch:9200/_cluster/health'
       GEOSERVER_URL: 'http://geoserver:8080/geoserver/rest/about/status'
       RABBITMQ_URL: 'http://rabbitmq:15672/api/overview'
-#    depends_on:
-#      - db_admin
-#      - mongo-express
-#      - elasticsearch
-#      - geoserver
-#      - rabbitmq
+  #    depends_on:
+  #      - db_admin
+  #      - mongo-express
+  #      - elasticsearch
+  #      - geoserver
+  #      - rabbitmq
   prometheus:
     image: prom/prometheus
     volumes:
@@ -267,8 +267,8 @@ services:
 
   pgadmin-exporter:
     build:
-        context: ./prometheus/pgadmin-exporter
-        dockerfile: Dockerfile
+      context: ./prometheus/pgadmin-exporter
+      dockerfile: Dockerfile
     ports:
       - "9101:9101"
 
@@ -293,10 +293,47 @@ services:
     ports:
       - "9104:9104"
 
+  watch_aoi:
+    build: scripts/watch_directory/
+    container_name: watch_aoi
+    environment:
+      - DIRECTORY_TO_WATCH=/watch/aoi
+      - DIRECTORY_TO_UPDATE=/update/aoi
+      - GEOSERVER_URL=http://geoserver:8080/geoserver
+      - WORKSPACE=tmet
+      - COVERAGESTORE=tmet
+      - USERNAME=admin
+      - PASSWORD=geoserver
+    volumes:
+      - /home/knn/Desktop/d_f_m/j_data/geoserver_data/data/aoi:/watch/aoi
 
+  watch_rgb:
+    build: scripts/watch_directory/
+    container_name: watch_rgb
+    environment:
+      - DIRECTORY_TO_WATCH=/watch/rgb
+      - DIRECTORY_TO_UPDATE=/update/rgb
+      - GEOSERVER_URL=http://geoserver:8080/geoserver
+      - WORKSPACE=tmet
+      - COVERAGESTORE=tmet
+      - USERNAME=admin
+      - PASSWORD=geoserver
+    volumes:
+      - /home/knn/Desktop/d_f_m/j_data/geoserver_data/data/rgb:/watch/rgb
 
-
-
+  watch_cloud:
+    build: scripts/watch_directory/
+    container_name: watch_cloud
+    environment:
+      - DIRECTORY_TO_WATCH=/watch/cloud
+      - DIRECTORY_TO_UPDATE=/update/cloud
+      - GEOSERVER_URL=http://geoserver:8080/geoserver
+      - WORKSPACE=tmet
+      - COVERAGESTORE=tmet
+      - USERNAME=admin
+      - PASSWORD=geoserver
+    volumes:
+      - /home/knn/Desktop/d_f_m/j_data/geoserver_data/data/cloud:/watch/cloud
 
 volumes:
   dev-static-data:
