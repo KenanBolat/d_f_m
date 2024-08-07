@@ -1,1 +1,3 @@
-requests
+# there is no need to  install bson and gridfs separately since the pymong package already includes them
+# if the environment does have bson and gridfs installed, it must be removed and pymongo installed as standalone
+pymongo==4.8.0

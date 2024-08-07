@@ -335,6 +335,16 @@ services:
     volumes:
       - /home/knn/Desktop/d_f_m/j_data/geoserver_data/data/cloud:/watch/cloud
 
+  mongodb_poller:
+    build: check_mongo/
+    container_name: mongodb_poller
+    environment:
+      - MONGGODB=mongodb
+    volumes:
+      - /home/knn/Desktop/d_f_m/j_data/geoserver_data/data/:/watch/data
+    depends_on:
+      - mongodb
+
 volumes:
   dev-static-data:
   grafana-storage:
