@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 MONGO_URI = f"mongodb://{os.environ.get('MONGODB', 'localhost')}:27017/"  # Update this to your MongoDB URI
 DB_NAME = "geotiff"
 COLLECTION_NAME = "fs.files"
-DOWNLOAD_FOLDER = os.environ.get('DATA_FOLDER', "/home/knn/Desktop/d_f_m/j_data/geoserver_data/data/")
+DOWNLOAD_FOLDER = f"/watch/data"
 POLL_INTERVAL = 60  # Poll interval in seconds
 
 client = pymongo.MongoClient(MONGO_URI)
@@ -18,6 +18,7 @@ collection = db[COLLECTION_NAME]
 
 
 def download_file(file_id):
+    print(f"Downloading file {file_id}")
     fs = gridfs.GridFS(db)
     file_data = fs.get(ObjectId(file_id))
     scope = None
@@ -30,6 +31,8 @@ def download_file(file_id):
             scope = "cloud"
     if scope is not None:
         destination_path = os.path.join(DOWNLOAD_FOLDER, scope, file_data.filename)
+
+        print(f"Saving file to {destination_path}")
 
         with open(destination_path, 'wb') as file:
             file.write(file_data.read())

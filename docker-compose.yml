@@ -298,7 +298,7 @@ services:
     container_name: watch_aoi
     environment:
       - DIRECTORY_TO_WATCH=/watch/aoi
-      - DIRECTORY_TO_UPDATE=/update/aoi
+      - DIRECTORY_TO_UPDATE=aoi
       - GEOSERVER_URL=http://geoserver:8080/geoserver
       - WORKSPACE=tmet
       - COVERAGESTORE=tmet
@@ -312,7 +312,7 @@ services:
     container_name: watch_rgb
     environment:
       - DIRECTORY_TO_WATCH=/watch/rgb
-      - DIRECTORY_TO_UPDATE=/update/rgb
+      - DIRECTORY_TO_UPDATE=rgb
       - GEOSERVER_URL=http://geoserver:8080/geoserver
       - WORKSPACE=tmet
       - COVERAGESTORE=tmet
@@ -326,7 +326,7 @@ services:
     container_name: watch_cloud
     environment:
       - DIRECTORY_TO_WATCH=/watch/cloud
-      - DIRECTORY_TO_UPDATE=/update/cloud
+      - DIRECTORY_TO_UPDATE=cloud
       - GEOSERVER_URL=http://geoserver:8080/geoserver
       - WORKSPACE=tmet
       - COVERAGESTORE=tmet
@@ -339,7 +339,7 @@ services:
     build: check_mongo/
     container_name: mongodb_poller
     environment:
-      - MONGGODB=mongodb
+      - MONGODB=mongodb
     volumes:
       - /home/knn/Desktop/d_f_m/j_data/geoserver_data/data/:/watch/data
     depends_on:
