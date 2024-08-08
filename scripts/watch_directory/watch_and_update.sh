@@ -12,6 +12,9 @@ do
     echo "New file detected: $NEW_FILE"
     echo "Triggering GeoServer update..."
 
+    echo "=========================================="
+    echo "curl -v -u $USERNAME:$PASSWORD -XPOST -H \"Content-type: text/plain\" -d \"file:///opt/geoserver_data/data/$DIRECTORY_TO_UPDATE\" \"$GEOSERVER_URL/rest/workspaces/$WORKSPACE/coveragestores/$COVERAGESTORE/external.imagemosaic\""
+    echo "=========================================="
     curl -v -u $USERNAME:$PASSWORD -XPOST -H "Content-type: text/plain" \
          -d "file:///opt/geoserver_data/data/$DIRECTORY_TO_UPDATE" \
          "$GEOSERVER_URL/rest/workspaces/$WORKSPACE/coveragestores/$COVERAGESTORE/external.imagemosaic"

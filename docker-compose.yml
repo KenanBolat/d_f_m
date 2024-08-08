@@ -315,7 +315,7 @@ services:
       - DIRECTORY_TO_UPDATE=rgb
       - GEOSERVER_URL=http://geoserver:8080/geoserver
       - WORKSPACE=tmet
-      - COVERAGESTORE=tmet
+      - COVERAGESTORE=rgb
       - USERNAME=admin
       - PASSWORD=geoserver
     volumes:
@@ -329,7 +329,7 @@ services:
       - DIRECTORY_TO_UPDATE=cloud
       - GEOSERVER_URL=http://geoserver:8080/geoserver
       - WORKSPACE=tmet
-      - COVERAGESTORE=tmet
+      - COVERAGESTORE=cloud
       - USERNAME=admin
       - PASSWORD=geoserver
     volumes:
