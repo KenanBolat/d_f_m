@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import ToolCard from '../components/ToolCard';
 
 const tools = [
     { name: 'pgAdmin', url: 'http://localhost:5050' },

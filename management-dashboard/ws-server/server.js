@@ -18,7 +18,7 @@ const services = [
     checkUrl: process.env.MONGOEXPRESS_URL || "http://localhost:8081",
     auth: {
       username: "admin",
-      password: "admin123",
+      password: "pass",
     },
   },
   {
@@ -92,7 +92,7 @@ const broadcastStatus = () => {
   });
 };
 
-setInterval(checkServiceStatus, 1000); // Check every 60 seconds
+setInterval(checkServiceStatus, 60000); // Check every 60 seconds
 
 wss.on("connection", (ws) => {
   ws.send(JSON.stringify(serviceStatuses));
