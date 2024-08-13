@@ -212,7 +212,7 @@ services:
       - elasticsearch
 
   health-checker:
-    build: ./management-dashboard/ws-server
+    build: ./management-dashboard/
     ports:
       - "4000:4000"
     environment:
@@ -221,12 +221,14 @@ services:
       ELASTICSEARCH_URL: 'http://elasticsearch:9200/_cluster/health'
       GEOSERVER_URL: 'http://geoserver:8080/geoserver/rest/about/status'
       RABBITMQ_URL: 'http://rabbitmq:15672/api/overview'
-  #    depends_on:
-  #      - db_admin
-  #      - mongo-express
-  #      - elasticsearch
-  #      - geoserver
-  #      - rabbitmq
+      APP_URL: 'http://app:8000/api/health-check'
+    depends_on:
+      - app
+      - db_admin
+      - mongo-express
+      - elasticsearch
+      - geoserver
+      - rabbitmq
 
   prometheus:
     image: prom/prometheus
@@ -346,6 +348,7 @@ services:
       - /home/knn/Desktop/d_f_m/j_data/geoserver_data/data/:/watch/data
     depends_on:
       - mongodb
+
 
 volumes:
   dev-static-data:

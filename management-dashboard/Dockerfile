@@ -1,10 +1,9 @@
-FROM node:14
-
 # Create app directory
-WORKDIR /usr/src/app
+FROM node:18-alpine as build
+WORKDIR /ws-server
 
 # Install app dependencies
-COPY package*.json ./
+COPY ws-server/* ./
 
 RUN npm install
 

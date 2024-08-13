@@ -1,41 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { Card, Button } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMap, faDatabase, faServer, faRocket, faCogs, faClipboardList, faCode } from '@fortawesome/free-solid-svg-icons'; // Add more icons as needed
 
-const tools = [
-    { name: 'pgAdmin', url: 'http://localhost:5050' },
-    { name: 'MongoExpress', url: 'http://localhost:8081' },
-    { name: 'Elasticsearch', url: 'http://localhost:9200' },
-    { name: 'GeoServer', url: 'http://localhost:8080/geoserver' },
-    { name: 'RabbitMQ', url: 'http://localhost:15672' },
-];
+import './ToolCard.css';
 
-const Dashboard = () => {
-    const [statuses, setStatuses] = useState({});
-
-    useEffect(() => {
-        const ws = new WebSocket('ws://localhost:4000');
-        
-        ws.onmessage = event => {
-            const updatedStatuses = JSON.parse(event.data);
-            setStatuses(updatedStatuses);
-        };
-
-        return () => {
-            ws.close();
-        };
-    }, []);
-
-    return (
-        <div className="dashboard">
-            {tools.map(tool => (
-                <ToolCard 
-                    key={tool.name} 
-                    toolName={tool.name} 
-                    toolUrl={tool.url} 
-                    status={statuses[tool.name]} 
-                />
-            ))}
-        </div>
-    );
+const iconMapping = {
+    "GeoServer": faMap,
+    "mongo-express": faDatabase,
+    "db_admin": faServer,
+    "Elasticsearch": faClipboardList,
+    "RabbitMQ": faRocket,
+    "Portainer": faCogs,
+    "app": faCode,
 };
 
-export default Dashboard;
+
+const ToolCard = ({ toolName, toolUrl, status}) => (
+
+    <Card className="tool-card">
+        <div className="status-indicator">
+            <div className={status==='Online' ? 'status-online' : 'status-offline'}></div>
+            <span>{status==='Online' ? 'Online' : 'Offline'}</span>
+        </div>
+        <Card.Body>
+            <div className="icon-wrapper">
+                <FontAwesomeIcon icon={iconMapping[toolName]} size="6x" />
+            </div>
+            <Card.Title>{toolName}</Card.Title>
+            <Button variant="outline-primary" href={toolUrl} target="_blank">Open</Button>
+        </Card.Body>
+    </Card>
+);
+
+export default ToolCard;

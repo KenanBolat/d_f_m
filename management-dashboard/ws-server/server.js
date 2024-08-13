@@ -44,6 +44,10 @@ const services = [
       password: "guest",
     },
   },
+  {
+    name: "app",
+    checkUrl: process.env.APP_URL || "http://localhost:8000/api/health-check",
+  },
 ];
 
 console.log(services);

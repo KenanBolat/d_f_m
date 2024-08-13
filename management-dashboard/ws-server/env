@@ -1,0 +1,5 @@
+PGADMIN_URL=db_admin
+MONGOEXPRESS_URL=mongo-express
+ELASTICSEARCH_URL=elasticsearch
+GEOSERVER_URL=geoserver
+RABBITMQ_URL=rabbitmq
