@@ -82,4 +82,4 @@ sudo systemctl enable watch_directory@c.service
 sudo systemctl start watch_directory@c.service
 sudo systemctl status watch_directory@c.service
 
-
+npm install --global serve

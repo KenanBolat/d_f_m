@@ -1,6 +1,36 @@
 document.addEventListener("DOMContentLoaded", function () {
     const map = L.map('map').setView([42, 33.5], 6);
 
+
+
+    const fetchLatestData = async (mission, channel, type) => {
+        try {
+            const response = await axios.get(`http://${window.location.hostname}:8000/api/${type}/`, {
+                params: {
+                    mission: mission,
+                    channel: channel
+                }
+            });
+            const latestData = response.data;
+            if (latestData) {
+                // Update the map with the latest data
+                const latestDate = latestData.ingestion;
+                startDatePicker.setDate(new Date(latestDate));
+                params.time = formatDateToLocalISO(new Date(latestDate));
+                updateMap();
+            }
+        } catch (error) {
+            // console.error(`Error fetching latest ${type} data:`, error);
+            console.log("an error occurred");
+        }
+    };
+
+    const mission = 'MSG'; // Replace with the selected mission
+    const channel = 'VIS008'; // Replace with the selected channel
+    fetchLatestData(mission, channel, 'aoi');
+    // fetchLatestData(mission, channel, 'rgb');
+    // fetchLatestData(mission, channel, 'cloud');
+
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; OpenStreetMap contributors'

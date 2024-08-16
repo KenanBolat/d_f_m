@@ -50,6 +50,36 @@ from . import serializers
 # from .serializers import ForeignerSerializer
 from django.conf import settings
 
+from django.db import connection
+
+
+class AOIViewSet(viewsets.ViewSet):
+
+    def list(self, request):
+        """Fetch the most recent data from AOI table filtered by mission and channel."""
+        mission = request.query_params.get('mission')
+        channel = request.query_params.get('channel')
+        print(request.query_params)
+
+        if not mission or not channel:
+            return Response({"error": "Mission and Channel parameters are required."}, status=400)
+
+        with connection.cursor() as cursor:
+            cursor.execute('''
+                SELECT * FROM public.aoi 
+                WHERE mission = %s AND channel = %s
+                ORDER BY ingestion DESC 
+                LIMIT 1;
+            ''', [mission, channel])
+            row = cursor.fetchone()
+            if row:
+                columns = [col[0] for col in cursor.description]
+                result = dict(zip(columns, row))
+                return Response(result)
+            else:
+                return Response({"error": "No data found for the specified mission and channel."}, status=404)
+
+
 # import uvicorn
 # from deepface import DeepFace
 # from .prediction import read_image, preprocess
@@ -210,6 +240,7 @@ class FileViewSet(viewsets.ModelViewSet):
             return HttpResponse(file_data.read(), content_type='image/png')
         except Exception as e:
             return Response({"message": "File not found in MongoDB"}, status=status.HTTP_404_NOT_FOUND)
+
     @action(detail=True, methods=['get'], url_path='download')
     def download(self, request, pk=None):
         try:
@@ -299,7 +330,7 @@ class FileViewSet(viewsets.ModelViewSet):
         # channel = request.query_params.get('channel', 'IR_120')
         channel = request.query_params.get('channel', '')
         file_type = request.query_params.get('file_type', '.png')
-        start_date = request.query_params.get('start_date', '2000-05-21T19:49:44.034Z') # '2000-12-31 23:59:59'
+        start_date = request.query_params.get('start_date', '2000-05-21T19:49:44.034Z')  # '2000-12-31 23:59:59'
         end_date = request.query_params.get('end_date', datetime.max)  # '9999-12-31 23:59:59'
 
         # Ensure dates are in the correct format
@@ -310,7 +341,7 @@ class FileViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Invalid date format. Use YYYY-MM-DD HH:MM:SS'}, status=400)
 
         files = ((File.objects
-                 .annotate(file_datetime=self.ToTimestamp(F('file_date'))))
+                  .annotate(file_datetime=self.ToTimestamp(F('file_date'))))
                  .filter(
             Q(file_name__contains=satellite_mission) &
             Q(file_name__contains=channel) &

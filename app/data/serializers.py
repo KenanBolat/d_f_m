@@ -3,7 +3,8 @@ Serializers for FaceID API.
 """
 from rest_framework import serializers
 
-from core.models import (Data, Configuration, Mission, Event, Consumed, File, Notification, )
+from core.models import (Data, Configuration, Mission, Event, Consumed, File, Notification )
+
 
 
 class MissionField(serializers.Field):
