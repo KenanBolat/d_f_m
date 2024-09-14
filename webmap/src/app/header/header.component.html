@@ -1,0 +1,20 @@
+<mat-toolbar color="primary" class="toolbar">
+  <!-- Left Side: Hamburger Menu -->
+  <button mat-icon-button aria-label="Menu" class="left-menu" (click)="onMenuClick()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- Center: Middle Buttons -->
+  <div class="middle-buttons">
+    <button mat-button (click)="onButton1Click()">Button 1</button>
+    <button mat-button (click)="onButton2Click()">Button 2</button>
+    <button mat-button (click)="onButton3Click()">Button 3</button>
+  </div>
+
+  <!-- Right Side: User Info and Logout -->
+  <div class="user-info">
+    <mat-icon>account_circle</mat-icon>
+    <span class="username">Username</span>
+    <button mat-button class="logout-button" (click)="onLogout()">Logout</button>
+  </div>
+</mat-toolbar>
