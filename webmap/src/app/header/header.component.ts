@@ -1,5 +1,5 @@
-// header.component.ts
 import { Component } from '@angular/core';
+import { AuthService } from '../auth/auth.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,6 +12,13 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [MatToolbarModule, MatButtonModule, MatIconModule],
 })
 export class HeaderComponent {
+
+  username: string | null;
+
+  constructor(private authService: AuthService) {
+    this.username = authService.getUsername();
+  }
+
   onMenuClick() {
     console.log('Menu clicked');
     // Implement menu toggle logic
@@ -33,7 +40,6 @@ export class HeaderComponent {
   }
 
   onLogout() {
-    console.log('Logout clicked');
-    // Implement logout logic
+    this.authService.logout();
   }
 }

@@ -1,6 +1,4 @@
-<div class="app-container">
-  <app-header></app-header>
-  <div class="content">
-    <app-map></app-map>
-  </div>
-</div>
+<!-- app.component.html -->
+  <app-header *ngIf="isAuthenticated"></app-header>
+    <router-outlet></router-outlet>
+
