@@ -96,6 +96,8 @@ services:
     build:
       context: ./data_retrieval/ftp_checker/
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
     restart: always
     depends_on:
       - rabbitmq
@@ -129,6 +131,8 @@ services:
     build:
       context: ./data_retrieval/file_downloader/
       dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
     restart: always
     depends_on:
       - rabbitmq
