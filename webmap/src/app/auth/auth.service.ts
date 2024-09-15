@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, interval, Observable, Subscription } from 'rxjs';
 import * as jwt_decode from 'jwt-decode';
+import localforage from 'localforage';
 
 interface AuthenticatedSubject {
   isAuthenticated: boolean;
@@ -48,8 +49,9 @@ export class AuthService {
     console.log('Refreshing token');
     const refreshToken = localStorage.getItem('refreshToken');
     if (refreshToken) {
-      this.httpClient.post(`${this.AUTH_URL}/refresh`, { refresh: refreshToken }).subscribe((response: any) => {
+      this.httpClient.post(`${this.AUTH_URL}refresh/`, { 'refresh': refreshToken }).subscribe((response: any) => {
         this.HandleAuthenticated(response);
+        this.router.navigate(['/']);
       });
     }
   }
@@ -100,28 +102,41 @@ export class AuthService {
     }
   }
 
-  autoLogin() {
+  autoLogin(){
     const accessToken = localStorage.getItem('accessToken');
     if (accessToken) {
       const decodedAccessToken: any = jwt_decode.jwtDecode(accessToken);
       const expirationDate = new Date(decodedAccessToken.exp * 1000);
 
-      if (Date.now() < expirationDate.getMilliseconds()) {
+      if (new Date() < expirationDate) {
         // If token is still valid, set the user as authenticated
         this.isAuthenticatedFlag = true;
         this.username = decodedAccessToken.user_name;
         this.accessTokenExpiration = expirationDate;
 
         // Optionally, you can refresh the token if it's about to expire soon
-        this.refreshTokenIfNeeded();
+        this.asyncrefreshTokenIfNeeded();
       } else {
         // If the token is expired, log the user out
-        this.logout();
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+          const decodedRefreshToken: any = jwt_decode.jwtDecode(refreshToken);
+          const refreshTokenExpiration = new Date(decodedRefreshToken.exp * 1000);
+
+          if (new Date() < refreshTokenExpiration) {
+            this.refreshToken();
+          }
+          else{
+            this.logout();
+          }
+        } else{
+          this.logout();
+        }
       }
     }
   }
 
-  refreshTokenIfNeeded() {
+  asyncrefreshTokenIfNeeded() {
     if (this.accessTokenExpiration) {
       const timeRemaining = this.accessTokenExpiration.getMilliseconds() - Date.now();
 
@@ -131,7 +146,7 @@ export class AuthService {
     }
   }
 
-  logout(): void {
+  logout() {
     this.isAuthenticatedFlag = false;
     this.username = null;
     this.accessTokenExpiration = null;
