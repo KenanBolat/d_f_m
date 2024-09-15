@@ -2,45 +2,131 @@ import { Component, AfterViewInit, OnInit } from '@angular/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
+import { GEOSERVER_URL, GET_CAPABILITIES, IMAGE_FORMAT, LAYER_NAME_DICTIONARY, LAYER_PROPERTY_TAG } from './map-constants';
+import { LayerData, TmetBackendService } from '../services/tmet-backend.service';
+import { AvailableDatesComponent } from "../available-dates/available-dates.component";
+import { HeaderComponent } from "../header/header.component";
+import { SharedService } from '../services/shared.service';
 
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule, HttpClientModule, AvailableDatesComponent, HeaderComponent],
 })
-export class MapComponent implements AfterViewInit {
+export class MapComponent implements AfterViewInit, OnInit {
 
-  private GEOSERVER_URL : string = 'http://88.231.222.119:8080/geoserver/tmet/wms';
   private map!: L.Map;
   layerAvailability: AvilableLayer[] = [];
+  layers: LayerData[] = [];
+  distinctTimes: string[] = [];
+  distinctChannels: string[] = [];
+  distinctMissions: string[] = [];
 
-  constructor(private http: HttpClient) {
-    console.log('constructor');
+  // selecteds
+  selectedTime: string | null = null;
+  selectedChannel: string | null = null;
+  selectedMission: string | null = null;
+
+  addedLayer : L.TileLayer.WMS | null = null;
+
+  constructor(private http: HttpClient, private tmetBackendService: TmetBackendService, private sharedService: SharedService) {
+  }
+
+  ngOnInit(): void {
+      this.getLayerData();
+
+      this.sharedService.selectedMission$.subscribe((mission) => {
+        this.selectedMission = mission;
+        console.log('Selected mission:', this.selectedMission);
+        if (this.selectedChannel && this.selectedTime) {
+          this.addWmsLayer(this.selectedMission!, this.selectedChannel!, this.selectedTime!);
+        }
+      });
+
+      this.sharedService.selectedDate$.subscribe((date) => {
+        this.selectedTime = date;
+        console.log('Selected date:', this.selectedTime);
+        if (this.selectedChannel && this.selectedMission) {
+          this.addWmsLayer(this.selectedMission!, this.selectedChannel!, this.selectedTime!);
+        }
+      });
+
+      this.sharedService.selectedChannel$.subscribe((channel) => {
+        this.selectedChannel = channel;
+        console.log('Selected channel:', this.selectedChannel);
+        if (this.selectedMission && this.selectedTime) {
+          this.addWmsLayer(this.selectedMission!, this.selectedChannel!, this.selectedTime!);
+        }
+      });
   }
 
   ngAfterViewInit(): void {
     console.log('ngAfterViewInit');
     this.initMap();
-    this.getAvailableDates();
+    // this.getAvailableDates();
 
     this.map.on('click', this.onMapClick.bind(this));
   }
 
-  private getAvailableDates(): void {
-    console.log('getAvailableDates');
+  private getLayerData(): void {
+    this.tmetBackendService.getDummyLayers().subscribe((data) => {
+      this.layers = data;
+      console.log('Layers:', this.layers);
 
-    this.http.get(this.GEOSERVER_URL + "?service=WMS&request=GetCapabilities", { responseType: 'text' }).subscribe((response) => {
+      // Extract the distinct time values
+      this.distinctTimes = this.getDistinctTimes(data);
+      this.distinctChannels = this.getDistinctChannels(data);
+      this.distinctMissions = this.getDistinctMissions(data);
+    });
+  }
+
+  private getDistinctTimes(data: any[]): string[] {
+    const timesSet = new Set(data.map(layer => layer.time));
+    return Array.from(timesSet);
+  }
+
+  private getDistinctChannels(data: any[]): string[] {
+    const channelsSet = new Set(data.map(layer => layer.channel));
+    return Array.from(channelsSet);
+  }
+
+  private getDistinctMissions(data: any[]): string[] {
+    const missionsSet = new Set(data.map(layer => layer.mission));
+    return Array.from(missionsSet);
+  }
+
+  private addWmsLayer(mission: string, channel: string, time: string): void {
+    if (this.addedLayer) {
+      this.map.removeLayer(this.addedLayer);
+    }
+    this.addedLayer = L.tileLayer.wms(GEOSERVER_URL, {
+      layers: `tmet:${LAYER_NAME_DICTIONARY.get(channel)}`,
+      format: IMAGE_FORMAT,
+      transparent: true,
+      opacity: 0.8,
+      DIM_MISSION: mission,
+      DIM_CHANNEL: channel,
+      time: time,
+      zIndex: 1000
+    } as any).addTo(this.map);
+  }
+
+
+  private getAvailableDates(): void {
+    this.http.get(GEOSERVER_URL + GET_CAPABILITIES, { responseType: 'text' }).subscribe((response) => {
       this.extractLayerAvailability(response);
-      const layerSelected = this.layerAvailability[2];
-      L.tileLayer.wms(this.GEOSERVER_URL, {
-        layers: `tmet:${layerSelected.Name}`,
-        format: 'image/png',
+      const layerSelected = this.layerAvailability[3];
+
+      L.tileLayer.wms(GEOSERVER_URL, {
+        layers: `tmet:${LAYER_NAME_DICTIONARY.get(layerSelected.Channel![0]) ?? layerSelected.Name}`,
+        format: IMAGE_FORMAT,
         transparent: true,
         opacity: 0.8,
         DIM_MISSION: layerSelected.Mission![1],
-        DIM_CHANNEL: layerSelected.Channel,
+        DIM_CHANNEL: layerSelected.Channel![0],
+        time: layerSelected.Time![3].toISOString(),
       } as any).addTo(this.map);
     });
   }
@@ -62,7 +148,7 @@ export class MapComponent implements AfterViewInit {
           };
 
 
-        const extentElements = layers[i].getElementsByTagName('Dimension');
+        const extentElements = layers[i].getElementsByTagName(LAYER_PROPERTY_TAG);
         for (let j = 0; j < extentElements.length; j++) {
           const extentElement = extentElements[j];
           if (extentElement.getAttribute('name') === 'time') {
@@ -74,7 +160,7 @@ export class MapComponent implements AfterViewInit {
           }
 
           if (extentElement.getAttribute('name') === 'CHANNEL') {
-            availableLayer.Channel = extentElement.textContent ?? '';
+            availableLayer.Channel = extentElement.textContent?.split(',') ?? [];
           }
 
           if (extentElement.getAttribute('name') === 'MISSION') {
@@ -91,6 +177,7 @@ export class MapComponent implements AfterViewInit {
 
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
+      detectRetina: true,
       attribution: '&copy; OpenStreetMap contributors',
     });
 
@@ -133,7 +220,7 @@ export class MapComponent implements AfterViewInit {
       layers: [osmLayer],
     });
 
-    L.control.layers(baseMaps).addTo(this.map);
+    L.control.layers(baseMaps, {}, {position: 'topleft'}).addTo(this.map);
   }
 
   private onMapClick(e: L.LeafletMouseEvent): void {
@@ -147,5 +234,5 @@ interface AvilableLayer {
   Name: string;
   Mission: string[] | undefined;
   Time: Date [] | undefined;
-  Channel: string | undefined;
+  Channel: string [] | undefined | null;
 }

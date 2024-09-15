@@ -6,9 +6,7 @@
 
   <!-- Center: Middle Buttons -->
   <div class="middle-buttons">
-    <button mat-button (click)="onButton1Click()">Button 1</button>
-    <button mat-button (click)="onButton2Click()">Button 2</button>
-    <button mat-button (click)="onButton3Click()">Button 3</button>
+    <button *ngFor="let mission of availableMissions" mat-button (click)="onMissionButtonClick(mission)">{{mission}}</button>
   </div>
 
   <!-- Right Side: User Info and Logout -->

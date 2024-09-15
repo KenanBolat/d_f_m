@@ -1,43 +1,39 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { SharedService } from '../services/shared.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css'],
   standalone: true,
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, CommonModule],
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
+  availableMissions: string[] | null = [];
 
   username: string | null;
 
-  constructor(private authService: AuthService) {
+  constructor(private authService: AuthService, private sharedService: SharedService) {
     this.username = authService.getUsername();
   }
-
-  onMenuClick() {
-    console.log('Menu clicked');
-    // Implement menu toggle logic
+  ngOnInit() {
+    this.sharedService.availableMissions$.subscribe((missions) => {
+      this.availableMissions = missions;
+      console.log('Available missions:', this.availableMissions);
+    });
   }
 
-  onButton1Click() {
-    console.log('Button 1 clicked');
-    // Implement button 1 logic
+  onMissionButtonClick(mission: string) {
+    console.log('Mission button clicked:', mission);
+    this.sharedService.setSelectedMission(mission);
   }
 
-  onButton2Click() {
-    console.log('Button 2 clicked');
-    // Implement button 2 logic
-  }
-
-  onButton3Click() {
-    console.log('Button 3 clicked');
-    // Implement button 3 logic
-  }
+  onMenuClick() {}
 
   onLogout() {
     this.authService.logout();

@@ -1,0 +1,17 @@
+<div class="date-list-container">
+  <h3>List of Available Dates</h3>
+
+  <!-- List of dates -->
+  <ul class="date-list">
+    <li *ngFor="let date of dates" (click)="onSelectDate(date)" [class.selected]="date === selectedDate">
+      {{ date }}
+    </li>
+  </ul>
+
+  <!-- Buttons at the bottom, stacked vertically -->
+  <div class="button-group">
+    <button [disabled]="!isRgbAvailable" [ngClass]="{'selected': selectedButton === 'rgb'}" (click)="onRgbClick()">RGB</button>
+    <button [disabled]="!isCloudAvailable" [ngClass]="{'selected': selectedButton === 'cloud'}" (click)="onCloudClick()">Cloud</button>
+    <button [disabled]="!isSingleChannelAvailable" [ngClass]="{'selected': selectedButton === 'single-channel'}" (click)="onSingleChannelClick()">Single Channel</button>
+  </div>
+</div>
