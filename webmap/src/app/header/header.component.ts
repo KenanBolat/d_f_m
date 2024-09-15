@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { SharedService } from '../services/shared.service';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -15,15 +16,21 @@ import { CommonModule } from '@angular/common';
 })
 export class HeaderComponent implements OnInit {
   availableMissions: string[] | null = [];
+  private authSubscription!: Subscription;
 
   selectedMission: string | null = null;
 
-  username: string | null;
+  username: string | null = null;
 
   constructor(private authService: AuthService, private sharedService: SharedService) {
-    this.username = authService.getUsername();
   }
   ngOnInit() {
+
+    this.authSubscription = this.authService.isAuthenticated$().subscribe((isAuth) => {
+      debugger;
+      this.username = isAuth.username;
+    });
+
     this.sharedService.availableMissions$.subscribe((missions) => {
       this.availableMissions = missions;
       console.log('Available missions:', this.availableMissions);

@@ -23,7 +23,7 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // Subscribe to the authentication state observable
     this.authSubscription = this.authService.isAuthenticated$().subscribe((isAuth) => {
-      this.isAuthenticated = isAuth;
+      this.isAuthenticated = isAuth.isAuthenticated;
     });
   }
 
