@@ -24,7 +24,6 @@ export class AppComponent implements OnInit, OnDestroy {
     // Subscribe to the authentication state observable
     this.authSubscription = this.authService.isAuthenticated$().subscribe((isAuth) => {
       this.isAuthenticated = isAuth;
-      console.log(`AppComponent: isAuthenticated = ${this.isAuthenticated}`);
     });
   }
 
