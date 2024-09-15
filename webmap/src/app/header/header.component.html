@@ -6,7 +6,7 @@
 
   <!-- Center: Middle Buttons -->
   <div class="middle-buttons">
-    <button *ngFor="let mission of availableMissions" mat-button (click)="onMissionButtonClick(mission)">{{mission}}</button>
+    <button *ngFor="let mission of availableMissions" mat-button (click)="onMissionButtonClick(mission)" [ngClass]="{'selected': (selectedMission === mission)}">{{mission}}</button>
   </div>
 
   <!-- Right Side: User Info and Logout -->

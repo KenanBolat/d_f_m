@@ -16,6 +16,8 @@ import { CommonModule } from '@angular/common';
 export class HeaderComponent implements OnInit {
   availableMissions: string[] | null = [];
 
+  selectedMission: string | null = null;
+
   username: string | null;
 
   constructor(private authService: AuthService, private sharedService: SharedService) {
@@ -27,14 +29,19 @@ export class HeaderComponent implements OnInit {
       console.log('Available missions:', this.availableMissions);
 
       if (this.availableMissions && this.availableMissions.length > 0){
-        this.sharedService.setSelectedMission(this.availableMissions![0]);
+        this.selectedMission = this.availableMissions[0];
+        this.sharedService.setSelectedMission(this.selectedMission);
       }
     });
   }
 
   onMissionButtonClick(mission: string) {
-    console.log('Mission button clicked:', mission);
-    this.sharedService.setSelectedMission(mission);
+
+    this.selectedMission = mission;
+    this.sharedService.setSelectedMission(this.selectedMission);
+
+    console.log('Mission selected:', mission);
+    console.log('Selected Mission:', this.selectedMission);
   }
 
   onMenuClick() {}

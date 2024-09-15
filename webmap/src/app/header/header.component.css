@@ -32,3 +32,9 @@
 .logout-button {
   margin-left: 16px;
 }
+
+.middle-buttons button.selected {
+  background-color: #4caf50 !important; /* Use !important as a temporary solution */
+  color: white !important;
+  border-color: #4caf50 !important;
+}

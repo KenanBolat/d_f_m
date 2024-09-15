@@ -70,3 +70,9 @@
 .button-group button:last-child {
   margin-bottom: 0; /* Remove margin for the last button */
 }
+
+.button-group button.selected {
+  background-color: #4caf50;
+  color: white;
+  border-color: #4caf50;
+}
