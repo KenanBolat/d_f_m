@@ -25,6 +25,10 @@ export class HeaderComponent implements OnInit {
     this.sharedService.availableMissions$.subscribe((missions) => {
       this.availableMissions = missions;
       console.log('Available missions:', this.availableMissions);
+
+      if (this.availableMissions && this.availableMissions.length > 0){
+        this.sharedService.setSelectedMission(this.availableMissions![0]);
+      }
     });
   }
 

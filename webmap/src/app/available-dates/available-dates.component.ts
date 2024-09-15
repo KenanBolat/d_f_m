@@ -45,6 +45,10 @@ export class AvailableDatesComponent {
       }
     });
 
+    // set first channel as selected
+    this.selectedButton = Array.from(filteredChannels)[0];
+    this.sharedService.setSelectedChannel(this.selectedButton!);
+
     const filteredMissions = new Set(filtered.map((data) => data.mission));
     this.sharedService.setSelectedMissions(Array.from(filteredMissions));
   }
