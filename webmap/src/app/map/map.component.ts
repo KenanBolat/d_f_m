@@ -2,7 +2,7 @@ import { Component, AfterViewInit, OnInit } from '@angular/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
-import { GEOSERVER_URL, GET_CAPABILITIES, IMAGE_FORMAT, LAYER_NAME_DICTIONARY, LAYER_PROPERTY_TAG } from './map-constants';
+import { GEOSERVER_URL, IMAGE_FORMAT, LAYER_NAME_DICTIONARY} from './map-constants';
 import { LayerData, TmetBackendService } from '../services/tmet-backend.service';
 import { AvailableDatesComponent } from "../available-dates/available-dates.component";
 import { HeaderComponent } from "../header/header.component";
@@ -111,66 +111,6 @@ export class MapComponent implements AfterViewInit, OnInit {
       time: time,
       zIndex: 1000
     } as any).addTo(this.map);
-  }
-
-
-  private getAvailableDates(): void {
-    this.http.get(GEOSERVER_URL + GET_CAPABILITIES, { responseType: 'text' }).subscribe((response) => {
-      this.extractLayerAvailability(response);
-      const layerSelected = this.layerAvailability[3];
-
-      L.tileLayer.wms(GEOSERVER_URL, {
-        layers: `tmet:${LAYER_NAME_DICTIONARY.get(layerSelected.Channel![0]) ?? layerSelected.Name}`,
-        format: IMAGE_FORMAT,
-        transparent: true,
-        opacity: 0.8,
-        DIM_MISSION: layerSelected.Mission![1],
-        DIM_CHANNEL: layerSelected.Channel![0],
-        time: layerSelected.Time![3].toISOString(),
-      } as any).addTo(this.map);
-    });
-  }
-
-  private extractLayerAvailability(xmlString: string): void {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
-
-    const layers = xmlDoc.getElementsByTagName('Layer');
-
-    for (let i = 0; i < layers.length; i++) {
-      const nameElement = layers[i].getElementsByTagName('Name')[0];
-      if (nameElement) {
-        const availableLayer: AvilableLayer = {
-            Name: nameElement.textContent ?? '',
-            Mission: undefined,
-            Time: undefined,
-            Channel: undefined,
-          };
-
-
-        const extentElements = layers[i].getElementsByTagName(LAYER_PROPERTY_TAG);
-        for (let j = 0; j < extentElements.length; j++) {
-          const extentElement = extentElements[j];
-          if (extentElement.getAttribute('name') === 'time') {
-            const time = extentElement.textContent;
-            if (time) {
-              const timeArray = time.split(',');
-              availableLayer.Time = timeArray.map((dateString) => new Date(dateString));
-            }
-          }
-
-          if (extentElement.getAttribute('name') === 'CHANNEL') {
-            availableLayer.Channel = extentElement.textContent?.split(',') ?? [];
-          }
-
-          if (extentElement.getAttribute('name') === 'MISSION') {
-            availableLayer.Mission = extentElement.textContent?.split(',') ?? [];
-          }
-        }
-        this.layerAvailability.push(availableLayer);
-      }
-    }
-    console.log('Available Dates:', this.layerAvailability);
   }
 
   private initMap(): void {
