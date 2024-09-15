@@ -1,6 +1,5 @@
 // want to export some constants to a separate file
 
-export const GEOSERVER_URL : string = 'http://88.231.222.119:8080/geoserver/tmet/wms';
 export const GET_CAPABILITIES : string = "?service=WMS&request=GetCapabilities";
 export const IMAGE_FORMAT : string = 'image/png';
 export const WORKSPACE : string = 'tmet:';

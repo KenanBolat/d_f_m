@@ -2,11 +2,12 @@ import { Component, AfterViewInit, OnInit, ChangeDetectorRef } from '@angular/co
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
-import { GEOSERVER_URL, IMAGE_FORMAT, LAYER_NAME_DICTIONARY} from './map-constants';
+import { IMAGE_FORMAT, LAYER_NAME_DICTIONARY} from './map-constants';
 import { LayerData, TmetBackendService } from '../services/tmet-backend.service';
 import { AvailableDatesComponent } from "../available-dates/available-dates.component";
 import { HeaderComponent } from "../header/header.component";
 import { SharedService } from '../services/shared.service';
+import { AppConfigService } from '../services/app-config.service';
 
 @Component({
   selector: 'app-map',
@@ -17,6 +18,7 @@ import { SharedService } from '../services/shared.service';
 })
 export class MapComponent implements AfterViewInit, OnInit {
 
+  private GEOSERVER_URL:string;;
   private map!: L.Map;
   layerAvailability: AvilableLayer[] = [];
   layers: LayerData[] = [];
@@ -31,7 +33,13 @@ export class MapComponent implements AfterViewInit, OnInit {
 
   addedLayer : L.TileLayer.WMS | null = null;
 
-  constructor(private http: HttpClient, private tmetBackendService: TmetBackendService, private sharedService: SharedService, private cdr: ChangeDetectorRef) {
+  constructor(
+    private http: HttpClient,
+    private tmetBackendService: TmetBackendService,
+    private sharedService: SharedService,
+    private cdr: ChangeDetectorRef,
+    private appConfigService: AppConfigService) {
+      this.GEOSERVER_URL = this.appConfigService.get('MAP_URL');
   }
 
   ngOnInit(): void {
@@ -107,7 +115,7 @@ export class MapComponent implements AfterViewInit, OnInit {
     if (this.addedLayer) {
       this.map.removeLayer(this.addedLayer);
     }
-    this.addedLayer = L.tileLayer.wms(GEOSERVER_URL, {
+    this.addedLayer = L.tileLayer.wms(this.GEOSERVER_URL, {
       layers: `tmet:${LAYER_NAME_DICTIONARY.get(channel)}`,
       format: IMAGE_FORMAT,
       transparent: true,

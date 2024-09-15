@@ -1,0 +1,4 @@
+{
+  "AUTH_URL": "http://88.231.222.119:8000/api/token/",
+  "MAP_URL": "http://88.231.222.119:8080/geoserver/tmet/wms"
+}

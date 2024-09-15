@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, interval, Observable, Subscription } from 'rxjs';
 import * as jwt_decode from 'jwt-decode';
 import localforage from 'localforage';
+import { AppConfigService } from '../services/app-config.service';
 
 interface AuthenticatedSubject {
   isAuthenticated: boolean;
@@ -15,7 +16,7 @@ interface AuthenticatedSubject {
   providedIn: 'root',
 })
 export class AuthService {
-  private AUTH_URL = 'http://88.231.222.119:8000/api/token/';
+  private AUTH_URL: string;
   private isAuthenticatedFlag = false;
   private isAuthenticatedSubject = new BehaviorSubject<AuthenticatedSubject>({ isAuthenticated: false, username: '' });
   private username: string | null = null;
@@ -24,7 +25,8 @@ export class AuthService {
   private refreshTokenInterval: Subscription | null = null;
 
 
-  constructor(private router: Router, private httpClient: HttpClient) {
+  constructor(private router: Router, private httpClient: HttpClient, private configService: AppConfigService) {
+    this.AUTH_URL = this.configService.get('AUTH_URL');
     this.autoLogin();
   }
 
