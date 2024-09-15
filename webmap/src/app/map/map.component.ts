@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
@@ -31,35 +31,11 @@ export class MapComponent implements AfterViewInit, OnInit {
 
   addedLayer : L.TileLayer.WMS | null = null;
 
-  constructor(private http: HttpClient, private tmetBackendService: TmetBackendService, private sharedService: SharedService) {
+  constructor(private http: HttpClient, private tmetBackendService: TmetBackendService, private sharedService: SharedService, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
       this.getLayerData();
-
-      this.sharedService.selectedMission$.subscribe((mission) => {
-        this.selectedMission = mission;
-        console.log('Selected mission:', this.selectedMission);
-        if (this.selectedChannel && this.selectedTime) {
-          this.addWmsLayer(this.selectedMission!, this.selectedChannel!, this.selectedTime!);
-        }
-      });
-
-      this.sharedService.selectedDate$.subscribe((date) => {
-        this.selectedTime = date;
-        console.log('Selected date:', this.selectedTime);
-        if (this.selectedChannel && this.selectedMission) {
-          this.addWmsLayer(this.selectedMission!, this.selectedChannel!, this.selectedTime!);
-        }
-      });
-
-      this.sharedService.selectedChannel$.subscribe((channel) => {
-        this.selectedChannel = channel;
-        console.log('Selected channel:', this.selectedChannel);
-        if (this.selectedMission && this.selectedTime) {
-          this.addWmsLayer(this.selectedMission!, this.selectedChannel!, this.selectedTime!);
-        }
-      });
   }
 
   ngAfterViewInit(): void {
@@ -68,6 +44,36 @@ export class MapComponent implements AfterViewInit, OnInit {
     // this.getAvailableDates();
 
     this.map.on('click', this.onMapClick.bind(this));
+
+    this.sharedService.selectedMission$.subscribe((mission) => {
+      this.selectedMission = mission;
+      console.log('Selected mission:', this.selectedMission);
+      if (this.selectedChannel && this.selectedTime) {
+        this.addWmsLayer(this.selectedMission!, this.selectedChannel!, this.selectedTime!);
+
+        this.cdr.detectChanges();
+      }
+    });
+
+    this.sharedService.selectedDate$.subscribe((date) => {
+      this.selectedTime = date;
+      console.log('Selected date:', this.selectedTime);
+      if (this.selectedChannel && this.selectedMission) {
+        this.addWmsLayer(this.selectedMission!, this.selectedChannel!, this.selectedTime!);
+
+        this.cdr.detectChanges();
+      }
+    });
+
+    this.sharedService.selectedChannel$.subscribe((channel) => {
+      this.selectedChannel = channel;
+      console.log('Selected channel:', this.selectedChannel);
+      if (this.selectedMission && this.selectedTime) {
+        this.addWmsLayer(this.selectedMission!, this.selectedChannel!, this.selectedTime!);
+
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   private getLayerData(): void {

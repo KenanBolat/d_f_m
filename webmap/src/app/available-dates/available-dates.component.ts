@@ -1,19 +1,30 @@
-import { Component, Input } from '@angular/core';
+import { AfterContentInit, AfterViewInit, ChangeDetectorRef, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LayerData } from '../services/tmet-backend.service';
 import { SharedService } from '../services/shared.service';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faStepBackward, faStepForward, faFastBackward, faFastForward } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-available-dates',
   templateUrl: './available-dates.component.html',
   styleUrls: ['./available-dates.component.css'],
-  imports: [CommonModule],
+  imports: [CommonModule, FontAwesomeModule],
   standalone: true,
 })
-export class AvailableDatesComponent {
+export class AvailableDatesComponent implements AfterContentInit {
   @Input() dates: string[] = [];
   @Input() allData : LayerData[] = [];
   selectedDate: string | null = null;
+  isForwardSelectionEnabled: boolean = true;
+  isBackwardSelectionEnabled: boolean = true;
+
+  // Font Awesome icons
+  faStepBackward = faStepBackward;
+  faStepForward = faStepForward;
+  faFastBackward = faFastBackward;
+  faFastForward = faFastForward;
+
 
   // Availability flags for the buttons
   isRgbAvailable: boolean = false;
@@ -22,13 +33,32 @@ export class AvailableDatesComponent {
 
   selectedButton: string | null = null;
 
-  constructor(private sharedService: SharedService) {}
+  constructor(private sharedService: SharedService, private cdr: ChangeDetectorRef) {}
+
+  ngAfterContentInit(): void {
+    if (this.dates.length > 0) {
+      this.onSelectDate(this.dates[0]);
+
+      this.cdr.detectChanges();
+    }
+  }
 
   // Method to handle date selection
   onSelectDate(date: string): void {
+    this.isForwardSelectionEnabled = true;
+    this.isBackwardSelectionEnabled = true;
+
     this.selectedDate = date;
     this.availabilityCheck(this.selectedDate);
     this.sharedService.setSelectedDate(date);
+
+    if(this.dates[this.dates.length - 1] === this.selectedDate) {
+      this.isForwardSelectionEnabled = false;
+    }
+
+    if(this.dates[0] === this.selectedDate) {
+      this.isBackwardSelectionEnabled = false;
+    }
   }
 
   private availabilityCheck(selectedDate: string): void {
@@ -72,5 +102,43 @@ export class AvailableDatesComponent {
 
   onSingleChannelClick(): void {
     console.log('Single Channel button clicked');
+  }
+
+  // Method to move to the first date
+  goToBeginning(): void {
+    if (this.dates.length > 0) {
+      const selection = this.dates[0];
+      this.onSelectDate(selection);
+    }
+  }
+
+  // Method to move to the last date
+  goToEnd(): void {
+    if (this.dates.length > 0) {
+      const selection = this.dates[this.dates.length - 1];
+      this.onSelectDate(selection);
+    }
+  }
+
+  // Method to move to the previous date
+  goBackward(): void {
+    if (this.selectedDate && this.dates.length > 0) {
+      const currentIndex = this.dates.indexOf(this.selectedDate);
+      if (currentIndex > 0) {
+        const selected = this.dates[currentIndex - 1];
+        this.onSelectDate(selected);
+      }
+    }
+  }
+
+  // Method to move to the next date
+  goForward(): void {
+    if (this.selectedDate && this.dates.length > 0) {
+      const currentIndex = this.dates.indexOf(this.selectedDate);
+      if (currentIndex < this.dates.length - 1) {
+        const selected = this.dates[currentIndex + 1];
+        this.onSelectDate(selected);
+      }
+    }
   }
 }

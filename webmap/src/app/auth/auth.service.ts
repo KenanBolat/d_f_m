@@ -24,7 +24,6 @@ export class AuthService {
 
 
   constructor(private router: Router, private httpClient: HttpClient) {
-    debugger;
     this.autoLogin();
   }
 
@@ -102,7 +101,6 @@ export class AuthService {
   }
 
   autoLogin() {
-    debugger;
     const accessToken = localStorage.getItem('accessToken');
     if (accessToken) {
       const decodedAccessToken: any = jwt_decode.jwtDecode(accessToken);
@@ -145,6 +143,8 @@ export class AuthService {
 
     // Stop the refresh interval
     this.stopTokenRefreshInterval();
+
+    this.isAuthenticatedSubject.next({ isAuthenticated: false, username: this.username ?? '' });
 
     // Navigate to login page
     this.router.navigate(['/login']);

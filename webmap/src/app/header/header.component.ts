@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [MatToolbarModule, MatButtonModule, MatIconModule, CommonModule],
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   availableMissions: string[] | null = [];
   private authSubscription!: Subscription;
 
@@ -22,12 +22,12 @@ export class HeaderComponent implements OnInit {
 
   username: string | null = null;
 
-  constructor(private authService: AuthService, private sharedService: SharedService) {
+  constructor(private authService: AuthService, private sharedService: SharedService, private cdr: ChangeDetectorRef) {
   }
+
   ngOnInit() {
 
     this.authSubscription = this.authService.isAuthenticated$().subscribe((isAuth) => {
-      debugger;
       this.username = isAuth.username;
     });
 
@@ -38,6 +38,8 @@ export class HeaderComponent implements OnInit {
       if (this.availableMissions && this.availableMissions.length > 0){
         this.selectedMission = this.availableMissions[0];
         this.sharedService.setSelectedMission(this.selectedMission);
+
+        this.cdr.detectChanges();
       }
     });
   }
@@ -55,5 +57,11 @@ export class HeaderComponent implements OnInit {
 
   onLogout() {
     this.authService.logout();
+  }
+
+  ngOnDestroy(): void {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
   }
 }
