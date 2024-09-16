@@ -193,11 +193,9 @@ export class MapComponent implements AfterViewInit, OnInit {
 
     const url = this.buildGetFeatureInfoUrl(this.addedLayer!, latlng, point);
 
-    // Make the GetFeatureInfo request
     fetch(url)
       .then((response) => response.text())
       .then((data) => {
-        // Show the result in a pop-up
         L.popup()
           .setLatLng(latlng)
           .setContent(`<strong>Info:</br><em>${latlng.lng.toFixed(2)}, ${latlng.lat.toFixed(2)}</em><br />${data}</strong>`)
@@ -210,19 +208,19 @@ export class MapComponent implements AfterViewInit, OnInit {
 
   private buildGetFeatureInfoUrl(layer: L.TileLayer.WMS, latlng: L.LatLng, point: L.Point): string {
     const mapSize = this.map.getSize();
-    const bounds = this.map.getBounds(); // Get the map bounds in the current CRS
+    const bounds = this.map.getBounds();
 
-    const bbox = bounds.toBBoxString(); // Bounding box as "minLon,minLat,maxLon,maxLat"
+    const bbox = bounds.toBBoxString();
 
     const params: any = {
       request: 'GetFeatureInfo',
       service: 'WMS',
-      crs: 'EPSG:4326', // WMS 1.3.0 uses CRS instead of SRS
+      crs: 'EPSG:4326',
       styles: '',
       transparent: layer.wmsParams.transparent,
       version: '1.3.0',
       format: layer.wmsParams.format,
-      bbox: bbox, // Correct bbox in lat/lon
+      bbox: bbox,
       height: mapSize.y,
       width: mapSize.x,
       layers: layer.wmsParams.layers,
@@ -235,7 +233,7 @@ export class MapComponent implements AfterViewInit, OnInit {
       j: point.y.toFixed(0)
     };
 
-    const baseUrl = this.GEOSERVER_URL; // Get WMS URL from the active layer
+    const baseUrl = this.GEOSERVER_URL;
     const queryString = Object.keys(params)
       .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
       .join('&');
