@@ -24,3 +24,5 @@ export const LAYER_NAME_DICTIONARY : Map<string, string> = new Map([
     ['WV_062', 'aoi'],
     ['WV_073', 'aoi']
 ]);
+
+export const aoiChannels : string[] = ['HRV', 'IR_016', 'IR_039', 'IR_087', 'IR_097', 'IR_108', 'IR_120', 'IR_134', 'VIS006', 'VIS008', 'WV_062', 'WV_073'];

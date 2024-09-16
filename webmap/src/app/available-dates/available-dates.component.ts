@@ -4,17 +4,24 @@ import { LayerData } from '../services/tmet-backend.service';
 import { SharedService } from '../services/shared.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faStepBackward, faStepForward, faFastBackward, faFastForward } from '@fortawesome/free-solid-svg-icons';
+import { aoiChannels } from '../map/map-constants';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-available-dates',
   templateUrl: './available-dates.component.html',
   styleUrls: ['./available-dates.component.css'],
-  imports: [CommonModule, FontAwesomeModule],
+  imports: [CommonModule, FontAwesomeModule, FormsModule],
   standalone: true,
 })
 export class AvailableDatesComponent implements AfterContentInit, OnChanges {
+
   @Input() dates: string[] = [];
   @Input() allData : LayerData[] = [];
+
+  availableAoiChannels : string[] = [];
+  selectedAoiChannel: string | null = null;
+
   selectedDate: string | null = null;
   isForwardSelectionEnabled: boolean = true;
   isBackwardSelectionEnabled: boolean = true;
@@ -81,6 +88,12 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
       if (element === 'ir_cloud_day') {
         this.isCloudAvailable = true;
       }
+
+      if(aoiChannels.includes(element)) {
+        this.isSingleChannelAvailable = true;
+      }
+
+      this.availableAoiChannels = Array.from(filteredChannels).filter((channel) => aoiChannels.includes(channel));
     });
 
     // set first channel as selected
@@ -91,6 +104,7 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
       this.selectedButton = 'ir_cloud_day';
     }
 
+    this.selectedAoiChannel = null;
     this.sharedService.setSelectedChannel(this.selectedButton!);
 
     const filteredMissions = new Set(filtered.map((data) => data.mission));
@@ -108,17 +122,23 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
     console.log('RGB button clicked');
     this.sharedService.setSelectedChannel('natural_color');
     this.selectedButton = 'natural_color';
+    this.selectedAoiChannel = null;
   }
 
   onCloudClick(): void {
     console.log('Cloud button clicked');
     this.sharedService.setSelectedChannel('ir_cloud_day');
     this.selectedButton = 'ir_cloud_day';
+    this.selectedAoiChannel = null;
   }
 
-  onSingleChannelClick(): void {
-    console.log('Single Channel button clicked');
-  }
+  onChannelSelect($event: Event) {
+    const target = $event.target as HTMLButtonElement;
+    const channel = target.value;
+    this.selectedAoiChannel = channel;
+    this.sharedService.setSelectedChannel(channel);
+    this.selectedButton = null;
+    }
 
   // Method to move to the first date
   goToBeginning(): void {

@@ -34,7 +34,7 @@
 }
 
 .middle-buttons button.selected {
-  background-color: #4caf50 !important; /* Use !important as a temporary solution */
+  background-color: #1e85be !important; /* Use !important as a temporary solution */
   color: white !important;
-  border-color: #4caf50 !important;
+  border-color: #1e85be !important;
 }
