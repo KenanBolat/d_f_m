@@ -112,7 +112,7 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
 
   onCloudClick(): void {
     console.log('Cloud button clicked');
-    this.sharedService.setSelectedChannel('cloud');
+    this.sharedService.setSelectedChannel('ir_cloud_day');
     this.selectedButton = 'ir_cloud_day';
   }
 
