@@ -32,5 +32,9 @@
       <button mat-button [disabled]="!isSingleChannelAvailable" class="dropdown-button" [ngClass]="{'selected': selectedAoiChannel}">
         Single Channel ({{ selectedAoiChannel || 'None' }})
       </button>
-    </div>  </div>
+    </div>
+  </div>
+
+  <div class="button-group" style="margin-top: 10px;">
+    <button mat-button (click)="onDownloadClick()"><fa-icon [icon]="faDownload"></fa-icon> Download</button>
 </div>

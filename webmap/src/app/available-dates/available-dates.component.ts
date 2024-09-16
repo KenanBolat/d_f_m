@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { LayerData } from '../services/tmet-backend.service';
 import { SharedService } from '../services/shared.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faStepBackward, faStepForward, faFastBackward, faFastForward } from '@fortawesome/free-solid-svg-icons';
+import { faStepBackward, faStepForward, faFastBackward, faFastForward, faDownload } from '@fortawesome/free-solid-svg-icons';
 import { aoiChannels } from '../map/map-constants';
 import { FormsModule } from '@angular/forms';
 
@@ -15,7 +15,6 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
 })
 export class AvailableDatesComponent implements AfterContentInit, OnChanges {
-
   @Input() dates: string[] = [];
   @Input() allData : LayerData[] = [];
 
@@ -35,6 +34,7 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
   faStepForward = faStepForward;
   faFastBackward = faFastBackward;
   faFastForward = faFastForward;
+  faDownload = faDownload;
 
 
   // Availability flags for the buttons
@@ -216,5 +216,26 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
         this.onSelectDate(selected);
       }
     }
+  }
+
+  onDownloadClick() {
+
+    const url = 'https://cdn.pixabay.com/photo/2017/07/31/04/28/cows-2556445_640.jpg';
+
+    fetch(url)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const objectURL = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = objectURL;
+        anchor.download = 'filename.png';
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        window.URL.revokeObjectURL(objectURL);
+      })
+      .catch((error) => {
+        console.error('Download failed:', error);
+      });
   }
 }
