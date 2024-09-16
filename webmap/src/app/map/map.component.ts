@@ -33,6 +33,8 @@ export class MapComponent implements AfterViewInit, OnInit {
 
   addedLayer : L.TileLayer.WMS | null = null;
 
+  mouseCoordinates: string | null = null;
+
   constructor(
     private http: HttpClient,
     private tmetBackendService: TmetBackendService,
@@ -81,6 +83,14 @@ export class MapComponent implements AfterViewInit, OnInit {
 
         this.cdr.detectChanges();
       }
+    });
+
+    this.map.on('mousemove', (e: L.LeafletMouseEvent) => {
+      const lat = parseFloat(e.latlng.lat.toFixed(2));
+      const lng = parseFloat(e.latlng.lng.toFixed(2));
+
+      // Format coordinates as degrees
+      this.mouseCoordinates = `${Math.abs(lng)}°${lng >= 0 ? 'E' : 'W'}, ${Math.abs(lat)}°${lat >= 0 ? 'N' : 'S'}`;
     });
   }
 

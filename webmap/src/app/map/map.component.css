@@ -12,3 +12,16 @@
 .leaflet-container {
   cursor: crosshair;
 }
+
+.coordinates-display {
+  position: absolute;
+  top: 20px;
+  left: 50px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #ff0000;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: large;
+  z-index: 1000;
+}
