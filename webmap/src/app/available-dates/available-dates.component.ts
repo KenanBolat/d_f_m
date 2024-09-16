@@ -117,7 +117,6 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
 }
 
   private autoSelectChannel(filteredChannels: Set<string>): boolean {
-    debugger;
     if(this.isUserSelectedButton || this.selectedAoiChannel) {
       return false;
     }
