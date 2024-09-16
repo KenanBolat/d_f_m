@@ -13,5 +13,25 @@
 </head>
 <body>
   <app-root></app-root>
+
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCFJzdfeCWkptGtqxcXka-hERUQK1OBWqw",
+      authDomain: "tmet-dev.firebaseapp.com",
+      projectId: "tmet-dev",
+      storageBucket: "tmet-dev.appspot.com",
+      messagingSenderId: "291405887895",
+      appId: "1:291405887895:web:1fa1da825a6ab2439f2cd2"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+  </script>
 </body>
 </html>
