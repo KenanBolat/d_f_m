@@ -19,6 +19,7 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
   @Input() dates: string[] = [];
   @Input() allData : LayerData[] = [];
 
+  isUserSelectedButton: boolean = false;
   availableAoiChannels : string[] = [];
   selectedAoiChannel: string | null = null;
 
@@ -98,17 +99,29 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
 
     // set first channel as selected
 
-    if(Array.from(filteredChannels).includes('natural_color')) {
-      this.selectedButton = 'natural_color';
-    } else if(Array.from(filteredChannels).includes('ir_cloud_day')) {
-      this.selectedButton = 'ir_cloud_day';
-    }
+    if(this.autoSelectChannel(filteredChannels)) {
 
-    this.selectedAoiChannel = null;
-    this.sharedService.setSelectedChannel(this.selectedButton!);
+      if(Array.from(filteredChannels).includes('natural_color')) {
+        this.selectedButton = 'natural_color';
+      } else if(Array.from(filteredChannels).includes('ir_cloud_day')) {
+        this.selectedButton = 'ir_cloud_day';
+      }
+
+      this.selectedAoiChannel = null;
+      this.sharedService.setSelectedChannel(this.selectedButton!);
+    }
 
     const filteredMissions = new Set(filtered.map((data) => data.mission));
     this.sharedService.setSelectedMissions(Array.from(filteredMissions));
+
+}
+
+  private autoSelectChannel(filteredChannels: Set<string>): boolean {
+    debugger;
+    if(this.isUserSelectedButton || this.selectedAoiChannel) {
+      return false;
+    }
+    return true;
   }
 
   private setButtonsDisabled(): void {
@@ -123,6 +136,7 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
     this.sharedService.setSelectedChannel('natural_color');
     this.selectedButton = 'natural_color';
     this.selectedAoiChannel = null;
+    this.isUserSelectedButton = true;
   }
 
   onCloudClick(): void {
@@ -130,6 +144,7 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
     this.sharedService.setSelectedChannel('ir_cloud_day');
     this.selectedButton = 'ir_cloud_day';
     this.selectedAoiChannel = null;
+    this.isUserSelectedButton = true;
   }
 
   onChannelSelect($event: Event) {
@@ -138,6 +153,7 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
     this.selectedAoiChannel = channel;
     this.sharedService.setSelectedChannel(channel);
     this.selectedButton = null;
+    this.isUserSelectedButton = true;
     }
 
   // Method to move to the first date
