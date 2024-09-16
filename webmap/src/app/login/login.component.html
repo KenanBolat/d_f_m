@@ -1,0 +1,21 @@
+<div class="login-container">
+  <!-- Left Side: Image -->
+  <div class="login-image">
+  </div>
+
+  <!-- Right Side: Login Form -->
+  <div class="login-form">
+    <h2>Login</h2>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-field">
+        <label for="username">Username</label>
+        <input id="username" formControlName="username" required />
+      </div>
+      <div class="form-field">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" required />
+      </div>
+      <button type="submit" [disabled]="loginForm.invalid">Login</button>
+    </form>
+  </div>
+</div>

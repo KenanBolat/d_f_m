@@ -1,0 +1,18 @@
+<mat-toolbar color="primary" class="toolbar">
+  <!-- Left Side: Hamburger Menu -->
+  <button mat-icon-button aria-label="Menu" class="left-menu" (click)="onMenuClick()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- Center: Middle Buttons -->
+  <div class="middle-buttons">
+    <button *ngFor="let mission of availableMissions" mat-button (click)="onMissionButtonClick(mission)" [ngClass]="{'selected': (selectedMission === mission)}">{{mission}}</button>
+  </div>
+
+  <!-- Right Side: User Info and Logout -->
+  <div class="user-info">
+    <mat-icon>account_circle</mat-icon>
+    <span class="username">{{ username }}</span>
+    <button mat-button class="logout-button" (click)="onLogout()">Logout</button>
+  </div>
+</mat-toolbar>

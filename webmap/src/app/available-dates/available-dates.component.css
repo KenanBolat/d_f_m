@@ -1,0 +1,146 @@
+.date-list-container {
+  position: absolute;
+  right: 10px;
+  top: 70px; /* Adjusted to start below the header (header height + margin) */
+  width: 250px;
+  height: calc(100% - 100px); /* 100px accounts for the header height and some extra margin */
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.date-list-container h3 {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.date-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.date-list li {
+  padding: 8px;
+  margin: 5px 0;
+  cursor: pointer;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.date-list li:hover {
+  background-color: #e9ecef;
+}
+
+.date-list li.selected {
+  background-color: #1e85be;
+  color: white;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  align-items: stretch; /* Make sure buttons take full width */
+}
+
+.button-group button {
+  padding: 10px;
+  margin-bottom: 10px; /* Space between buttons */
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button-group button:hover {
+  background-color: #e9ecef;
+}
+
+.button-group button:last-child {
+  margin-bottom: 0; /* Remove margin for the last button */
+}
+
+.button-group button.selected {
+  background-color: #1e85be;
+  color: white;
+  border-color: #1e85be;
+}
+
+.button-group button.playing{
+  background-color: #f75d57;
+  color: white;
+  border-color: #f75d57;
+}
+
+.navigation-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.navigation-buttons button {
+  margin: 5px;
+  padding: 10px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.navigation-buttons button:hover {
+  background-color: #e9ecef;
+}
+
+.navigation-buttons button:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+/* Dropdown container to position elements correctly */
+.dropdown-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* Hide the dropdown but still make it clickable */
+.channel-dropdown {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Styling the button to look like it's controlling the dropdown */
+.dropdown-button {
+  width: 100%;
+  background-color: #007bff; /* Customize the button color */
+  border: none;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+/* Ensure dropdown doesn't pop out visually */
+.channel-dropdown:focus + .dropdown-button, .channel-dropdown:hover + .dropdown-button {
+  outline: none;
+}

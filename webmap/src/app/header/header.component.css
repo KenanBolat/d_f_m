@@ -1,0 +1,40 @@
+/* header.component.css */
+
+/* Make the toolbar a flex container */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Left Menu */
+.left-menu {
+  margin-right: auto;
+}
+
+/* Middle Buttons */
+.middle-buttons {
+  display: flex;
+  gap: 16px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* User Info */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Adjust the logout button margin */
+.logout-button {
+  margin-left: 16px;
+}
+
+.middle-buttons button.selected {
+  background-color: #1e85be !important; /* Use !important as a temporary solution */
+  color: white !important;
+  border-color: #1e85be !important;
+}

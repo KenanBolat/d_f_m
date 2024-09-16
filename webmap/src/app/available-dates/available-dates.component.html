@@ -1,0 +1,40 @@
+<div class="date-list-container">
+  <h3>List of Available Dates</h3>
+
+  <!-- List of dates -->
+  <ul class="date-list">
+    <li *ngFor="let date of dates" (click)="onSelectDate(date)" [class.selected]="date === selectedDate">
+      {{ date }}
+    </li>
+  </ul>
+
+  <div class="navigation-buttons">
+    <button (click)="goToBeginning()" [disabled]="!isBackwardSelectionEnabled"> <fa-icon [icon]="faFastBackward"></fa-icon></button>
+    <button (click)="goBackward()" [disabled]="!isBackwardSelectionEnabled"><fa-icon [icon]="faStepBackward"></fa-icon></button>
+    <button (click)="goForward()" [disabled]="!isForwardSelectionEnabled"><fa-icon [icon]="faStepForward"></fa-icon></button>
+    <button (click)="goToEnd()" [disabled]="!isForwardSelectionEnabled"><fa-icon [icon]="faFastForward"></fa-icon>
+    </button>
+  </div>
+
+  <div class="button-group" style="margin-bottom: 10px; margin-top: 10px;">
+    <button mat-button (click)="onAnimationClick()" [ngClass]="{'playing': isAnimationPlaying}">Animation <span *ngIf="isAnimationPlaying">(Playing..)</span></button>
+  </div>
+
+  <!-- Buttons at the bottom, stacked vertically -->
+  <div class="button-group">
+    <button [disabled]="!isRgbAvailable" [ngClass]="{'selected': selectedButton === 'natural_color'}" (click)="onRgbClick()">RGB</button>
+    <button [disabled]="!isCloudAvailable" [ngClass]="{'selected': selectedButton === 'ir_cloud_day'}" (click)="onCloudClick()">Cloud</button>
+    <div class="dropdown-container">
+      <select class="channel-dropdown" [disabled]="!isSingleChannelAvailable" [(ngModel)]="selectedAoiChannel" (change)="onChannelSelect($event)">
+        <option *ngFor="let channel of availableAoiChannels" [value]="channel">{{ channel }}</option>
+      </select>
+
+      <button mat-button [disabled]="!isSingleChannelAvailable" class="dropdown-button" [ngClass]="{'selected': selectedAoiChannel}">
+        Single Channel ({{ selectedAoiChannel || 'None' }})
+      </button>
+    </div>
+  </div>
+
+  <div class="button-group" style="margin-top: 10px;">
+    <button mat-button (click)="onDownloadClick()"><fa-icon [icon]="faDownload"></fa-icon> Download</button>
+</div>

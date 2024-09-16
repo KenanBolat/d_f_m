@@ -1,0 +1,11 @@
+<div id="map" style="height: 100%; width: 100%; position: relative;">
+  <div class="coordinates-display" *ngIf="mouseCoordinates">
+    {{ mouseCoordinates }}
+  </div>
+
+  <div id="legend" *ngIf="addedLayer">
+  </div>
+</div>
+
+<!-- Overlayed AvailableDatesComponent -->
+<app-available-dates [dates]="distinctTimes" [allData]="layers"></app-available-dates>
