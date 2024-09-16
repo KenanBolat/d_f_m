@@ -25,3 +25,12 @@
   font-size: large;
   z-index: 1000;
 }
+
+#legend{
+  padding: 10px;
+  background-color: white;
+  position: absolute;
+  bottom: 100px;
+  left: 50px;
+  z-index: 2000;;
+}

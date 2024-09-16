@@ -135,6 +135,8 @@ export class MapComponent implements AfterViewInit, OnInit {
       time: time.replace(':00Z', ':000Z'),
       zIndex: 1000
     } as any).addTo(this.map);
+
+    this.updateLegendGraphic(this.addedLayer);
   }
 
   private initMap(): void {
@@ -255,6 +257,52 @@ export class MapComponent implements AfterViewInit, OnInit {
     return `${baseUrl}?${queryString}`;
   }
 
+  private buildGetLegendGraphicUrl(layer: L.TileLayer.WMS): string {
+    const params: any = {
+      request: 'GetLegendGraphic',
+      service: 'WMS',
+      crs: 'EPSG:4326',
+      styles: '',
+      transparent: layer.wmsParams.transparent,
+      version: '1.3.0',
+      format: layer.wmsParams.format,
+      layer: layer.wmsParams.layers,
+      DIM_MISSION: this.selectedMission,
+      DIM_CHANNEL: this.selectedChannel,
+      time: this.selectedTime,
+      legend_options: 'forceLabels:on'
+    };
+
+    const baseUrl = this.GEOSERVER_URL;
+    const queryString = Object.keys(params)
+      .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+      .join('&');
+
+    return `${baseUrl}?${queryString}`;
+  }
+
+  private updateLegendGraphic(layer: L.TileLayer.WMS): void {
+
+    const legend = document.getElementById('legend');
+    if (!legend) {
+      return;
+    }
+    legend.innerHTML = '<h4>Legend</h4><p>Loading...</p>';
+    const url = this.buildGetLegendGraphicUrl(layer);
+
+    fetch(url)
+      .then((response) => response.blob())
+      .then((data) => {
+        const url = URL.createObjectURL(data);
+        if (legend) {
+          legend.innerHTML = `<h4>Legend</h4><img src="${url}" alt="legend" />`;
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching legend:', error);
+      });
+
+  }
 }
 
 interface AvilableLayer {
