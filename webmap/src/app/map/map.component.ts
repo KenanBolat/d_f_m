@@ -165,10 +165,24 @@ export class MapComponent implements AfterViewInit, OnInit {
       subdomains: ['0', '1', '2', '3'],
     });
 
+    const cartoDb = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      detectRetina: true,
+      attribution: '&copy; OpenStreetMap contributors',
+    });
+
+    const cartoDBDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      detectRetina: true,
+      attribution: '&copy; OpenStreetMap contributors',
+    });
+
     const noBasemapLayer = L.layerGroup();
 
     const baseMaps = {
       'OpenStreetMap': osmLayer,
+      'CartoDB': cartoDb,
+      'CartoDB Dark': cartoDBDark,
       'Google Hybrid': googleHybrid,
       'Google Satellite': googleSat,
       'Google Terrain': googleTerrain,
