@@ -188,8 +188,59 @@ export class MapComponent implements AfterViewInit, OnInit {
   }
 
   private onMapClick(e: L.LeafletMouseEvent): void {
-    const { lat, lng } = e.latlng;
-    console.log(`Map clicked at latitude: ${lat}, longitude: ${lng}`);
+    const latlng = e.latlng;
+    const point = this.map.latLngToContainerPoint(latlng);
+
+    const url = this.buildGetFeatureInfoUrl(this.addedLayer!, latlng, point);
+
+    // Make the GetFeatureInfo request
+    fetch(url)
+      .then((response) => response.text())
+      .then((data) => {
+        // Show the result in a pop-up
+        L.popup()
+          .setLatLng(latlng)
+          .setContent(`<strong>Info:</br><em>${latlng.lng.toFixed(2)}, ${latlng.lat.toFixed(2)}</em><br />${data}</strong>`)
+          .openOn(this.map);
+      })
+      .catch((error) => {
+        console.error('Error fetching feature info:', error);
+      });
+  }
+
+  private buildGetFeatureInfoUrl(layer: L.TileLayer.WMS, latlng: L.LatLng, point: L.Point): string {
+    const mapSize = this.map.getSize();
+    const bounds = this.map.getBounds(); // Get the map bounds in the current CRS
+
+    const bbox = bounds.toBBoxString(); // Bounding box as "minLon,minLat,maxLon,maxLat"
+
+    const params: any = {
+      request: 'GetFeatureInfo',
+      service: 'WMS',
+      crs: 'EPSG:4326', // WMS 1.3.0 uses CRS instead of SRS
+      styles: '',
+      transparent: layer.wmsParams.transparent,
+      version: '1.3.0',
+      format: layer.wmsParams.format,
+      bbox: bbox, // Correct bbox in lat/lon
+      height: mapSize.y,
+      width: mapSize.x,
+      layers: layer.wmsParams.layers,
+      query_layers: layer.wmsParams.layers,
+      info_format: 'text/html',
+      DIM_MISSION: this.selectedMission,
+      DIM_CHANNEL: this.selectedChannel,
+      time: this.selectedTime,
+      i: point.x.toFixed(0),
+      j: point.y.toFixed(0)
+    };
+
+    const baseUrl = this.GEOSERVER_URL; // Get WMS URL from the active layer
+    const queryString = Object.keys(params)
+      .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+      .join('&');
+
+    return `${baseUrl}?${queryString}`;
   }
 
 }
