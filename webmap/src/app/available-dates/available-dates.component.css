@@ -77,6 +77,12 @@
   border-color: #1e85be;
 }
 
+.button-group button.playing{
+  background-color: #f75d57;
+  color: white;
+  border-color: #f75d57;
+}
+
 .navigation-buttons {
   display: flex;
   justify-content: center;

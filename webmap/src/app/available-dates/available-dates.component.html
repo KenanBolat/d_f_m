@@ -16,6 +16,10 @@
     </button>
   </div>
 
+  <div class="button-group" style="margin-bottom: 10px; margin-top: 10px;">
+    <button mat-button (click)="onAnimationClick()" [ngClass]="{'playing': isAnimationPlaying}">Animation <span *ngIf="isAnimationPlaying">(Playing..)</span></button>
+  </div>
+
   <!-- Buttons at the bottom, stacked vertically -->
   <div class="button-group">
     <button [disabled]="!isRgbAvailable" [ngClass]="{'selected': selectedButton === 'natural_color'}" (click)="onRgbClick()">RGB</button>

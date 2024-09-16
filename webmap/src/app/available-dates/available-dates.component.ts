@@ -19,6 +19,9 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
   @Input() dates: string[] = [];
   @Input() allData : LayerData[] = [];
 
+  isAnimationPlaying: boolean = false;
+  animationInterval: any;
+
   isUserSelectedButton: boolean = false;
   availableAoiChannels : string[] = [];
   selectedAoiChannel: string | null = null;
@@ -153,6 +156,28 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
     this.sharedService.setSelectedChannel(channel);
     this.selectedButton = null;
     this.isUserSelectedButton = true;
+    }
+
+    onAnimationClick() {
+      if(!this.isAnimationPlaying) {
+        let selectedDateIndex = this.dates.indexOf(this.selectedDate!);
+
+        // start moving forward in every 5 seconds and create a loop
+        this.animationInterval = setInterval(() => {
+          if(selectedDateIndex < this.dates.length - 1) {
+            this.onSelectDate(this.dates[selectedDateIndex + 1]);
+            selectedDateIndex++;
+          } else {
+            this.onSelectDate(this.dates[0]);
+            selectedDateIndex = 0;
+          }
+        }, 5000);
+      } else {
+        clearInterval(this.animationInterval);
+      }
+
+
+      this.isAnimationPlaying = !this.isAnimationPlaying;
     }
 
   // Method to move to the first date
