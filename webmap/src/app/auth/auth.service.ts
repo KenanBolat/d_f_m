@@ -20,18 +20,19 @@ export class AuthService {
   private isAuthenticatedFlag = false;
   private isAuthenticatedSubject = new BehaviorSubject<AuthenticatedSubject>({ isAuthenticated: false, username: '' });
   private username: string | null = null;
+  private accessToken: string | null = null;
   private accessTokenExpiration: Date | null = null;
   private refreshTokenExpiration: Date | null = null;
   private refreshTokenInterval: Subscription | null = null;
 
 
   constructor(private router: Router, private httpClient: HttpClient, private configService: AppConfigService) {
-    this.AUTH_URL = this.configService.get('AUTH_URL');
+    this.AUTH_URL = this.configService.get('API_URL');
     this.autoLogin();
   }
 
   login(username: string, password: string): boolean {
-    this.httpClient.post(this.AUTH_URL, { 'email': username, 'password': password }).subscribe((response: any) => {
+    this.httpClient.post(this.AUTH_URL + "/api/token/", { 'email': username, 'password': password }).subscribe((response: any) => {
       this.HandleAuthenticated(response);
       this.router.navigate(['/']);
       return true;
@@ -51,7 +52,7 @@ export class AuthService {
     console.log('Refreshing token');
     const refreshToken = localStorage.getItem('refreshToken');
     if (refreshToken) {
-      this.httpClient.post(`${this.AUTH_URL}refresh/`, { 'refresh': refreshToken }).subscribe((response: any) => {
+      this.httpClient.post(this.AUTH_URL + '/api/token/refresh/', { 'refresh': refreshToken }).subscribe((response: any) => {
         this.HandleAuthenticated(response);
         this.router.navigate(['/']);
       });
@@ -62,6 +63,7 @@ export class AuthService {
     const accessToken = response['access'];
     const refreshToken = response['refresh'];
 
+    this.accessToken = accessToken;
 
 
     const decodedAccessToken: any = jwt_decode.jwtDecode(accessToken);
@@ -178,5 +180,9 @@ export class AuthService {
 
   getUsername(): string | null {
     return this.username;
+  }
+
+  getToken(): string | null {
+    return this.accessToken;
   }
 }

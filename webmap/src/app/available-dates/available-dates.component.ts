@@ -12,7 +12,7 @@ import { faStepBackward, faStepForward, faFastBackward, faFastForward } from '@f
   imports: [CommonModule, FontAwesomeModule],
   standalone: true,
 })
-export class AvailableDatesComponent implements AfterContentInit {
+export class AvailableDatesComponent implements AfterContentInit, OnChanges {
   @Input() dates: string[] = [];
   @Input() allData : LayerData[] = [];
   selectedDate: string | null = null;
@@ -34,6 +34,14 @@ export class AvailableDatesComponent implements AfterContentInit {
   selectedButton: string | null = null;
 
   constructor(private sharedService: SharedService, private cdr: ChangeDetectorRef) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if(changes['dates'].currentValue !== changes['dates'].previousValue) {
+      this.onSelectDate(this.dates[0]);
+
+      this.cdr.detectChanges();
+    }
+  }
 
   ngAfterContentInit(): void {
     if (this.dates.length > 0) {
@@ -70,13 +78,19 @@ export class AvailableDatesComponent implements AfterContentInit {
       if (element === 'natural_color') {
         this.isRgbAvailable = true;
       }
-      if (element === 'cloud') {
+      if (element === 'ir_cloud_day') {
         this.isCloudAvailable = true;
       }
     });
 
     // set first channel as selected
-    this.selectedButton = Array.from(filteredChannels)[0];
+
+    if(Array.from(filteredChannels).includes('natural_color')) {
+      this.selectedButton = 'natural_color';
+    } else if(Array.from(filteredChannels).includes('ir_cloud_day')) {
+      this.selectedButton = 'ir_cloud_day';
+    }
+
     this.sharedService.setSelectedChannel(this.selectedButton!);
 
     const filteredMissions = new Set(filtered.map((data) => data.mission));
@@ -93,11 +107,13 @@ export class AvailableDatesComponent implements AfterContentInit {
   onRgbClick(): void {
     console.log('RGB button clicked');
     this.sharedService.setSelectedChannel('natural_color');
+    this.selectedButton = 'natural_color';
   }
 
   onCloudClick(): void {
     console.log('Cloud button clicked');
     this.sharedService.setSelectedChannel('cloud');
+    this.selectedButton = 'ir_cloud_day';
   }
 
   onSingleChannelClick(): void {

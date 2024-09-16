@@ -19,7 +19,7 @@
   <!-- Buttons at the bottom, stacked vertically -->
   <div class="button-group">
     <button [disabled]="!isRgbAvailable" [ngClass]="{'selected': selectedButton === 'natural_color'}" (click)="onRgbClick()">RGB</button>
-    <button [disabled]="!isCloudAvailable" [ngClass]="{'selected': selectedButton === 'cloud'}" (click)="onCloudClick()">Cloud</button>
+    <button [disabled]="!isCloudAvailable" [ngClass]="{'selected': selectedButton === 'ir_cloud_day'}" (click)="onCloudClick()">Cloud</button>
     <button [disabled]="!isSingleChannelAvailable" [ngClass]="{'selected': selectedButton === 'single-channel'}" (click)="onSingleChannelClick()">Single Channel</button>
   </div>
 

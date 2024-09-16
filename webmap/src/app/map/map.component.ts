@@ -85,7 +85,7 @@ export class MapComponent implements AfterViewInit, OnInit {
   }
 
   private getLayerData(): void {
-    this.tmetBackendService.getDummyLayers().subscribe((data) => {
+    this.tmetBackendService.getAllLayers().subscribe((data) => {
       this.layers = data;
       console.log('Layers:', this.layers);
 
@@ -98,7 +98,7 @@ export class MapComponent implements AfterViewInit, OnInit {
 
   private getDistinctTimes(data: any[]): string[] {
     const timesSet = new Set(data.map(layer => layer.time));
-    return Array.from(timesSet);
+    return Array.from(timesSet).sort();
   }
 
   private getDistinctChannels(data: any[]): string[] {
@@ -122,7 +122,7 @@ export class MapComponent implements AfterViewInit, OnInit {
       opacity: 0.8,
       DIM_MISSION: mission,
       DIM_CHANNEL: channel,
-      time: time,
+      time: time.replace(':00Z', ':000Z'),
       zIndex: 1000
     } as any).addTo(this.map);
   }
