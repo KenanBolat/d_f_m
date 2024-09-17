@@ -313,7 +313,7 @@ services:
       - USERNAME=admin
       - PASSWORD=geoserver
     volumes:
-      - /home/knn/Desktop/d_f_m/j_data/geoserver_data/data/aoi:/watch/aoi
+      - ./j_data/geoserver_data/data/aoi:/watch/aoi
 
   watch_rgb:
     build: scripts/watch_directory/
@@ -327,7 +327,7 @@ services:
       - USERNAME=admin
       - PASSWORD=geoserver
     volumes:
-      - /home/knn/Desktop/d_f_m/j_data/geoserver_data/data/rgb:/watch/rgb
+      - ./j_data/geoserver_data/data/rgb:/watch/rgb
 
   watch_cloud:
     build: scripts/watch_directory/
@@ -341,7 +341,7 @@ services:
       - USERNAME=admin
       - PASSWORD=geoserver
     volumes:
-      - /home/knn/Desktop/d_f_m/j_data/geoserver_data/data/cloud:/watch/cloud
+      - ./j_data/geoserver_data/data/cloud:/watch/cloud
 
   mongodb_poller:
     build: check_mongo/
@@ -349,7 +349,7 @@ services:
     environment:
       - MONGODB=mongodb
     volumes:
-      - /home/knn/Desktop/d_f_m/j_data/geoserver_data/data/:/watch/data
+      - ./j_data/geoserver_data/data/:/watch/data
     depends_on:
       - mongodb
   nginx:
