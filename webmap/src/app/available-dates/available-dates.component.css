@@ -4,7 +4,7 @@
   top: 70px; /* Adjusted to start below the header (header height + margin) */
   width: 250px;
   height: calc(100% - 100px); /* 100px accounts for the header height and some extra margin */
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   border: 1px solid #ddd;
   padding: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -108,7 +108,6 @@
   cursor: not-allowed;
 }
 
-/* Dropdown container to position elements correctly */
 .dropdown-container {
   position: relative;
   display: flex;
@@ -118,7 +117,6 @@
   margin-top: 10px;
 }
 
-/* Hide the dropdown but still make it clickable */
 .channel-dropdown {
   position: absolute;
   top: 0;
@@ -129,7 +127,6 @@
   cursor: pointer;
 }
 
-/* Styling the button to look like it's controlling the dropdown */
 .dropdown-button {
   width: 100%;
   background-color: #007bff; /* Customize the button color */
@@ -140,7 +137,22 @@
   border-radius: 4px;
 }
 
-/* Ensure dropdown doesn't pop out visually */
 .channel-dropdown:focus + .dropdown-button, .channel-dropdown:hover + .dropdown-button {
   outline: none;
+}
+
+div.logo-tmet{
+  margin-bottom: 200px;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin:  0;
+}
+
+.logo-img {
+  max-width: 200px;
+  height: auto;
+  display: block;
 }

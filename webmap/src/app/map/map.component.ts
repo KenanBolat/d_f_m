@@ -280,7 +280,6 @@ export class MapComponent implements AfterViewInit {
 
   private updateLegendGraphic(layer: L.TileLayer.WMS): void {
 
-    debugger;
     const legend = document.getElementById('legend');
     legend!.innerHTML = '<h4>Legend</h4><p>Loading...</p>';
     const url = this.buildGetLegendGraphicUrl(layer);
@@ -294,7 +293,8 @@ export class MapComponent implements AfterViewInit {
           `<h4>Legend</h4>
           <h5>${this.selectedTime} - ${this.selectedChannel} - ${this.selectedMission}</h5>
           <h5>Copyright: ${new Date().getFullYear()}, NextHops</h5>
-          <img src="${url}" alt="legend" />`;
+          <img src="${url}" alt="legend" />
+          <img src="assets/tmet_logo.png" alt="mini-logo-tmet" class="legend-img" style="width: 40px; float: right" />`;
         }
       })
       .catch((error) => {
