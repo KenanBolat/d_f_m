@@ -1,0 +1,24 @@
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: white;
+}
+
+.loading-gif {
+  width: 300px;
+  height: 300px;
+}
+
+.logo-container{
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  bottom: 10px
+}
+
+.logo-container img{
+  height: 100px;
+  margin-left: 100px;
+}
