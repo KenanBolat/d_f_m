@@ -34,7 +34,10 @@ export class AuthService {
   login(username: string, password: string): boolean {
     this.httpClient.post(this.AUTH_URL + "/api/token/", { 'email': username, 'password': password }).subscribe((response: any) => {
       this.HandleAuthenticated(response);
-      this.router.navigate(['/']);
+      this.router.navigate(['/loading']);
+
+      setTimeout(() => {
+        this.router.navigate(['/']);}, 2000);
       return true;
     });
 

@@ -34,3 +34,7 @@
   left: 50px;
   z-index: 2000;;
 }
+
+div.hidden {
+  display: none;
+}

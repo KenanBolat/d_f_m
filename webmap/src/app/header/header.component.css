@@ -5,6 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background-color: white;
 }
 
 /* Left Menu */
@@ -37,4 +38,8 @@
   background-color: #1e85be !important; /* Use !important as a temporary solution */
   color: white !important;
   border-color: #1e85be !important;
+}
+
+div.user-info img{
+  width: 40px;
 }
