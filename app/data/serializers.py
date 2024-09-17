@@ -3,8 +3,9 @@ Serializers for FaceID API.
 """
 from rest_framework import serializers
 
-from core.models import (Data, Configuration, Mission, Event, Consumed, File, Notification )
+import dateutil.parser as parser
 
+from core.models import (Data, Configuration, Mission, Event, Consumed, File, Notification, )
 
 
 class MissionField(serializers.Field):
@@ -214,3 +215,18 @@ class NotificationSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+
+
+
+class GeoserverDataSourceSerializer(serializers.Serializer):
+    # Fields from aoi, rgb, cloud, and extra table
+    id = serializers.IntegerField()
+    layername = serializers.CharField()
+    channel = serializers.CharField()
+    mission = serializers.CharField()
+    time = serializers.DateTimeField()
+    downloadid = serializers.CharField(required=False)
+    filename = serializers.CharField(required=False)
+    created_at = serializers.DateTimeField(required=False)
+    file_size = serializers.IntegerField(required=False)
+    status = serializers.CharField(required=False)

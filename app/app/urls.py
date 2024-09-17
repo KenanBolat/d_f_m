@@ -26,6 +26,7 @@ from core import views as core_views
 from core.views import (file_list, file_list2)
 
 from data.views import MyTokenObtainPairView
+from data.views import get_geoserver_data
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -46,6 +47,7 @@ urlpatterns = [
 
     path('api/file_converted', file_list, name='file-list'),
     path('api/file_converted2', file_list2, name='file-list2'),
+    path('api/get_geoserver_data/', get_geoserver_data, name='get_combined_data'),
 
     path('api/compare', core_views.compare_view, name='compare'),
     path('api/schema', SpectacularAPIView.as_view(), name='api-schema'),

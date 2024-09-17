@@ -2,6 +2,7 @@
 Views for the data APIs.
 """
 import os.path
+from django.db import connection
 
 import gridfs
 import pymongo
@@ -9,6 +10,7 @@ from bson import ObjectId
 from django.http import (HttpResponse, JsonResponse)
 from datetime import datetime
 from rest_framework.exceptions import NotFound
+from rest_framework.decorators import api_view
 
 from django.db.models import Func, Value
 
@@ -47,6 +49,8 @@ from core.models import (Data,
                          Notification)
 
 from . import serializers
+from .serializers import GeoserverDataSourceSerializer
+
 # from .serializers import ForeignerSerializer
 from django.conf import settings
 
@@ -354,3 +358,46 @@ class FileViewSet(viewsets.ModelViewSet):
         serializer = FileSerializer(files, many=True)
 
         return Response(serializer.data)
+
+
+# class GeoserverDataSourceSerializerViewSet(viewsets.ModelViewSet):
+#     serializer_class = serializers.FileSerializer
+#     queryset = File.objects.all()
+
+
+@api_view(['GET'])
+def get_geoserver_data(request):
+    # Define the raw SQL query (including the union)
+    query = """
+select foo.fid , foo.location, foo.ingestion, foo.mission, foo.channel, foo.coverage, cf.id , cf.file_name, cf.created_at, cf.file_size  from (
+SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc , 'aoi' as coverage FROM aoi
+UNION
+SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc ,'rgb' as coverage FROM rgb
+UNION
+SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc , 'cloud' as coverage FROM cloud  ) as foo 
+left join core_file cf on foo.loc =  cf.file_name; 
+"""
+
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+    # Prepare the data for serialization
+    combined_data = []
+    for row in results:
+        print('row*100', row)
+        combined_data.append({
+            'id': row[0],  # ID field
+            'layername': row[5] if len(row) > 5 else None,
+            'channel': row[4] if len(row) > 4 else None,
+            'mission': row[3] if len(row) > 3 else None,
+            'time': f'{row[2].strftime("%Y-%m-%dT%H:%M:%S.000Z")}' if len(row) > 2 else None,
+            'downloadid': f'/file/{row[6]}/download/' if len(row) > 6 else None,
+            'filename': row[7] if len(row) > 7 else None,
+            'created_at': f'{row[8].strftime("%Y-%m-%dT%H:%M:%S.000Z")}' if len(row) > 8 else None,
+            'file_size': row[9] if len(row) > 9 else None,
+        })
+
+    # Serialize the combined data
+    serializer = GeoserverDataSourceSerializer(combined_data, many=True)
+    return Response(serializer.data)

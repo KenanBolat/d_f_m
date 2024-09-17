@@ -112,6 +112,7 @@ class DataConverter:
             self._convert_png()
             self._convert_tiff()
             self._convert_tiff_aoi()
+            self._convert_png_aoi()
 
 
     @staticmethod
@@ -286,6 +287,30 @@ class DataConverter:
 
             self._create_overiew()
             return True
+    @custom_printer
+    def _convert_png_aoi(self):
+        print("="*25, "Converting to AOI:png ", "="*25)
+        print("="*25, "Converting to AOI:png ", "="*25)
+
+
+        if self.check_file_exists(self.nc_filename_hrv) or self.check_file_exists(self.nc_filename_vis):
+            print("=" * 100, "File already exists", "=" * 100)
+        else:
+
+            tag = f'{self.mission}_{self.date_tag}'
+            self.aoi.save_datasets(writer='simple_image', filename=os.path.join(self.TEMP_DIR, tag + '_{name}_aoi.png'))
+
+            for png in glob.glob(os.path.join(self.TEMP_DIR, tag + '_*_aoi.png')):
+                self.upload_to_mongodb(png, ftype="png")
+                self.update_payload(file_name=f'{png.split("/")[-1]}',
+                                    file_path=png,
+                                    file_type='png',
+                                    file_size=os.path.getsize(png),
+                                    file_status='converted')
+                self.insert_file()
+
+            self._create_overiew()
+            return True
 
     @custom_printer
     def _create_overiew(self):
@@ -319,16 +344,15 @@ class DataConverter:
 
     @custom_printer
     def _convert_tiff_aoi(self):
+        print("="*25, "Converting to AOI: tiff", "="*25)
         """Converts data to geotiff"""
-        print("**"*100)
         aoi = create_area_def('aoi', {'proj': 'longlat', 'datum': 'WGS84'},
                               area_extent=[22, 30, 45, 45],
                               resolution=0.01,
                               units='degrees',
                               description='Global 0.01x0.01 degree lat-lon grid')
 
-        scn_aoi = self.scn.resample(aoi)
-        print("="*100)
+        self.aoi = self.scn.resample(aoi)
 
         for ch in [r for r in self.seviri_data_names]:
             f_name = f"{self.mission}_{self.date_tag}_{ch}_aoi.tif"
@@ -337,14 +361,12 @@ class DataConverter:
             if self.check_file_exists(f_name):
                 print("=" * 100, "File already exists", "=" * 100)
             else:
-                scn_aoi.save_datasets(writer='geotiff', datasets=[ch], filename=f_path)
-                scn_aoi.save_datasets(writer='geotiff', datasets=[ch], filename=f_path)
+                self.aoi.save_datasets(writer='geotiff', datasets=[ch], filename=f_path)
                 self.update_payload(file_name=f_name, file_path=f_path, file_type='geotiff',
                                     file_size=os.path.getsize(f_path),
                                     file_status='converted')
                 self.upload_to_mongodb(f_path, ftype="geotiff")
                 self.insert_file()
 
-        print("="*100)
-        del scn_aoi
+
         return True

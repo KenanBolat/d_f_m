@@ -22,6 +22,9 @@ downloaded_files/
 ssh/
 ssh/*
 
+ssl/
+ssl/*
+
 local_git
 local_git/*
 
