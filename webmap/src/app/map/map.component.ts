@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
@@ -16,7 +16,7 @@ import { AppConfigService } from '../services/app-config.service';
   standalone: true,
   imports: [CommonModule, HttpClientModule, AvailableDatesComponent, HeaderComponent],
 })
-export class MapComponent implements AfterViewInit, OnInit {
+export class MapComponent implements AfterViewInit {
 
   private GEOSERVER_URL:string;;
   private map!: L.Map;
@@ -44,14 +44,9 @@ export class MapComponent implements AfterViewInit, OnInit {
       this.GEOSERVER_URL = this.appConfigService.get('MAP_URL');
   }
 
-  ngOnInit(): void {
-      this.getLayerData();
-  }
-
   ngAfterViewInit(): void {
     console.log('ngAfterViewInit');
     this.initMap();
-    // this.getAvailableDates();
 
     this.map.on('click', this.onMapClick.bind(this));
 
@@ -92,6 +87,8 @@ export class MapComponent implements AfterViewInit, OnInit {
       // Format coordinates as degrees
       this.mouseCoordinates = `${Math.abs(lng)}°${lng >= 0 ? 'E' : 'W'}, ${Math.abs(lat)}°${lat >= 0 ? 'N' : 'S'}`;
     });
+
+    this.getLayerData();
   }
 
   private getLayerData(): void {
@@ -283,11 +280,9 @@ export class MapComponent implements AfterViewInit, OnInit {
 
   private updateLegendGraphic(layer: L.TileLayer.WMS): void {
 
+    debugger;
     const legend = document.getElementById('legend');
-    if (!legend) {
-      return;
-    }
-    legend.innerHTML = '<h4>Legend</h4><p>Loading...</p>';
+    legend!.innerHTML = '<h4>Legend</h4><p>Loading...</p>';
     const url = this.buildGetLegendGraphicUrl(layer);
 
     fetch(url)
@@ -295,7 +290,11 @@ export class MapComponent implements AfterViewInit, OnInit {
       .then((data) => {
         const url = URL.createObjectURL(data);
         if (legend) {
-          legend.innerHTML = `<h4>Legend</h4><img src="${url}" alt="legend" />`;
+          legend.innerHTML =
+          `<h4>Legend</h4>
+          <h5>${this.selectedTime} - ${this.selectedChannel} - ${this.selectedMission}</h5>
+          <h5>Copyright: ${new Date().getFullYear()}, NextHops</h5>
+          <img src="${url}" alt="legend" />`;
         }
       })
       .catch((error) => {
