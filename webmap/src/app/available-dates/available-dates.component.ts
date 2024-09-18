@@ -14,9 +14,9 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FontAwesomeModule, FormsModule],
   standalone: true,
 })
-export class AvailableDatesComponent implements AfterContentInit, OnChanges {
-  @Input() dates: string[] = [];
-  @Input() allData : LayerData[] = [];
+export class AvailableDatesComponent implements AfterContentInit, AfterViewInit {
+  dates: string[] = [];
+  allData : LayerData[] = [];
 
   isAnimationPlaying: boolean = false;
   animationInterval: any;
@@ -45,13 +45,21 @@ export class AvailableDatesComponent implements AfterContentInit, OnChanges {
   selectedButton: string | null = null;
 
   constructor(private sharedService: SharedService, private cdr: ChangeDetectorRef) {}
+  ngAfterViewInit(): void {
+    this.sharedService.allData$.subscribe((allData) => {
+      if(allData) {
+        this.allData = allData;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if(changes['dates'].currentValue !== changes['dates'].previousValue) {
-      this.onSelectDate(this.dates[0]);
+        var sortedTime = Array.from(new Set(allData.map(data => data.time))).sort().reverse();
+        this.dates = sortedTime;
 
-      this.cdr.detectChanges();
-    }
+        if(!this.selectedDate || this.selectedDate !== this.dates[0]) {
+          this.onSelectDate(this.dates[0]);
+        }
+
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   ngAfterContentInit(): void {
