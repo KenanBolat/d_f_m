@@ -53,7 +53,7 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
         var sortedTime = Array.from(new Set(allData.map(data => data.time))).sort().reverse();
         this.dates = sortedTime;
 
-        if(!this.selectedDate || this.selectedDate !== this.dates[0]) {
+        if(!this.selectedDate) {
           this.onSelectDate(this.dates[0]);
         }
 
