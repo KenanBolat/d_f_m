@@ -89,18 +89,31 @@ export class MapComponent implements AfterViewInit {
     });
 
     this.getLayerData();
+
+    // this getLayerData every 60 seconds
+    setInterval(() => {
+      this.getLayerData();
+    }, 60000);
+
   }
 
   private getLayerData(): void {
     this.tmetBackendService.getAllLayers().subscribe((data) => {
+      // if(isFirstTime){
+      //   // remove last 10 elements from the data
+      //   data = data.filter(data => data.time !== '2023-08-14T08:45:00.000Z');
+      // }
       this.layers = data;
-      console.log('Layers:', this.layers);
 
       // Extract the distinct time values
       this.distinctTimes = this.getDistinctTimes(data);
       this.distinctChannels = this.getDistinctChannels(data);
       this.distinctMissions = this.getDistinctMissions(data);
+
+      this.sharedService.setAllData(data);
     });
+
+    console.log(`Layer (${this.layers.length})data: ${this.layers}`);
   }
 
   private getDistinctTimes(data: any[]): string[] {
