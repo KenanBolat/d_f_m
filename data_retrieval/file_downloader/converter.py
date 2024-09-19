@@ -108,12 +108,11 @@ class DataConverter:
         self.reader()
         self.read_data()
         if self.check_bands():
-            self._convert_netcdf()
+            self._convert_netcdf(upload=False)
             self._convert_png()
-            self._convert_tiff()
+            self._convert_tiff(upload=False)
             self._convert_tiff_aoi()
             self._convert_png_aoi()
-
 
     @staticmethod
     def calculate_hash(content):
@@ -144,7 +143,7 @@ class DataConverter:
             existing_file = fs.find_one({"filename": fname})
 
             if existing_file:
-                print("="*100, "File already exists", "="*100)
+                print("=" * 100, "File already exists", "=" * 100)
                 fid = existing_file._id
                 # fs.delete(existing_file._id)
                 # print("="*100, "File deleted", "="*100)
@@ -182,7 +181,7 @@ class DataConverter:
         self.scn = satpy.Scene(reader=self._reader, filenames=files_updated)
         print(self.seviri_data_names)
         self.scn.load(self.seviri_data_names)
-        print("="*1500)
+        print("=" * 1500)
 
     def check_bands(self):
         channels = [r for r in self.scn.available_dataset_names() if r not in self.seviri_data_names]
@@ -209,7 +208,8 @@ class DataConverter:
             for file in files:
                 if file['file_name'] == file_name_to_check:
                     return True
-                    print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:File {file_name_to_check} already uploaded")
+                    print(
+                        f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:File {file_name_to_check} already uploaded")
                 else:
                     False
         else:
@@ -235,7 +235,7 @@ class DataConverter:
             return False
 
     @custom_printer
-    def _convert_netcdf(self):
+    def _convert_netcdf(self, upload=True):
         """Converts netcdf data to netcdf"""
         hrv_datasets = ['HRV']
         vis_datasets = [r for r in self.seviri_data_names if r != 'HRV']
@@ -244,26 +244,33 @@ class DataConverter:
         self.nc_filename_vis = os.path.join(self.TEMP_DIR, f'{self.mission}_{self.date_tag}_vis.nc')
 
         if self.check_file_exists(self.nc_filename_hrv) or self.check_file_exists(self.nc_filename_vis):
-            print("="*100, "File already exists", "="*100)
+            print("=" * 100, "File already exists", "=" * 100)
         else:
             self.scn.save_datasets(writer='cf', datasets=hrv_datasets, filename=self.nc_filename_hrv)
             self.scn.save_datasets(writer='cf', datasets=vis_datasets, filename=self.nc_filename_vis)
 
-            self.upload_to_mongodb(self.nc_filename_hrv, ftype="netcdf")
-            self.update_payload(file_name=f'{self.mission}_{self.date_tag}_hrv.nc',
-                                file_path=self.nc_filename_hrv,
-                                file_type='netcdf',
-                                file_size=os.path.getsize(self.nc_filename_hrv),
-                                file_status='converted')
-
             self.insert_file()
 
-            self.upload_to_mongodb(self.nc_filename_vis, ftype="netcdf")
+            if upload:
+                self.upload_to_mongodb(self.nc_filename_vis, ftype="netcdf")
+                self.upload_to_mongodb(self.nc_filename_hrv, ftype="netcdf")
+                os.remove(self.nc_filename_vis)
+                os.remove(self.nc_filename_hrv)
+                file_status = 'converted but not uploaded'
+            else:
+                print("ney upload" * 100)
+                file_status = 'converted and uploaded to mongodb'
             self.update_payload(file_name=f'{self.mission}_{self.date_tag}_vis.nc',
                                 file_path=self.nc_filename_vis,
                                 file_type='netcdf',
                                 file_size=os.path.getsize(self.nc_filename_vis),
-                                file_status='converted')
+                                file_status=file_status)
+
+            self.update_payload(file_name=f'{self.mission}_{self.date_tag}_hrv.nc',
+                                file_path=self.nc_filename_hrv,
+                                file_type='netcdf',
+                                file_size=os.path.getsize(self.nc_filename_hrv),
+                                file_status=file_status)
 
             return self.insert_file()
 
@@ -287,11 +294,10 @@ class DataConverter:
 
             self._create_overiew()
             return True
+
     @custom_printer
     def _convert_png_aoi(self):
-        print("="*25, "Converting to AOI:png ", "="*25)
-        print("="*25, "Converting to AOI:png ", "="*25)
-
+        print("=" * 25, "Converting to AOI:png ", "=" * 25)
 
         if self.check_file_exists(self.nc_filename_hrv) or self.check_file_exists(self.nc_filename_vis):
             print("=" * 100, "File already exists", "=" * 100)
@@ -318,7 +324,7 @@ class DataConverter:
         pass
 
     @custom_printer
-    def _convert_tiff(self):
+    def _convert_tiff(self, upload=True):
         """Converts data to geotiff"""
 
         rds_vis = rioxarray.open_rasterio(self.nc_filename_vis)
@@ -334,20 +340,28 @@ class DataConverter:
                     rds_hrv[ch].rio.to_raster(f_path)
                 else:
                     rds_vis[ch].rio.to_raster(f_path)
+
+                if upload:
+                    file_status = 'converted but not uploaded'
+                    self.upload_to_mongodb(f_path, ftype="geotiff")
+                    os.remove(f_path)
+                else:
+                    file_status = 'converted and uploaded to mongodb'
+
                 self.update_payload(file_name=f_name, file_path=f_path, file_type='geotiff',
                                     file_size=os.path.getsize(f_path),
-                                    file_status='converted')
-                self.upload_to_mongodb(f_path, ftype="geotiff")
+                                    file_status=file_status)
                 self.insert_file()
         del rds_hrv, rds_vis
         return True
 
     @custom_printer
     def _convert_tiff_aoi(self):
-        print("="*25, "Converting to AOI: tiff", "="*25)
+        print("=" * 25, "Converting to AOI: tiff", "=" * 25)
         """Converts data to geotiff"""
         aoi = create_area_def('aoi', {'proj': 'longlat', 'datum': 'WGS84'},
-                              area_extent=[22, 30, 45, 45],
+                              # area_extent=[22, 30, 45, 45],
+                              area_extent=[20, 30, 52, 52],
                               resolution=0.01,
                               units='degrees',
                               description='Global 0.01x0.01 degree lat-lon grid')
@@ -367,6 +381,5 @@ class DataConverter:
                                     file_status='converted')
                 self.upload_to_mongodb(f_path, ftype="geotiff")
                 self.insert_file()
-
 
         return True
