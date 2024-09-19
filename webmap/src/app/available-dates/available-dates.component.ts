@@ -3,9 +3,11 @@ import { CommonModule } from '@angular/common';
 import { LayerData } from '../services/tmet-backend.service';
 import { SharedService } from '../services/shared.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faStepBackward, faStepForward, faFastBackward, faFastForward, faDownload } from '@fortawesome/free-solid-svg-icons';
+import { faStepBackward, faStepForward, faFastBackward, faFastForward, faDownload, faSpinner, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { aoiChannels } from '../map/map-constants';
 import { FormsModule } from '@angular/forms';
+import { AnimationSelectionModes } from './available-dates-constants';
+import { AppConfigService } from '../services/app-config.service';
 
 @Component({
   selector: 'app-available-dates',
@@ -15,17 +17,29 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
 })
 export class AvailableDatesComponent implements AfterContentInit, AfterViewInit {
+  API_URL: string = '';
+
   dates: string[] = [];
   allData : LayerData[] = [];
 
   isAnimationPlaying: boolean = false;
   animationInterval: any;
+  runningAnimationDate: string | null = null;
+
+  isDownloading: boolean = false;
 
   isUserSelectedButton: boolean = false;
   availableAoiChannels : string[] = [];
   selectedAoiChannel: string | null = null;
 
+  selectedChannel: string | null = null;
+
+  selectedMission: string | null = null;
+
   selectedDate: string | null = null;
+  selectedDates: string[] = [];
+  lastSelectedDateIndex: number | null = null;
+
   isForwardSelectionEnabled: boolean = true;
   isBackwardSelectionEnabled: boolean = true;
 
@@ -35,6 +49,7 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
   faFastBackward = faFastBackward;
   faFastForward = faFastForward;
   faDownload = faDownload;
+  faSpinner = faSpinner;
 
 
   // Availability flags for the buttons
@@ -42,9 +57,20 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
   isCloudAvailable: boolean = false;
   isSingleChannelAvailable: boolean = false;
 
+  // Animation selection modes enum conversion for template
+  animationSelectionModesCustom = AnimationSelectionModes.CUSTOM;
+  animationSelectionModesLast12 = AnimationSelectionModes.LAST12;
+  animationSelectionModesLast30 = AnimationSelectionModes.LAST30;
+
+  // default selection for animation mode (most used)
+  selectedAnimationMode: AnimationSelectionModes | null = null;
+
+  // default selection for animation dates
+  selectedAnimationDates: string[] = this.dates.sort().reverse().slice(0, 12);
+
   selectedButton: string | null = null;
 
-  constructor(private sharedService: SharedService, private cdr: ChangeDetectorRef) {}
+  constructor(private sharedService: SharedService, private cdr: ChangeDetectorRef, private appConfigService: AppConfigService) {}
   ngAfterViewInit(): void {
     this.sharedService.allData$.subscribe((allData) => {
       if(allData) {
@@ -60,6 +86,20 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
         this.cdr.detectChanges();
       }
     });
+
+    this.sharedService.selectedMission$.subscribe((mission) => {
+      this.selectedMission = mission;
+
+      this.cdr.detectChanges();
+    });
+
+    this.sharedService.selectedChannel$.subscribe((channel) => {
+      this.selectedChannel = channel;
+
+      this.cdr.detectChanges();
+    });
+
+    this.API_URL = this.appConfigService.get('API_URL');
   }
 
   ngAfterContentInit(): void {
@@ -68,6 +108,48 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
 
       this.cdr.detectChanges();
     }
+  }
+
+  onDatesClick(date: string, event: MouseEvent): void {
+    const clickedIndex = this.dates.indexOf(date);
+
+    // Handle Ctrl (Cmd) click for multiple selections
+    if (event.ctrlKey || event.metaKey) {
+      this.toggleDateSelection(date);
+    }
+
+    // Handle Shift click for range selection
+    else if (event.shiftKey && this.lastSelectedDateIndex !== null) {
+      this.selectRange(this.lastSelectedDateIndex, clickedIndex);
+    }
+
+    // Default behavior (single selection)
+    else {
+      this.selectedDates = [date];
+    }
+
+    // Update last selected date index
+    this.lastSelectedDateIndex = clickedIndex;
+    this.onSelectDate(this.dates[clickedIndex]);
+  }
+
+  toggleDateSelection(date: string) {
+    const index = this.selectedDates.indexOf(date);
+    if (index > -1) {
+      // Deselect if already selected
+      this.selectedDates.splice(index, 1);
+    } else {
+      // Select if not already selected
+      this.selectedDates.push(date);
+    }
+  }
+
+  selectRange(startIndex: number, endIndex: number) {
+    const [start, end] = startIndex < endIndex ? [startIndex, endIndex] : [endIndex, startIndex];
+    const range = this.dates.slice(start, end + 1);
+
+    // Add all dates in the range to the selected list, avoiding duplicates
+    this.selectedDates = [...new Set([...this.selectedDates, ...range])];
   }
 
   // Method to handle date selection
@@ -79,6 +161,10 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
     this.availabilityCheck(this.selectedDate);
     this.sharedService.setSelectedDate(date);
 
+    if(this.selectedDates.length === 0) {
+      this.selectedDates = [date];
+    }
+
     if(this.dates[this.dates.length - 1] === this.selectedDate) {
       this.isForwardSelectionEnabled = false;
     }
@@ -87,6 +173,8 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
       this.isBackwardSelectionEnabled = false;
     }
   }
+
+  isSelected = (date: string): boolean => this.selectedDates.includes(date);
 
   private availabilityCheck(selectedDate: string): void {
     this.setButtonsDisabled();
@@ -166,28 +254,6 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
     this.isUserSelectedButton = true;
     }
 
-    onAnimationClick() {
-      if(!this.isAnimationPlaying) {
-        let selectedDateIndex = this.dates.indexOf(this.selectedDate!);
-
-        // start moving forward in every 5 seconds and create a loop
-        this.animationInterval = setInterval(() => {
-          if(selectedDateIndex < this.dates.length - 1) {
-            this.onSelectDate(this.dates[selectedDateIndex + 1]);
-            selectedDateIndex++;
-          } else {
-            this.onSelectDate(this.dates[0]);
-            selectedDateIndex = 0;
-          }
-        }, 5000);
-      } else {
-        clearInterval(this.animationInterval);
-      }
-
-
-      this.isAnimationPlaying = !this.isAnimationPlaying;
-    }
-
   // Method to move to the first date
   goToBeginning(): void {
     if (this.dates.length > 0) {
@@ -226,24 +292,158 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
     }
   }
 
-  onDownloadClick() {
+  onAnimationClick() {
+    if(!this.isAnimationPlaying) {
+      if(this.selectedAnimationMode === AnimationSelectionModes.CUSTOM) {
+        this.selectedAnimationDates = this.selectedDates;
+      }
 
-    const url = 'https://cdn.pixabay.com/photo/2017/07/31/04/28/cows-2556445_640.jpg';
+      if(this.selectedAnimationMode == null){
+        this.selectedAnimationDates = this.dates;
+      }
 
-    fetch(url)
-      .then((response) => response.blob())
-      .then((blob) => {
-        const objectURL = window.URL.createObjectURL(blob);
-        const anchor = document.createElement('a');
-        anchor.href = objectURL;
-        anchor.download = 'filename.png';
-        document.body.appendChild(anchor);
-        anchor.click();
-        document.body.removeChild(anchor);
-        window.URL.revokeObjectURL(objectURL);
-      })
-      .catch((error) => {
-        console.error('Download failed:', error);
-      });
+      let selectedDateIndex = this.selectedAnimationDates.indexOf(this.selectedDate!);
+
+      // start moving forward in every 5 seconds and create a loop
+      this.animationInterval = setInterval(() => {
+        if(selectedDateIndex < this.selectedAnimationDates.length - 1) {
+          this.runningAnimationDate = this.selectedAnimationDates[selectedDateIndex + 1];
+          this.onSelectDate(this.runningAnimationDate);
+          selectedDateIndex++;
+        } else {
+          this.runningAnimationDate = this.selectedAnimationDates[0];
+          this.onSelectDate(this.runningAnimationDate);
+          selectedDateIndex = 0;
+        }
+      }, 5000);
+    } else {
+      clearInterval(this.animationInterval);
+      this.selectedAnimationDates = [];
+      this.runningAnimationDate = null;
+    }
+
+
+    this.isAnimationPlaying = !this.isAnimationPlaying;
   }
-}
+
+  onAnimationSelectionClick(){
+    this.selectedAnimationMode = AnimationSelectionModes.CUSTOM;
+  }
+
+  // animation
+  onAnimationLast12Click(){
+    if(this.selectedAnimationMode === AnimationSelectionModes.LAST12) {
+      this.animationClearSelectedDates();
+      return;
+    }
+    this.selectedAnimationMode = AnimationSelectionModes.LAST12;
+    this.selectedAnimationDates = this.dates.sort().reverse().slice(0, 12);
+    this.selectedDates = this.selectedAnimationDates;
+  }
+
+  // animation
+  onAnimationLast30Click(){
+    if(this.selectedAnimationMode === AnimationSelectionModes.LAST30) {
+      this.animationClearSelectedDates();
+      return;
+    }
+    this.selectedAnimationMode = AnimationSelectionModes.LAST30;
+    this.selectedAnimationDates = this.dates.sort().reverse().slice(0, 30);
+    this.selectedDates = this.selectedAnimationDates;
+  }
+
+  private animationClearSelectedDates() {
+    this.selectedAnimationMode = null;
+    this.selectedAnimationDates = [];
+    this.selectedDates = [this.selectedDate!];
+  }
+
+  async onDownloadClick() {
+    this.isDownloading = true;
+
+    try{
+      if(this.selectedDates.length > 1) {
+        await this.downloadMultipleFiles();
+        return;
+      }
+      await this.downloadSingleFile();
+    } finally{
+      this.isDownloading = false;
+    }
+
+  }
+
+  private async downloadSingleFile() : Promise<void> {
+    try{
+      const foundLayer = this.allData.filter((data) => data.time === this.selectedDate && data.channel === this.selectedButton && data.mission === this.selectedMission)[0];
+      const url = new URL(this.API_URL + foundLayer.downloadid);
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const objectURL = window.URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = objectURL;
+      anchor.download = foundLayer.filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(objectURL);
+    } catch (error) {
+      console.error('Error during file download:', error);
+    }
+  }
+
+  private async downloadMultipleFiles(): Promise<void> {
+    const myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'application/json');
+
+    const selectedLayers = this.allData.filter(
+      (data) =>
+        this.selectedDates.includes(data.time) &&
+        data.mission === this.selectedMission &&
+        data.channel === this.selectedButton
+    );
+
+    const links = selectedLayers.map((layer) => {
+      return {
+        link: layer.downloadid,
+        fileName: layer.filename,
+      };
+    });
+
+    const raw = JSON.stringify({ links });
+
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow' as RequestRedirect,
+    };
+
+    const dateName = `${this.selectedDates[0]
+      .replaceAll('-', '')
+      .replace('.000Z', '')}-${this.selectedDates[
+      this.selectedDates.length - 1
+    ]
+      .replaceAll('-', '')
+      .replace('.000Z', '')}`;
+
+    try {
+      const response = await fetch(this.API_URL + '/api/create-zip/', requestOptions);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const blob = await response.blob();
+
+      const link = document.createElement('a');
+      const url = window.URL.createObjectURL(blob);
+      link.href = url;
+      link.download = `${this.selectedMission}_${dateName}_${this.selectedButton}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error during file download:', error);
+    }
+    }
+  }

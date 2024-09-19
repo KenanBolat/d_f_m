@@ -22,7 +22,7 @@ export class SharedService {
     this.allData.next(data);
   }
 
-  setSelectedMission(data: string){
+  setSelectedMission(data: string | null){
     this.selectedMission.next(data);
   }
 

@@ -6,7 +6,10 @@
 
   <!-- Center: Middle Buttons -->
   <div class="middle-buttons">
-    <button *ngFor="let mission of availableMissions" mat-button (click)="onMissionButtonClick(mission)" [ngClass]="{'selected': (selectedMission === mission)}">{{mission}}</button>
+    <button mat-button [disabled]="!isMsgAvailable" [ngClass]="{'selected': (selectedMission === MSG)}" (click)="onMissionButtonClick(MSG)">{{MSG}}</button>
+    <button mat-button [disabled]="!isIodcAvailable" [ngClass]="{'selected': (selectedMission === IODC)}" (click)="onMissionButtonClick(IODC)">{{IODC}}</button>
+    <button mat-button [disabled]="!isRssAvailable" [ngClass]="{'selected': (selectedMission === RSS)}" (click)="onMissionButtonClick(RSS)">{{RSS}}</button>
+    <button mat-button [disabled]="!isMtgAvailable" [ngClass]="{'selected': (selectedMission === MTG)}" (click)="onMissionButtonClick(MTG)">{{MTG}}</button>
   </div>
 
   <!-- Right Side: User Info and Logout -->

@@ -47,6 +47,14 @@
   color: white;
 }
 
+/* Disable text selection */
+.date-list li {
+  -webkit-user-select: none; /* Chrome, Safari, Opera */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE 10+ */
+  user-select: none;         /* Standard syntax */
+}
+
 .button-group {
   display: flex;
   flex-direction: column; /* Stack buttons vertically */
@@ -87,6 +95,22 @@
   display: flex;
   justify-content: center;
   margin-top: 20px;
+}
+
+.favorite-animation-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.favorite-animation-buttons button {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  margin-bottom: 5px !important;
+}
+
+/* disabled buttom cursor should be error*/
+.favorite-animation-buttons button:disabled {
+  cursor: not-allowed;
 }
 
 .navigation-buttons button {
