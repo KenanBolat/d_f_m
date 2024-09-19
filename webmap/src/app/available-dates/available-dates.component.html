@@ -3,8 +3,11 @@
 
   <!-- List of dates -->
   <ul class="date-list">
-    <li *ngFor="let date of dates" (click)="onSelectDate(date)" [class.selected]="date === selectedDate">
+    <li *ngFor="let date of dates" (click)="onDatesClick(date, $event)" [class.selected]="isSelected(date)">
       {{ date }}
+      <span *ngIf="runningAnimationDate === date">
+        <fa-icon [icon]="faSpinner" [animation]="'spin'"></fa-icon>
+      </span>
     </li>
   </ul>
 
@@ -16,8 +19,14 @@
     </button>
   </div>
 
-  <div class="button-group" style="margin-bottom: 10px; margin-top: 10px;">
+  <div class="button-group" style="margin-bottom: 10px; margin-top: 10px; border: 1px solid grey; padding: 10px;">
     <button mat-button (click)="onAnimationClick()" [ngClass]="{'playing': isAnimationPlaying}">Animation <span *ngIf="isAnimationPlaying">(Playing..)</span></button>
+
+    <div class="favorite-animation-buttons">
+      <button [ngClass]="{'selected': selectedAnimationMode === animationSelectionModesLast12}" (click)="onAnimationLast12Click()">Last 12</button>
+      <button [ngClass]="{'selected': selectedAnimationMode === animationSelectionModesLast30}" (click)="onAnimationLast30Click()">Last 30</button>
+    </div>
+
   </div>
 
   <!-- Buttons at the bottom, stacked vertically -->
@@ -36,5 +45,10 @@
   </div>
 
   <div class="button-group" style="margin-top: 10px;">
-    <button disabled mat-button><fa-icon [icon]="faDownload"></fa-icon> Download</button>
+    <button [disabled]="isDownloading" mat-button (click)="onDownloadClick()">
+      <fa-icon *ngIf="!isDownloading" [icon]="faDownload"></fa-icon>
+      <fa-icon *ngIf="isDownloading" [icon]="faSpinner" [animation]="'spin'"></fa-icon>
+      <span *ngIf="isDownloading"> Downloading...</span>
+      <span *ngIf="!isDownloading"> Download</span>
+    </button>
 </div>
