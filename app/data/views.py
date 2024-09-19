@@ -1,6 +1,16 @@
 """
 Views for the data APIs.
 """
+from io import BytesIO
+
+import os
+import zipfile
+import shutil
+import httpx
+import requests
+
+from urllib.parse import urljoin
+
 import os.path
 from django.db import connection
 
@@ -11,6 +21,8 @@ from django.http import (HttpResponse, JsonResponse)
 from datetime import datetime
 from rest_framework.exceptions import NotFound
 from rest_framework.decorators import api_view
+from rest_framework.test import APIRequestFactory
+
 
 from django.db.models import Func, Value
 
@@ -252,6 +264,7 @@ class FileViewSet(viewsets.ModelViewSet):
             file = self.get_object()
             mongo_id = file.mongo_id
             file_type = file.file_type
+            print("tirlasldalsd*"*100)
 
             if not mongo_id:
                 return Response({"message": "No MongoDB ID provided for file."}, status=status.HTTP_400_BAD_REQUEST)
@@ -385,14 +398,14 @@ left join core_file cf on foo.loc =  cf.file_name;
     # Prepare the data for serialization
     combined_data = []
     for row in results:
-        print('row*100', row)
+
         combined_data.append({
             'id': row[0],  # ID field
             'layername': row[5] if len(row) > 5 else None,
             'channel': row[4] if len(row) > 4 else None,
             'mission': row[3] if len(row) > 3 else None,
             'time': f'{row[2].strftime("%Y-%m-%dT%H:%M:%S.000Z")}' if len(row) > 2 else None,
-            'downloadid': f'/file/{row[6]}/download/' if len(row) > 6 else None,
+            'downloadid': f'/api/file/{row[6]}/download/' if len(row) > 6 else None,
             'filename': row[7] if len(row) > 7 else None,
             'created_at': f'{row[8].strftime("%Y-%m-%dT%H:%M:%S.000Z")}' if len(row) > 8 else None,
             'file_size': row[9] if len(row) > 9 else None,
@@ -401,3 +414,54 @@ left join core_file cf on foo.loc =  cf.file_name;
     # Serialize the combined data
     serializer = GeoserverDataSourceSerializer(combined_data, many=True)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+def create_zip(request):
+    files = request.data.get('links', [])
+    print(files)
+    # Extract the file links and names from the request
+    files = request.data.get('links', [])
+    if not files:
+        return JsonResponse({'error': 'No links provided'}, status=400)
+
+        # Create a temporary directory to download files
+
+    factory = APIRequestFactory()
+
+    # Create an async client for HTTP requests
+    # zip_file_path = os.path.join(settings.MEDIA_ROOT, 'zipped_files.zip')
+    zip_file_path = BytesIO()
+    with zipfile.ZipFile(zip_file_path, 'w') as zipf:
+        for file_info in files:
+            link = file_info.get('link')
+            file_name = file_info.get('fileName')
+            # /api/file/1707/download/
+            request = factory.get(link)
+            pk = link.split('/')[3]
+
+            view = FileViewSet.as_view({'get': 'download'})
+            file_response = view(request, pk=pk)
+
+            if file_response.status_code == 200:
+
+                # Make sure the buffer is set at the beginning of the stream
+                temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_downloads')
+                os.makedirs(temp_dir, exist_ok=True)
+                temp_file_path = os.path.join(temp_dir, file_name)
+
+
+                with open(temp_file_path, 'wb') as f:
+                    f.write(file_response.content)
+                zipf.write(temp_file_path, arcname=file_name)
+                # zipf.writestr(file_name, file_response.content)
+                print('zipf'*100, temp_file_path)
+                print('ok'*100)
+                # Make sure the buffer is set at the beginning of the stream
+    zip_file_path.seek(0)
+
+    # Create an HTTP response with the zip file
+    response = HttpResponse(zip_file_path, content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=zipped_files.zip'
+
+    return response

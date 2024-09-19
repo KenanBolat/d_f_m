@@ -16,3 +16,5 @@ Uvicorn>=0.20.0, <0.21
 websocket-client>=1.4.0, <1.5
 daphne>=3.0.0, <3.1
 python-dateutil>=2.8.2, <2.9
+requests>=2.26.0, <2.27
+httpx>=0.21.0, <0.22

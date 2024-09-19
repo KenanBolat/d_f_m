@@ -96,8 +96,6 @@ services:
     build:
       context: ./data_retrieval/ftp_checker/
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
     restart: always
     depends_on:
       - rabbitmq
@@ -131,8 +129,6 @@ services:
     build:
       context: ./data_retrieval/file_downloader/
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
     restart: always
     depends_on:
       - rabbitmq
@@ -352,18 +348,6 @@ services:
       - ./j_data/geoserver_data/data/:/watch/data
     depends_on:
       - mongodb
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf  # Nginx config
-      - ./ssl:/etc/nginx/ssl  # SSL certificates
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - geoserver
-      - app  # Ensure app is listed here
 
 
 
