@@ -12,7 +12,7 @@ dev-mongo-data/
 *.pyc 
 __pycache__
 
-
+**/data_retrieval/file_downloader/temp/
 **/migrations/**
 !**/migrations
 !**/migrations/__init__.py
