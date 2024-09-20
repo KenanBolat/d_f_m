@@ -108,11 +108,22 @@ class DataConverter:
         self.reader()
         self.read_data()
         if self.check_bands():
-            self._convert_netcdf(upload=False)
+            self._convert_netcdf(upload_flag=False)
             self._convert_png()
-            self._convert_tiff(upload=False)
+            self._convert_tiff(upload_flag=False)
             self._convert_tiff_aoi()
             self._convert_png_aoi()
+
+    def remove_files(self):
+        """Removes all files from the temp directory"""
+
+        files = glob.glob(f'{self.TEMP_DIR}/*')
+        for file_ in files:
+            print('removing file:', file_)
+            os.remove(file_)
+            print('file removed:', file_)
+        print('All files removed')
+
 
     @staticmethod
     def calculate_hash(content):
@@ -120,9 +131,6 @@ class DataConverter:
         md5.update(content)
         return md5.hexdigest()
 
-    def remove_files(self):
-        """Removes all files from the temp directory"""
-        pass
 
     @custom_printer
     def upload_to_mongodb(self, f, ftype="netcdf"):
@@ -235,7 +243,7 @@ class DataConverter:
             return False
 
     @custom_printer
-    def _convert_netcdf(self, upload=True):
+    def _convert_netcdf(self, upload_flag=True):
         """Converts netcdf data to netcdf"""
         hrv_datasets = ['HRV']
         vis_datasets = [r for r in self.seviri_data_names if r != 'HRV']
@@ -249,22 +257,22 @@ class DataConverter:
             self.scn.save_datasets(writer='cf', datasets=hrv_datasets, filename=self.nc_filename_hrv)
             self.scn.save_datasets(writer='cf', datasets=vis_datasets, filename=self.nc_filename_vis)
 
-            self.insert_file()
+            file_status = 'To be Converted'
 
-            if upload:
+            if upload_flag == True:
                 self.upload_to_mongodb(self.nc_filename_vis, ftype="netcdf")
                 self.upload_to_mongodb(self.nc_filename_hrv, ftype="netcdf")
-                os.remove(self.nc_filename_vis)
-                os.remove(self.nc_filename_hrv)
-                file_status = 'converted but not uploaded'
-            else:
-                print("ney upload" * 100)
                 file_status = 'converted and uploaded to mongodb'
+            else:
+                file_status = 'converted but not uploaded'
+
             self.update_payload(file_name=f'{self.mission}_{self.date_tag}_vis.nc',
                                 file_path=self.nc_filename_vis,
                                 file_type='netcdf',
                                 file_size=os.path.getsize(self.nc_filename_vis),
                                 file_status=file_status)
+            self.insert_file()
+
 
             self.update_payload(file_name=f'{self.mission}_{self.date_tag}_hrv.nc',
                                 file_path=self.nc_filename_hrv,
@@ -324,7 +332,7 @@ class DataConverter:
         pass
 
     @custom_printer
-    def _convert_tiff(self, upload=True):
+    def _convert_tiff(self, upload_flag=True):
         """Converts data to geotiff"""
 
         rds_vis = rioxarray.open_rasterio(self.nc_filename_vis)
@@ -341,10 +349,10 @@ class DataConverter:
                 else:
                     rds_vis[ch].rio.to_raster(f_path)
 
-                if upload:
+                if upload_flag:
                     file_status = 'converted but not uploaded'
                     self.upload_to_mongodb(f_path, ftype="geotiff")
-                    os.remove(f_path)
+
                 else:
                     file_status = 'converted and uploaded to mongodb'
 

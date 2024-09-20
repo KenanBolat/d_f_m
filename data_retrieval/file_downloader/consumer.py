@@ -38,6 +38,8 @@ class FileConverterConsumer:
                 id = response.json()[0]['id']
                 dcv = DataConverter(date_tag, satellite_mission, id, file_list=files)
                 dcv.convert()
+                dcv.remove_files()
+
             else:
                 print(f"Failed to retrieve data: {response.status_code} {response.json()}")
 
