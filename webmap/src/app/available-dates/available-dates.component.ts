@@ -309,16 +309,16 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
   }
 
   onAnimationClick() {
+    ;
     if(!this.isAnimationPlaying) {
-      if(this.selectedAnimationMode === AnimationSelectionModes.CUSTOM) {
+      if(this.selectedAnimationMode == null && this.selectedDates.length <= 1) {
+        this.selectedAnimationDates = this.dates;
+      } else if(this.selectedAnimationMode == null && this.selectedDates.length > 1) {
         this.selectedAnimationDates = this.selectedDates;
       }
 
-      if(this.selectedAnimationMode == null){
-        this.selectedAnimationDates = this.dates;
-      }
-
       let selectedDateIndex = this.selectedAnimationDates.indexOf(this.selectedDate!);
+      this.runningAnimationDate = this.selectedAnimationDates[selectedDateIndex];
 
       // start moving forward in every 5 seconds and create a loop
       this.animationInterval = setInterval(() => {
@@ -340,10 +340,6 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
 
 
     this.isAnimationPlaying = !this.isAnimationPlaying;
-  }
-
-  onAnimationSelectionClick(){
-    this.selectedAnimationMode = AnimationSelectionModes.CUSTOM;
   }
 
   // animation
