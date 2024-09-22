@@ -111,6 +111,7 @@ export class MapComponent implements AfterViewInit {
       this.distinctMissions = this.getDistinctMissions(data);
 
       this.sharedService.setAllData(data);
+      this.sharedService.setDistinctMissions(this.distinctMissions);
     });
 
     console.log(`Layer (${this.layers.length})data: ${this.layers}`);

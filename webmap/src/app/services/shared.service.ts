@@ -6,13 +6,13 @@ import { LayerData } from './tmet-backend.service';
   providedIn: 'root',
 })
 export class SharedService {
-  private availableMissions = new BehaviorSubject<string[] | null>(null);
+  private distinctMissions = new BehaviorSubject<string[] | null>(null);
   private selectedDate = new BehaviorSubject<string | null>(null);
   private selectedChannel = new BehaviorSubject<string | null>(null);
   private selectedMission = new BehaviorSubject<string | null>(null);
   private allData = new BehaviorSubject<LayerData[] | null>(null);
 
-  availableMissions$ = this.availableMissions.asObservable();
+  distinctMissions$ = this.distinctMissions.asObservable();
   selectedDate$ = this.selectedDate.asObservable();
   selectedChannel$ = this.selectedChannel.asObservable();
   selectedMission$ = this.selectedMission.asObservable();
@@ -26,8 +26,8 @@ export class SharedService {
     this.selectedMission.next(data);
   }
 
-  setSelectedMissions(data: string[]){
-    this.availableMissions.next(data);
+  setDistinctMissions(data: string[]){
+    this.distinctMissions.next(data);
   }
 
   setSelectedDate(data: string){
