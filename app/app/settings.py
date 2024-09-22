@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -187,3 +188,12 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880
 CORS_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://localhost:8000']
 
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f'redis://{os.environ.get("REDIS_HOST", "127.0.0.1")}:6379/1',  # Adjust the location as per your Redis setup
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}

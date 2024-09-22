@@ -22,7 +22,7 @@ from datetime import datetime
 from rest_framework.exceptions import NotFound
 from rest_framework.decorators import api_view
 from rest_framework.test import APIRequestFactory
-
+from django.core.cache import cache
 
 from django.db.models import Func, Value
 
@@ -264,7 +264,7 @@ class FileViewSet(viewsets.ModelViewSet):
             file = self.get_object()
             mongo_id = file.mongo_id
             file_type = file.file_type
-            print("tirlasldalsd*"*100)
+            print("tirlasldalsd*" * 100)
 
             if not mongo_id:
                 return Response({"message": "No MongoDB ID provided for file."}, status=status.HTTP_400_BAD_REQUEST)
@@ -380,16 +380,25 @@ class FileViewSet(viewsets.ModelViewSet):
 
 @api_view(['GET'])
 def get_geoserver_data(request):
+    cache_key = 'geoserver_data_cache'
+    cache_timeout = 60 * 1
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        print('Cache hit', )
+        return Response(cached_data)
+
     # Define the raw SQL query (including the union)
-    query = """
-select foo.fid , foo.location, foo.ingestion, foo.mission, foo.channel, foo.coverage, cf.id , cf.file_name, cf.created_at, cf.file_size  from (
-SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc , 'aoi' as coverage FROM aoi
-UNION
-SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc ,'rgb' as coverage FROM rgb
-UNION
-SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc , 'cloud' as coverage FROM cloud  ) as foo 
-left join core_file cf on foo.loc =  cf.file_name; 
-"""
+    query = """select 
+                foo.fid , foo.location, foo.ingestion, foo.mission, 
+                foo.channel, foo.coverage, cf.id , cf.file_name, cf.created_at, cf.file_size  from (
+                SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc , 'aoi' as coverage FROM aoi
+                UNION
+                SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc ,'rgb' as coverage FROM rgb
+                UNION
+                SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc , 'cloud' as coverage FROM cloud  ) 
+                as foo 
+                left join core_file cf on foo.loc =  cf.file_name where cf.file_name is not null;    
+            """
 
     with connection.cursor() as cursor:
         cursor.execute(query)
@@ -398,7 +407,6 @@ left join core_file cf on foo.loc =  cf.file_name;
     # Prepare the data for serialization
     combined_data = []
     for row in results:
-
         combined_data.append({
             'id': row[0],  # ID field
             'layername': row[5] if len(row) > 5 else None,
@@ -413,6 +421,8 @@ left join core_file cf on foo.loc =  cf.file_name;
 
     # Serialize the combined data
     serializer = GeoserverDataSourceSerializer(combined_data, many=True)
+    serializer_data = serializer.data
+    cache.set(cache_key, serializer_data, cache_timeout)
     return Response(serializer.data)
 
 
@@ -444,19 +454,17 @@ def create_zip(request):
             file_response = view(request, pk=pk)
 
             if file_response.status_code == 200:
-
                 # Make sure the buffer is set at the beginning of the stream
                 temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_downloads')
                 os.makedirs(temp_dir, exist_ok=True)
                 temp_file_path = os.path.join(temp_dir, file_name)
 
-
                 with open(temp_file_path, 'wb') as f:
                     f.write(file_response.content)
                 zipf.write(temp_file_path, arcname=file_name)
                 # zipf.writestr(file_name, file_response.content)
-                print('zipf'*100, temp_file_path)
-                print('ok'*100)
+                print('zipf' * 100, temp_file_path)
+                print('ok' * 100)
                 # Make sure the buffer is set at the beginning of the stream
     zip_file_path.seek(0)
 
