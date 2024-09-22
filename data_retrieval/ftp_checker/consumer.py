@@ -48,13 +48,11 @@ def callback(ch, method, properties, body):
 
             }))
 
-            time.sleep(5)
             if response_on_update.status_code == 200 and response_on_update.json()['status'] == 'downloading':
                 response_done = requests.patch(f"http://{os.environ.get('CORE_APP', 'localhost')}:8000/api/data/{response_current.json()[0]['id']}/",
                                                data=json.dumps({
                                                    "status": "done",
                                                }), headers=headers)
-                time.sleep(5)
                 ##
                 if response_done.status_code == 200 and response_done.json()['status'] == 'done':
                     content = {
