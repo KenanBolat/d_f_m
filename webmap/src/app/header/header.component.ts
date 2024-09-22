@@ -16,7 +16,7 @@ import * as headerConstants from './header-constants';
   imports: [MatToolbarModule, MatButtonModule, MatIconModule, CommonModule],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  availableMissions: string[] = [];
+  distinctMissions: string[] = [];
   private authSubscription!: Subscription;
 
   selectedMission: string | null = null;
@@ -43,21 +43,21 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.username = isAuth.username;
     });
 
-    this.sharedService.availableMissions$.subscribe((missions) => {
-      this.availableMissions = missions ?? [];
-      console.log('Available missions:', this.availableMissions);
+    this.sharedService.distinctMissions$.subscribe((missions) => {
+      this.distinctMissions = missions ?? [];
+      console.log('Distinct missions:', this.distinctMissions);
 
-      this.isMsgAvailable = this.availableMissions.includes(this.MSG);
-      this.isIodcAvailable = this.availableMissions.includes(this.IODC);
-      this.isRssAvailable = this.availableMissions.includes(this.RSS);
-      this.isMtgAvailable = this.availableMissions.includes(this.MTG);
+      this.isMsgAvailable = this.distinctMissions.includes(this.MSG);
+      this.isIodcAvailable = this.distinctMissions.includes(this.IODC);
+      this.isRssAvailable = this.distinctMissions.includes(this.RSS);
+      this.isMtgAvailable = this.distinctMissions.includes(this.MTG);
 
-      if(this.selectedMission && !this.availableMissions.includes(this.selectedMission)) {
+      if(this.selectedMission && !this.distinctMissions.includes(this.selectedMission)) {
         this.selectMission(null);
       }
 
       if (this.canSelectMission()) {
-        this.selectMission(this.availableMissions[0]);
+        this.selectMission(this.distinctMissions[0]);
         this.cdr.detectChanges();
       }
     });
@@ -80,7 +80,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   canSelectMission = () : boolean =>
-    this.availableMissions && this.availableMissions.length > 0 && !this.selectedMission;
+    this.distinctMissions && this.distinctMissions.length > 0 && !this.selectedMission;
 
   ngOnDestroy(): void {
     if (this.authSubscription) {

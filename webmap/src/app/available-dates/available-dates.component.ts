@@ -20,6 +20,7 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
   API_URL: string = '';
 
   dates: string[] = [];
+  availableDates: string[] = [];
   allData : LayerData[] = [];
 
   isAnimationPlaying: boolean = false;
@@ -75,20 +76,28 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
     this.sharedService.allData$.subscribe((allData) => {
       if(allData) {
         this.allData = allData;
-
-        var sortedTime = Array.from(new Set(allData.map(data => data.time))).sort().reverse();
-        this.dates = sortedTime;
-
-        if(!this.selectedDate) {
-          this.onSelectDate(this.dates[0]);
-        }
-
         this.cdr.detectChanges();
       }
     });
 
+    // on mission change
     this.sharedService.selectedMission$.subscribe((mission) => {
       this.selectedMission = mission;
+
+      this.dates = Array.from(
+        new Set(
+          this.allData.filter(
+            (data) => data.mission === mission
+          )
+              .map((data) => data.time)
+        )
+      )
+      .sort()
+      .reverse();
+
+      if(!this.selectedDate || (this.selectedDate && !this.dates.includes(this.selectedDate))) {
+        this.onSelectDate(this.dates[0]);
+      }
 
       this.cdr.detectChanges();
     });
@@ -174,7 +183,7 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
     }
   }
 
-  isSelected = (date: string): boolean => this.selectedDates.includes(date);
+  isSelected = (date: string): boolean => this.selectedDates.includes(date) || this.selectedDate === date;
 
   private availabilityCheck(selectedDate: string): void {
     this.setButtonsDisabled();
@@ -209,10 +218,6 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
       this.selectedAoiChannel = null;
       this.sharedService.setSelectedChannel(this.selectedButton!);
     }
-
-    const filteredMissions = new Set(filtered.map((data) => data.mission));
-    this.sharedService.setSelectedMissions(Array.from(filteredMissions));
-
 }
 
   private autoSelectChannel(filteredChannels: Set<string>): boolean {
