@@ -73,9 +73,10 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
 
   constructor(private sharedService: SharedService, private cdr: ChangeDetectorRef, private appConfigService: AppConfigService) {}
   ngAfterViewInit(): void {
-    this.sharedService.allData$.subscribe((allData) => {
-      if(allData) {
-        this.allData = allData;
+    this.sharedService.allData$.subscribe((freshData) => {
+      if(freshData) {
+        this.allData = freshData;
+        this.onDataUpdateReceived();
         this.cdr.detectChanges();
       }
     });
@@ -84,16 +85,7 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
     this.sharedService.selectedMission$.subscribe((mission) => {
       this.selectedMission = mission;
 
-      this.dates = Array.from(
-        new Set(
-          this.allData.filter(
-            (data) => data.mission === mission
-          )
-              .map((data) => data.time)
-        )
-      )
-      .sort()
-      .reverse();
+      this.dates = this.oderDatesFromAllData(this.allData, this.selectedMission!);
 
       if(!this.selectedDate || (this.selectedDate && !this.dates.includes(this.selectedDate))) {
         this.onSelectDate(this.dates[0]);
@@ -116,6 +108,25 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
       this.onSelectDate(this.dates[0]);
 
       this.cdr.detectChanges();
+    }
+  }
+
+  private oderDatesFromAllData = (layerData : LayerData[], mission: string): string[] => Array.from(
+      new Set(
+        layerData.filter(
+          (data) => data.mission === mission
+        )
+            .map((data) => data.time)
+      )
+    )
+    .sort()
+    .reverse();
+
+  private onDataUpdateReceived() {
+    const orderedFreshDates = this.oderDatesFromAllData(this.allData, this.selectedMission!);
+
+    if(this.dates !== orderedFreshDates) {
+      this.dates = orderedFreshDates;
     }
   }
 
