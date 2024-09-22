@@ -17,10 +17,6 @@ from pyresample import create_area_def
 
 from bson.objectid import ObjectId
 from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
-
-# os.environ['XRIT_DECOMPRESS_PATH'] = '/opt/conda/pkgs/public-decomp-wt-2.8.1-h3fd9d12_1/bin/xRITDecompress'
-
-
 os.environ['XRIT_DECOMPRESS_PATH'] = '/usr/local/bin/xRITDecompress'
 
 
@@ -185,6 +181,7 @@ class DataConverter:
     def read_data(self):
 
         files_updated = [os.path.join(self.prefix, f[1:]) for f in self.filenames]
+
 
         self.scn = satpy.Scene(reader=self._reader, filenames=files_updated)
         print(self.seviri_data_names)
@@ -369,7 +366,7 @@ class DataConverter:
         """Converts data to geotiff"""
         aoi = create_area_def('aoi', {'proj': 'longlat', 'datum': 'WGS84'},
                               # area_extent=[22, 30, 45, 45],
-                              area_extent=[20, 30, 52, 52],
+                              area_extent=[16, 30, 52, 52],
                               resolution=0.01,
                               units='degrees',
                               description='Global 0.01x0.01 degree lat-lon grid')

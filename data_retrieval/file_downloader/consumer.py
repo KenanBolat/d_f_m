@@ -17,6 +17,7 @@ class FileConverterConsumer:
         self._rabbit = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', queue_name)
 
     def connect(self):
+        print("Connecting to RabbitMQ...")
         self._channel = self._rabbit.connect()
 
     def on_message(self, channel, method_frame, header_frame, body):
@@ -48,6 +49,7 @@ class FileConverterConsumer:
         except Exception as e:
             print(f"Failed to process message: {e}")
             # Requeue the message for future processing
+            # TODO: Add a retry limit
             channel.basic_nack(delivery_tag=method_frame.delivery_tag)
 
     def start_consuming(self):
@@ -66,7 +68,9 @@ class FileConverterConsumer:
 
     def run(self):
         self.connect()
+        print("Consumer connected...")
         self.start_consuming()
+        print("Consumer started...")
 
 
 # Usage
