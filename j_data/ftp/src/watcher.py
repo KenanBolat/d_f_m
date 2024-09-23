@@ -57,7 +57,9 @@ class FileHandler(FileSystemEventHandler):
         self.watch_dir = watch_dir
         self.temp_dir = temp_dir
         self.final_dir = final_dir
-        self.threshold_value = {'MSG': 114, 'IODC': 114, 'RSS': 114, 'Unknown': 14}
+        self.threshold_value = {'MSG': 114,
+                                'IODC': 114,
+                                'RSS': 44, 'Unknown': 14}
         self.files_collected = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
         self.df = pd.DataFrame(columns=['mission', 'timestamp', 'channel', 'file_name', 'last_modified'])
         self.last_modification = defaultdict(lambda: datetime.now())
