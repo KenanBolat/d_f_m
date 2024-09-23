@@ -65,7 +65,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   onMissionButtonClick = (mission: string) => this.selectMission(mission);
 
-  onMenuClick() {}
+  onMenuClick() {
+    this.sharedService.setMenuToggle();
+  }
 
   onLogout() {
     this.authService.logout();
