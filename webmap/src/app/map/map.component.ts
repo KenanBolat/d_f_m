@@ -8,13 +8,23 @@ import { AvailableDatesComponent } from "../available-dates/available-dates.comp
 import { HeaderComponent } from "../header/header.component";
 import { SharedService } from '../services/shared.service';
 import { AppConfigService } from '../services/app-config.service';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
   standalone: true,
-  imports: [CommonModule, HttpClientModule, AvailableDatesComponent, HeaderComponent],
+  imports: [CommonModule, HttpClientModule, AvailableDatesComponent, HeaderComponent, MatToolbarModule,
+    MatSidenavModule, MatCheckboxModule,
+    MatFormFieldModule,
+    MatButtonModule,
+    MatInputModule],
 })
 export class MapComponent implements AfterViewInit {
 

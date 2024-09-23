@@ -26,6 +26,7 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
   isAnimationPlaying: boolean = false;
   animationInterval: any;
   runningAnimationDate: string | null = null;
+  animationFrequency: number = 5;
 
   isDownloading: boolean = false;
 
@@ -98,6 +99,10 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
       this.selectedChannel = channel;
 
       this.cdr.detectChanges();
+    });
+
+    this.sharedService.animationValue$.subscribe((animationValue) => {
+      this.animationFrequency = animationValue ?? 5;
     });
 
     this.API_URL = this.appConfigService.get('API_URL');
@@ -331,7 +336,7 @@ export class AvailableDatesComponent implements AfterContentInit, AfterViewInit 
           this.onSelectDate(this.runningAnimationDate);
           selectedDateIndex = 0;
         }
-      }, 5000);
+      }, this.animationFrequency * 1_000);
     } else {
       clearInterval(this.animationInterval);
       this.selectedAnimationDates = [];

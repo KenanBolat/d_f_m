@@ -1,0 +1,27 @@
+<mat-sidenav-container class="example-container">
+  <mat-sidenav #sidenav mode="side" [opened]="isOpen" class="example-sidenav"
+               [fixedInViewport]="false" [fixedTopGap]="0"
+               [fixedBottomGap]="0">
+
+<h3>Settings</h3>
+
+    <form (ngSubmit)="onSaveSettings()">
+      <mat-form-field class="example-full-width">
+        <mat-label>Animation</mat-label>
+        <input matInput
+        name="animationValue"
+        [(ngModel)]="animationValue"
+        type="number" max="100" min="1" placeholder="5" value="5">
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit">Save</button>
+    </form>
+
+
+
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <app-map></app-map>
+  </mat-sidenav-content>
+</mat-sidenav-container>

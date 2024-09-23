@@ -6,13 +6,14 @@ import { AuthService } from './auth/auth.service';
 import { CommonModule } from '@angular/common';
 import { MapComponent } from "./map/map.component";
 import { Subscription } from 'rxjs';
+import { SettingsComponent } from "./settings/settings.component";
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   standalone: true,
-  imports: [CommonModule, RouterModule, HeaderComponent, MapComponent],
+  imports: [CommonModule, RouterModule, HeaderComponent, MapComponent, SettingsComponent],
 })
 export class AppComponent implements OnInit, OnDestroy {
   isAuthenticated: boolean = false;
