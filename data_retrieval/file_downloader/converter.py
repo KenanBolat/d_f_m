@@ -366,7 +366,8 @@ class DataConverter:
         """Converts data to geotiff"""
         aoi = create_area_def('aoi', {'proj': 'longlat', 'datum': 'WGS84'},
                               # area_extent=[22, 30, 45, 45],
-                              area_extent=[16, 30, 52, 52],
+                              # area_extent=[16, 30, 52, 52],
+                              area_extent=[10, 30, 52, 52],
                               resolution=0.01,
                               units='degrees',
                               description='Global 0.01x0.01 degree lat-lon grid')
