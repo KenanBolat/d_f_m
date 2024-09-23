@@ -83,3 +83,8 @@ sudo systemctl start watch_directory@c.service
 sudo systemctl status watch_directory@c.service
 
 npm install --global serve
+
+
+0 1 * * * /media/external/scripts/remove_old_files_from_ftp.sh MSG 3
+0 1 * * * /media/external/scripts/remove_old_files_from_ftp.sh IODC 3
+0 1 * * * /media/external/scripts/remove_old_files_from_ftp.sh RSS 3
