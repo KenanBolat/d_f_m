@@ -348,8 +348,10 @@ services:
       - ./j_data/geoserver_data/data/:/watch/data
     depends_on:
       - mongodb
-
-
+  webmap:
+    build: ./webmap/
+    ports:
+      - "4201:80"
 
 volumes:
   dev-static-data:
