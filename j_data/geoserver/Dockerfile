@@ -73,8 +73,8 @@ ARG STABLE_PLUGIN_URL=https://downloads.sourceforge.net/project/geoserver/GeoSer
 ARG COMMUNITY_PLUGIN_URL=''
 
 ARG GS_DATA_PATH=./geoserver_data/
-ARG ADDITIONAL_LIBS_PATH=./additional_libs/
-ARG ADDITIONAL_FONTS_PATH=./additional_fonts/
+# ARG ADDITIONAL_LIBS_PATH=./additional_libs/
+# ARG ADDITIONAL_FONTS_PATH=./additional_fonts/
 
 ENV GEOSERVER_VERSION=$GS_VERSION
 ENV GEOSERVER_BUILD=$GS_BUILD
