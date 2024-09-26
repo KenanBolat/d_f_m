@@ -1,6 +1,7 @@
 import pymongo
 import os
 import gridfs
+import re  # Regular expressions
 from bson.objectid import ObjectId
 
 import time
@@ -11,6 +12,17 @@ DB_NAME = "geotiff"
 COLLECTION_NAME = "fs.files"
 DOWNLOAD_FOLDER = f"/watch/data"
 POLL_INTERVAL = 60  # Poll interval in seconds
+RGB_LIST = ['natural_color',
+            'day_microphysics',
+            'ash',
+            'airmass',
+            'convection',
+            'dust',
+            'fog',
+            'natural_color',
+            'night_microphysics',
+            'natural_with_night_fog',
+            'snow']
 
 client = pymongo.MongoClient(MONGO_URI)
 db = client[DB_NAME]
@@ -25,7 +37,9 @@ def download_file(file_id):
 
     if file_data.filename.__contains__("aoi.tif"):
         scope = "aoi"
-        if file_data.filename.__contains__("natural_color"):
+        # if file_data.filename.__contains__("natural_color"):
+        match_ = re.findall('(?<=[0-9]{12}_).+?(?=_aoi)', file_data.filename)[0]
+        if match_ in RGB_LIST:
             scope = "rgb"
         if file_data.filename.__contains__("ir_cloud_day"):
             scope = "cloud"

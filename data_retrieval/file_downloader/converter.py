@@ -17,6 +17,7 @@ from pyresample import create_area_def
 
 from bson.objectid import ObjectId
 from dataconverter.communication.message_broker_if import RabbitMQInterface as rabbitmq
+
 os.environ['XRIT_DECOMPRESS_PATH'] = '/usr/local/bin/xRITDecompress'
 
 
@@ -66,10 +67,12 @@ class DataConverter:
         # self.TEMP_DIR = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/temp/'
         self.prefix = r'/app/downloaded_files/'
         self.TEMP_DIR = r'/app/temp/'
-        self.TOKEN = os.environ.get('TOKEN')
         self.readers = {'MSG': 'seviri_l1b_hrit',
-                        'IODC': 'seviri_l1b_hrit'}
+                        'IODC': 'seviri_l1b_hrit',
+                        'RSS': 'seviri_l1b_hrit',
+                        }
         self._reader = None
+        self.TOKEN = os.environ.get('TOKEN')
         self.seviri_data_names = ['HRV',
                                   'IR_016',
                                   'IR_039',
@@ -83,7 +86,17 @@ class DataConverter:
                                   'WV_062',
                                   'WV_073',
                                   'natural_color',
-                                  'ir_cloud_day']
+                                  'ir_cloud_day',
+                                  'day_microphysics',
+                                  'ash',
+                                  'airmass',
+                                  'convection',
+                                  'dust',
+                                  'fog',
+                                  'natural_color',
+                                  'night_microphysics',
+                                  'natural_with_night_fog',
+                                  'snow']
 
     def connect(self):
         self._channel = self._rabbit.connect()
@@ -120,13 +133,11 @@ class DataConverter:
             print('file removed:', file_)
         print('All files removed')
 
-
     @staticmethod
     def calculate_hash(content):
         md5 = hashlib.md5()
         md5.update(content)
         return md5.hexdigest()
-
 
     @custom_printer
     def upload_to_mongodb(self, f, ftype="netcdf"):
@@ -181,7 +192,6 @@ class DataConverter:
     def read_data(self):
 
         files_updated = [os.path.join(self.prefix, f[1:]) for f in self.filenames]
-
 
         self.scn = satpy.Scene(reader=self._reader, filenames=files_updated)
         print(self.seviri_data_names)
@@ -269,7 +279,6 @@ class DataConverter:
                                 file_size=os.path.getsize(self.nc_filename_vis),
                                 file_status=file_status)
             self.insert_file()
-
 
             self.update_payload(file_name=f'{self.mission}_{self.date_tag}_hrv.nc',
                                 file_path=self.nc_filename_hrv,

@@ -2,6 +2,7 @@ from satpy.scene import Scene
 from satpy import find_files_and_readers
 
 # define path to FCI test data folder
+# path_to_data = '/home/knn/Downloads/MTG/202408200015/'
 path_to_data = '/home/knn/Downloads/MTG/202408200015/'
 
 # find files and assign the FCI reader
@@ -28,4 +29,4 @@ vis_04_values = scn['vis_04'].values
 scn_resampled = scn.resample("eurol", resampler='nearest', radius_of_influence=5000)
 
 # save the resampled dataset/composite to disk
-scn_resampled.save_dataset("natural_color", filename='./fci_natural_color_resampled.png')
+scn_resampled.save_dataset ("natural_color", filename='./fci_natural_color_resampled.png')
