@@ -40,6 +40,7 @@ def custom_printer(func):
 
 class DataConverter:
     def __init__(self, date_tag, mission, id, file_list):
+        self.uniq_id = uuid.uuid4()
         self.date_tag = date_tag
         self.mission = mission
         self.data = id
@@ -64,9 +65,9 @@ class DataConverter:
         }
 
         # self.prefix = r'/media/knn/New Volume/Test_Data/'
-        # self.TEMP_DIR = r'/home/knn/Desktop/d_f_m/data_retrieval/file_downloader/temp/'
+        # self.TEMP_DIR = os.path.join(r'/home/knn/d_f_m/data_retrieval/file_downloader/temp/', str(self.uniq_id))
         self.prefix = r'/app/downloaded_files/'
-        self.TEMP_DIR = r'/app/temp/'
+        self.TEMP_DIR = os.path.join(r'/app/temp/', str(self.uniq_id))
         self.readers = {'MSG': 'seviri_l1b_hrit',
                         'IODC': 'seviri_l1b_hrit',
                         'RSS': 'seviri_l1b_hrit',
@@ -113,7 +114,12 @@ class DataConverter:
         """Applies area of interest to the data"""
         pass
 
+    def check_folder(self):
+        if not os.path.exists(self.TEMP_DIR):
+            os.makedirs(self.TEMP_DIR)
+
     def convert(self):
+        self.check_folder()
         self.reader()
         self.read_data()
         if self.check_bands():

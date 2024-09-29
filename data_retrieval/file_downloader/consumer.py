@@ -14,14 +14,20 @@ class FileConverterConsumer:
     def __init__(self, queue_name='geoserver_tasks'):
         self._queue_name = queue_name
         self._channel = None
+        self._connection = None
         self._rabbit = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', queue_name)
 
     def connect(self):
         print("Connecting to RabbitMQ...")
         self._channel = self._rabbit.connect()
+        print("Connected to RabbitMQ...")
+        self._channel.basic_qos(prefetch_count=1)
 
     def on_message(self, channel, method_frame, header_frame, body):
         print(f"Received message: {body}")
+        print("Processing successful, acknowledging message...")
+        channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+        print("Message acknowledged.")
         try:
             message_body = json.loads(body)
             payload = {
@@ -38,19 +44,21 @@ class FileConverterConsumer:
                 satellite_mission = response.json()[0]['satellite_mission']
                 id = response.json()[0]['id']
                 dcv = DataConverter(date_tag, satellite_mission, id, file_list=files)
+
                 dcv.convert()
                 dcv.remove_files()
 
             else:
                 print(f"Failed to retrieve data: {response.status_code} {response.json()}")
 
-            channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+
 
         except Exception as e:
             print(f"Failed to process message: {e}")
             # Requeue the message for future processing
             # TODO: Add a retry limit
-            channel.basic_nack(delivery_tag=method_frame.delivery_tag)
+
+            # channel.basic_nack(delivery_tag=method_frame.delivery_tag)
 
     def start_consuming(self):
         self._channel.basic_consume(queue=self._queue_name, on_message_callback=self.on_message)
@@ -63,8 +71,8 @@ class FileConverterConsumer:
             # self.start_consuming()
             pass
         finally:
-            if self._connection.is_open:
-                self._connection.close()
+            if self._channel.is_open:
+                self._channel.close()
 
     def run(self):
         self.connect()

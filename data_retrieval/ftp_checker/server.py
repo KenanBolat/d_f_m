@@ -36,14 +36,14 @@ def ftp_check_task():
         # raise Exception("FTP check failed")
     except Exception as e:
         print(f"FTP check failed: {e}")
-        payload = {
-            "queue_name": "ftp-tasks",
-            "content": f"{rabbit.get_current_time()}:Failed:Task:{e}",
-            "service_name": "FTP Checker",
-            "producer_ip": rabbit.get_ip(),
-            "status": "Failed",
-        }
-        rabbit.send(message=json.dumps(payload))
+        # payload = {
+        #     "queue_name": "ftp-tasks",
+        #     "content": f"{rabbit.get_current_time()}:Failed:Task:{e}",
+        #     "service_name": "FTP Checker",
+        #     "producer_ip": rabbit.get_ip(),
+        #     "status": "Failed",
+        # }
+        # rabbit.send(message=json.dumps(payload))
 
     with task_lock:
         is_task_running = False
@@ -52,7 +52,7 @@ def ftp_check_task():
 @app.route('/start', methods=['GET'])
 def start_monitoring():
     global job
-    if not scheduler.running:
+    if job is None:
         job = scheduler.add_job(ftp_check_task, 'interval', minutes=2,
                                 next_run_time=datetime.now() + timedelta(minutes=1))
         # job = scheduler.add_job(ftp_check_task, 'interval', minutes=1)
@@ -88,6 +88,6 @@ start_monitoring()
 
 if __name__ == '__main__':
     try:
-        app.run(debug=True, host='0.0.0.0', port=5000)
+        app.run(debug=True, host='0.0.0.0', port=5000,  use_reloader=False)
     finally:
         rabbit.close()
