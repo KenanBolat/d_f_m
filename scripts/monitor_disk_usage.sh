@@ -14,6 +14,9 @@ if [ "$USAGE" -gt "$THRESHOLD" ]; then
     # Run the cleanup script with the specified parameters
     /media/external/d_f_m/scripts/remove_old_files_from_directory.sh /mnt/data/ tmp  $OLDER_THAN_DAYS
     /media/external/d_f_m/scripts/remove_old_files_from_directory.sh /mnt/data/ eumetcast  $OLDER_THAN_DAYS
+
+    /media/external/d_f_m/scripts/remove_old_files_from_directory.sh /data/ tmp  $OLDER_THAN_DAYS
+    /media/external/d_f_m/scripts/remove_old_files_from_directory.sh /data/ eumetcast  $OLDER_THAN_DAYS
 else
     echo "Disk usage on / is under control (${USAGE}%). No action needed."
 fi
