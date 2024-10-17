@@ -18,16 +18,16 @@ class FileConverterConsumer:
         self._rabbit = rabbitmq(os.environ.get('RABBITMQ_HOST', 'localhost'), 5672, 'guest', 'guest', queue_name)
 
     def connect(self):
-        print("Connecting to RabbitMQ...")
+        print("data_down_consumer ==> Connecting to RabbitMQ...")
         self._channel = self._rabbit.connect()
-        print("Connected to RabbitMQ...")
+        print("data_down_consumer ==> Connected to RabbitMQ...")
         self._channel.basic_qos(prefetch_count=1)
 
     def on_message(self, channel, method_frame, header_frame, body):
-        print(f"Received message: {body}")
-        print("Processing successful, acknowledging message...")
+        print(f"data_down_consumer ==> Received message: {body}")
+        print("data_down_consumer ==> Processing successful, acknowledging message...")
         channel.basic_ack(delivery_tag=method_frame.delivery_tag)
-        print("Message acknowledged.")
+        print("data_down_consumer ==> Message acknowledged.")
         try:
             message_body = json.loads(body)
             payload = {
@@ -49,12 +49,12 @@ class FileConverterConsumer:
                 dcv.remove_files()
 
             else:
-                print(f"Failed to retrieve data: {response.status_code} {response.json()}")
+                print(f"data_down_consumer ==> Failed to retrieve data: {response.status_code} {response.json()}")
 
 
 
         except Exception as e:
-            print(f"Failed to process message: {e}")
+            print(f"data_down_consumer ==> Failed to process message: {e}")
             # Requeue the message for future processing
             # TODO: Add a retry limit
 
@@ -76,12 +76,12 @@ class FileConverterConsumer:
 
     def run(self):
         self.connect()
-        print("Consumer connected...")
+        print("data_down_consumer ==> Consumer connected...")
         self.start_consuming()
-        print("Consumer started...")
+        print("data_down_consumer ==> Consumer started...")
 
 
 # Usage
-print(f"[{datetime.datetime.now().strftime('%Y%m%d%H%S')}] : ", "Starting consumer...")
+print(f"data_down_consumer ==> [{datetime.datetime.now().strftime('%Y%m%d%H%S')}] : ", "Starting consumer...")
 consumer = FileConverterConsumer()
 consumer.run()

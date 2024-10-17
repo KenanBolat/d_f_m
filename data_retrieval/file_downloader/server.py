@@ -18,7 +18,7 @@ class FileDownloadConsumer:
         self._channel = self._rabbit.connect()
 
     def on_message(self, channel, method_frame, header_frame, body):
-        print(f"Received message: {body}")
+        print(f"data_downloader_server_py ==> Received message: {body}")
         try:
             message_body = json.loads(body)
             payload = {
@@ -34,7 +34,7 @@ class FileDownloadConsumer:
             channel.basic_ack(delivery_tag=method_frame.delivery_tag)
 
         except Exception as e:
-            print(f"Failed to process message: {e}")
+            print(f"data_downloader_server_py ==> Failed to process message: {e}")
             # Requeue the message for future processing
             channel.basic_nack(delivery_tag=method_frame.delivery_tag)
 
@@ -63,6 +63,6 @@ class FileDownloadConsumer:
 
 
 # Usage
-print(f"[{datetime.datetime.now().strftime('%Y%m%d%H%S')}] : ", "Starting consumer...")
+print(f"data_downloader_server_py ==> [{datetime.datetime.now().strftime('%Y%m%d%H%S')}] : ", "Starting consumer...")
 consumer = FileDownloadConsumer()
 consumer.run()
