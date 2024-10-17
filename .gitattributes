@@ -13,8 +13,9 @@
 
 *.docx   diff=astextplain
 *.DOCX   diff=astextplain
-*.sh            text eol=lf # Don't do auto-detection. Treat as text. Checkout and add with eol=lf
-*.py            text eol=lf # Don't do auto-detection. Treat as text. Checkout and add with eol=lf
+
+*.sh     text eol=lf
+*.py     text eol=lf
 
 
 # absolute paths are ok, as are globs
