@@ -52,7 +52,7 @@ class CheckProducts(object):
         if self.config:
             self.ftp = ftplib.FTP()
             if os.environ.get('DEBUG_MODE') in ('True', 'true', '1', 'TRUE'):
-                ftp_server = 'localhost'
+                ftp_server = '10.10.60.131'
             else:
                 ftp_server = self.config['ftp_server']
             self.ftp.connect(ftp_server, self.config['ftp_port'])

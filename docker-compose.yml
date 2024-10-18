@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   app:
+    image: application:tmet
     build:
       context: .
       args:
@@ -35,6 +36,7 @@ services:
       - mongodb
 
   geoserver:
+    image: geoserver:tmet
     build:
       context: ./j_data/geoserver/
       args:
@@ -57,6 +59,7 @@ services:
       - db
 
   db:
+    image: db:tmet
     build:
       context: ./db/
       dockerfile: Dockerfile
@@ -93,6 +96,7 @@ services:
       - "15672:15672"
 
   ftp_checker:
+    image: ftp_checker:tmet
     build:
       context: ./data_retrieval/ftp_checker/
       dockerfile: Dockerfile
@@ -116,6 +120,7 @@ services:
 
   # dummy ftp server to create a demo
   ftp_server:
+    image : ftp_server:tmet
     build: j_data/ftp/
     environment:
       - LOGSTASH_HOST=logstash
@@ -126,6 +131,7 @@ services:
       - '/media/knn/New Volume/Test_Data/:/data/'
 
   data_downloader:
+    image : data_downloader:tmet
     build:
       context: ./data_retrieval/file_downloader/
       dockerfile: Dockerfile
@@ -152,6 +158,8 @@ services:
       - TOKEN=${TOKEN}
       - MONGODB=mongodb
       - FILE_AGE_LIMIT=111 # minutes
+    volumes:
+      - ./downloaded_files:/app/downloaded_files
 #
 #    ports:
 #      - "5020:5000"
