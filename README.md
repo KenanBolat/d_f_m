@@ -1,3 +1,17 @@
+### TODO 
+
+  * [ ] Animation Fix 
+  * [ ] Geotiff --> PNG 
+  * [ ] MTG data Integration 
+  * [ ] Mouse Hover display: attribute information right below lat long info 
+  * [ ] Channel Names 
+  * [x] Select by data and associated avaliable date from the date selection pane 
+  * [ ] Nowcasting Saf integration 
+  * [ ] Release notes 
+
+
+
+
 # Documentation
 ## How to run the project
 
