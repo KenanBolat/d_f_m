@@ -54,6 +54,7 @@ def callback(ch, method, properties, body):
                                                    "status": "done",
                                                }), headers=headers)
                 ##
+                # Check Done
                 if response_done.status_code == 200 and response_done.json()['status'] == 'done':
                     content = {
                         'status': 'ready',
@@ -61,7 +62,8 @@ def callback(ch, method, properties, body):
                         'date': data['date'],
                         'event_id': data['event_id']
                     }
-                    rabbit_geo.send(message=json.dumps(content))
+                    # It has been disabled to handle the double and early request bug
+                    # rabbit_geo.send(message=json.dumps(content))
 
 
 def start_consuming():

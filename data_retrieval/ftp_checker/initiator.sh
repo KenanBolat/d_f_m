@@ -1,4 +1,4 @@
-#!/bin/bash
+F#!/bin/bash
 
 cd /app/;
 rm -rf dataconverter tmet_sdk;

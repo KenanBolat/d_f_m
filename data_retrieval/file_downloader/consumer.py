@@ -26,7 +26,6 @@ class FileConverterConsumer:
     def on_message(self, channel, method_frame, header_frame, body):
         print(f"data_down_consumer ==> Received message: {body}")
         print("data_down_consumer ==> Processing successful, acknowledging message...")
-        channel.basic_ack(delivery_tag=method_frame.delivery_tag)
         print("data_down_consumer ==> Message acknowledged.")
         try:
             message_body = json.loads(body)
@@ -39,6 +38,7 @@ class FileConverterConsumer:
                                     params=payload,
                                     headers=headers)
             if response.status_code == 200 and len(response.json()) == 1:
+                channel.basic_ack(delivery_tag=method_frame.delivery_tag)
                 files = response.json()[0]['files']
                 date_tag = response.json()[0]['date_tag']
                 satellite_mission = response.json()[0]['satellite_mission']
