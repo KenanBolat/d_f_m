@@ -11,6 +11,7 @@ export interface LayerData {
   time: string;
   downloadid: string;
   filename: string;
+  area_of_interest: string;
 }
 
 @Injectable({
