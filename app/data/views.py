@@ -390,7 +390,7 @@ def get_geoserver_data(request):
     # Define the raw SQL query (including the union)
     query = """select 
                 foo.fid , foo.location, foo.ingestion, foo.mission, 
-                foo.channel, foo.coverage, cf.id , cf.file_name, cf.created_at, cf.file_size  from (
+                foo.channel, foo.coverage, cf.id , cf.file_name, cf.created_at, cf.file_size, '[[10,52], [52,30]]' as ullr    from (
                 SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc , 'aoi' as coverage FROM aoi
                 UNION
                 SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc ,'rgb' as coverage FROM rgb
@@ -417,6 +417,7 @@ def get_geoserver_data(request):
             'filename': row[7] if len(row) > 7 else None,
             'created_at': f'{row[8].strftime("%Y-%m-%dT%H:%M:%S.000Z")}' if len(row) > 8 else None,
             'file_size': row[9] if len(row) > 9 else None,
+            'area_of_interest': row[10] if len(row) > 10 else None,
         })
 
     # Serialize the combined data

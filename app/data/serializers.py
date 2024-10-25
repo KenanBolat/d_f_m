@@ -229,4 +229,5 @@ class GeoserverDataSourceSerializer(serializers.Serializer):
     filename = serializers.CharField(required=False)
     created_at = serializers.DateTimeField(required=False)
     file_size = serializers.IntegerField(required=False)
+    area_of_interest = serializers.CharField(required=False)
     status = serializers.CharField(required=False)
