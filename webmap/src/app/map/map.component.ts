@@ -29,6 +29,7 @@ import { MatInputModule } from '@angular/material/input';
 export class MapComponent implements AfterViewInit {
 
   private GEOSERVER_URL:string;;
+  private API_URL: string;
   private map!: L.Map;
   layerAvailability: AvilableLayer[] = [];
   layers: LayerData[] = [];
@@ -42,6 +43,7 @@ export class MapComponent implements AfterViewInit {
   selectedMission: string | null = null;
 
   addedLayer : L.TileLayer.WMS | null = null;
+  addedPngLayer : L.ImageOverlay | null = null;
 
   mouseCoordinates: string | null = null;
 
@@ -52,6 +54,7 @@ export class MapComponent implements AfterViewInit {
     private cdr: ChangeDetectorRef,
     private appConfigService: AppConfigService) {
       this.GEOSERVER_URL = this.appConfigService.get('MAP_URL');
+      this.API_URL = this.appConfigService.get('API_URL');
   }
 
   ngAfterViewInit(): void {
@@ -96,6 +99,8 @@ export class MapComponent implements AfterViewInit {
 
       // Format coordinates as degrees
       this.mouseCoordinates = `${Math.abs(lng)}°${lng >= 0 ? 'E' : 'W'}, ${Math.abs(lat)}°${lat >= 0 ? 'N' : 'S'}`;
+
+
     });
 
     this.getLayerData();
@@ -138,19 +143,51 @@ export class MapComponent implements AfterViewInit {
   }
 
   private addWmsLayer(mission: string, channel: string, time: string): void {
-    if (this.addedLayer) {
-      this.map.removeLayer(this.addedLayer);
-    }
     this.addedLayer = L.tileLayer.wms(this.GEOSERVER_URL, {
       layers: `tmet:${LAYER_NAME_DICTIONARY.get(channel)}`,
       format: IMAGE_FORMAT,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0,
       DIM_MISSION: mission,
       DIM_CHANNEL: channel,
       time: time.replace(':00Z', ':000Z'),
       zIndex: 1000
-    } as any).addTo(this.map);
+    } as any);
+    const foundLayer = this.layers.find(
+      (data) => data.time === time && data.channel === channel && data.mission === mission
+    );
+
+    if (!foundLayer) {
+      console.error('No layer found for the selected mission, channel and time.');
+      return;
+    }
+
+    const latlongBounds = JSON.parse(foundLayer.area_of_interest) as [number, number][];
+    const imageUrl = `${this.API_URL}${foundLayer.downloadid}`;
+
+    // Preload the image due to slow loading times
+    const img = new Image();
+    img.onload = () => {
+      const newLayer = L.imageOverlay(imageUrl, latlongBounds, {
+        opacity: 0.5,
+        alt: foundLayer.layername,
+        interactive: true,
+        zIndex: 1100,
+      }).addTo(this.map);
+
+      if (this.addedPngLayer) {
+        this.map.removeLayer(this.addedPngLayer);
+      }
+
+      this.addedPngLayer = newLayer;
+    };
+
+    img.onerror = () => {
+      console.error('Failed to load the image.');
+    };
+
+    // Start loading the image
+    img.src = imageUrl;
 
     this.updateLegendGraphic(this.addedLayer);
   }
@@ -225,6 +262,10 @@ export class MapComponent implements AfterViewInit {
 
     const url = this.buildGetFeatureInfoUrl(this.addedLayer!, latlng, point);
 
+    this.getInfoFromLayer(url, latlng);
+  }
+
+  private getInfoFromLayer(url: string, latlng: L.LatLng): void {
     fetch(url)
       .then((response) => response.text())
       .then((data) => {
