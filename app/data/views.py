@@ -264,7 +264,6 @@ class FileViewSet(viewsets.ModelViewSet):
             file = self.get_object()
             mongo_id = file.mongo_id
             file_type = file.file_type
-            print("tirlasldalsd*" * 100)
 
             if not mongo_id:
                 return Response({"message": "No MongoDB ID provided for file."}, status=status.HTTP_400_BAD_REQUEST)
@@ -390,7 +389,7 @@ def get_geoserver_data(request):
     # Define the raw SQL query (including the union)
     query = """select 
                 foo.fid , foo.location, foo.ingestion, foo.mission, 
-                foo.channel, foo.coverage, cf.id , cf.file_name, cf.created_at, cf.file_size, '[[10,52], [52,30]]' as ullr    from (
+                foo.channel, foo.coverage, cf.id , cf.file_name, cf.created_at, cf.file_size, '[[52,10], [30,52]]' as ullr    from (
                 SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc , 'aoi' as coverage FROM aoi
                 UNION
                 SELECT *, (split_part(location, '.tif', 1 ) || '.png') as loc ,'rgb' as coverage FROM rgb
