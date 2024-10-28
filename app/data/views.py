@@ -35,7 +35,7 @@ from drf_spectacular.utils import (
 
 from dateutil.parser import parse as parse_datetime
 
-from .serializers import FileSerializer
+from .serializers import FileSerializer, UploadImageSerializer
 
 from rest_framework import (viewsets, mixins, status)
 # mixins is required to add additional functionalities to views
@@ -58,7 +58,9 @@ from core.models import (Data,
                          Consumed,
                          Event,
                          File,
-                         Notification)
+                         Notification,
+                         UploadedImage,
+                         )
 
 from . import serializers
 from .serializers import GeoserverDataSourceSerializer
@@ -417,6 +419,7 @@ def get_geoserver_data(request):
             'created_at': f'{row[8].strftime("%Y-%m-%dT%H:%M:%S.000Z")}' if len(row) > 8 else None,
             'file_size': row[9] if len(row) > 9 else None,
             'area_of_interest': row[10] if len(row) > 10 else None,
+            'static_image': f'/static/media/images/{row[7]}' if len(row) > 7 else None,
         })
 
     # Serialize the combined data
@@ -473,3 +476,8 @@ def create_zip(request):
     response['Content-Disposition'] = 'attachment; filename=zipped_files.zip'
 
     return response
+
+
+class ImageUploadViewset(viewsets.ModelViewSet):
+    queryset = UploadedImage.objects.all()
+    serializer_class = UploadImageSerializer

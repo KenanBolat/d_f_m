@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 import dateutil.parser as parser
 
-from core.models import (Data, Configuration, Mission, Event, Consumed, File, Notification, )
+from core.models import (Data, Configuration, Mission, Event, Consumed, File, Notification, UploadedImage, )
 
 
 class MissionField(serializers.Field):
@@ -230,4 +230,13 @@ class GeoserverDataSourceSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(required=False)
     file_size = serializers.IntegerField(required=False)
     area_of_interest = serializers.CharField(required=False)
+    static_image = serializers.CharField(required=False)
     status = serializers.CharField(required=False)
+
+
+
+class UploadImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UploadedImage
+        fields = ['id', 'title', 'image', 'uploaded_at']
+

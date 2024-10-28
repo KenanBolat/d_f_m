@@ -19,6 +19,8 @@ router.register('events', views.EventViewSet)
 router.register('consumer', views.ConsumedViewSet)
 router.register('file', views.FileViewSet)
 router.register('notifications', views.NotificationViewSet)
+router.register(r'upload',views.ImageUploadViewset, basename='image-upload')
+
 router.register(r'aoi', AOIViewSet, basename='aoi')
 
 

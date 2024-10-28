@@ -3,6 +3,7 @@ Database models.
 """
 import uuid
 import os
+from enum import unique
 
 from django.conf import settings
 from django.db import models
@@ -238,3 +239,11 @@ class Notification(models.Model):
         ordering = ['-time']
         verbose_name = 'Notification'
         verbose_name_plural = 'Notifications'
+
+class UploadedImage(models.Model):
+    title = models.CharField(max_length=255, unique=True)
+    image = models.ImageField(upload_to='images/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    deleted = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
+

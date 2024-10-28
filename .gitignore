@@ -1,6 +1,7 @@
 venv/
 .idea/
 dev-db-data/
+dev-static-media/
 
 venv/*
 mysql/*

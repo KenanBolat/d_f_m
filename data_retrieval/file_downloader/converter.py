@@ -255,6 +255,28 @@ class DataConverter:
                 f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: File {self.file_payload['file_name']} upload failed {response.status_code} {response.json()}")
             return False
 
+    def upload_file(self, file_name):
+        """Updates the file status"""
+        # headers = {'Content-Type': 'application/json'}
+
+        with open(file_name, 'rb') as file_data:
+
+            files = {
+                'image': (file_name, file_data, 'image/png'),  # Adjust MIME type if not PNG
+            }
+            response = requests.post(f"http://{os.environ.get('CORE_APP', 'localhost')}:8000/api/upload/",
+                                     data={'title':f'{file_name.split("/")[-1]}'},
+                                     files=files,)
+        if response.status_code == 201:
+            print(
+                f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}:File uploaded successfully")
+
+            return True
+        else:
+            print(
+                f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}: File upload failed {response.status_code} {response.json()}")
+            return False
+
     @custom_printer
     def _convert_netcdf(self, upload_flag=True):
         """Converts netcdf data to netcdf"""
@@ -311,6 +333,7 @@ class DataConverter:
                                     file_size=os.path.getsize(png),
                                     file_status='converted')
                 self.insert_file()
+                self.upload_file(png)
 
             self._create_overiew()
             return True
@@ -334,6 +357,7 @@ class DataConverter:
                                     file_size=os.path.getsize(png),
                                     file_status='converted')
                 self.insert_file()
+                self.upload_file(file_name=png)
 
             self._create_overiew()
             return True
