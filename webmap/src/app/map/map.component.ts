@@ -163,7 +163,7 @@ export class MapComponent implements AfterViewInit {
     }
 
     const latlongBounds = JSON.parse(foundLayer.area_of_interest) as [number, number][];
-    const imageUrl = `${this.API_URL}${foundLayer.downloadid}`;
+    let imageUrl = `${this.API_URL}${foundLayer.static_image}`;
 
     // Preload the image due to slow loading times
     const img = new Image();
