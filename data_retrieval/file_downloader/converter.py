@@ -13,6 +13,8 @@ import json
 from pymongo import MongoClient
 from gridfs import GridFS
 
+from osgeo import gdal
+
 from pyresample import create_area_def
 
 from bson.objectid import ObjectId
@@ -124,9 +126,9 @@ class DataConverter:
         self.read_data()
         if self.check_bands():
             self._convert_netcdf(upload_flag=False)
-            self._convert_png()
             self._convert_tiff(upload_flag=False)
             self._convert_tiff_aoi()
+            self._convert_png()
             self._convert_png_aoi()
 
     def remove_files(self):
@@ -324,18 +326,40 @@ class DataConverter:
 
             tag = f'{self.mission}_{self.date_tag}'
             self.scn.save_datasets(writer='simple_image', filename=os.path.join(self.TEMP_DIR, tag + '_{name}.png'))
+            kwargs_warp = {
+                'srcSRS': 'EPSG:4326',
+                'dstSRS': 'EPSG:3857',
+            }
+            kwargs_translate = {
+                'format': 'PNG',
+                'outputType': gdal.GDT_Byte,
+            }
+            for tiff in list(set(glob.glob(os.path.join(self.TEMP_DIR, tag + '_*.tif'))) - set(
+                    glob.glob(os.path.join(self.TEMP_DIR, tag + '_*3857.tif')))):
+                print(f"{tiff} is being converted" )
 
-            for png in glob.glob(os.path.join(self.TEMP_DIR, tag + '_*.png')):
-                self.upload_to_mongodb(png, ftype="png")
-                self.update_payload(file_name=f'{png.split("/")[-1]}',
-                                    file_path=png,
+                # add a flag for the name of the geotiff re-projected to 3857
+                projected_tif_name = tiff.replace('.tif', '_3857.tif')
+
+                # re-project
+                gdal.Warp(projected_tif_name, tiff, **kwargs_warp)
+
+                # png name of the geotiff re-projected to 3857
+                projected_png_name =  tiff.replace('.tif', '.png')
+
+                # export png
+                gdal.Translate(projected_png_name, projected_tif_name, **kwargs_translate)
+
+                self.upload_to_mongodb(projected_png_name, ftype="png")
+                self.update_payload(file_name=f'{projected_png_name.split("/")[-1]}',
+                                    file_path=projected_png_name,
                                     file_type='png',
-                                    file_size=os.path.getsize(png),
+                                    file_size=os.path.getsize(projected_png_name),
                                     file_status='converted')
                 self.insert_file()
-                self.upload_file(png)
+                self.upload_file(projected_png_name)
 
-            self._create_overiew()
+                self._create_overiew()
             return True
 
     @custom_printer
@@ -417,10 +441,10 @@ class DataConverter:
             f_name = f"{self.mission}_{self.date_tag}_{ch}_aoi.tif"
             f_path = os.path.join(self.TEMP_DIR, f"{f_name}")
 
+            self.aoi.save_datasets(writer='geotiff', datasets=[ch], filename=f_path)
             if self.check_file_exists(f_name):
-                print("=" * 100, "File already exists", "=" * 100)
+                print("=" * 50, "File already exists", "=" * 50)
             else:
-                self.aoi.save_datasets(writer='geotiff', datasets=[ch], filename=f_path)
                 self.update_payload(file_name=f_name, file_path=f_path, file_type='geotiff',
                                     file_size=os.path.getsize(f_path),
                                     file_status='converted')
