@@ -90,4 +90,4 @@ EXPOSE 3003
 #
 # Set entrypoint
 # ENTRYPOINT ["bash", "-c", "tail -f /dev/null"]
-ENTRYPOINT ["bash", "-c", "python3 server.py & python3 consumer.py & cron && tail -f /dev/null"]
+#ENTRYPOINT ["bash", "-c", "python3 server.py & python3 consumer.py & cron && tail -f /dev/null"]

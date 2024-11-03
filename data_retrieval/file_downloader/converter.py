@@ -66,10 +66,14 @@ class DataConverter:
             "mongo_id": None,
         }
 
-        # self.prefix = r'/media/knn/New Volume/Test_Data/'
-        # self.TEMP_DIR = os.path.join(r'/home/knn/d_f_m/data_retrieval/file_downloader/temp/', str(self.uniq_id))
-        self.prefix = r'/app/downloaded_files/'
-        self.TEMP_DIR = os.path.join(r'/app/temp/', str(self.uniq_id))
+        if os.environ.get('DEBUG_MODE') in ('True', 'true', '1', 'TRUE'):
+            self.prefix = r'/media/knn/New Volume/Test_Data/'
+            self.TEMP_DIR = os.path.join(r'/home/knn/d_f_m/data_retrieval/file_downloader/temp/', str(self.uniq_id))
+        else:
+            self.prefix = r'/app/downloaded_files/'
+            self.TEMP_DIR = os.path.join(r'/app/temp/', str(self.uniq_id))
+
+
         self.readers = {'MSG': 'seviri_l1b_hrit',
                         'IODC': 'seviri_l1b_hrit',
                         'RSS': 'seviri_l1b_hrit',
@@ -320,46 +324,48 @@ class DataConverter:
 
     @custom_printer
     def _convert_png(self):
+
+
+
         if self.check_file_exists(self.nc_filename_hrv) or self.check_file_exists(self.nc_filename_vis):
             print("=" * 100, "File already exists", "=" * 100)
-        else:
 
-            tag = f'{self.mission}_{self.date_tag}'
-            self.scn.save_datasets(writer='simple_image', filename=os.path.join(self.TEMP_DIR, tag + '_{name}.png'))
-            kwargs_warp = {
-                'srcSRS': 'EPSG:4326',
-                'dstSRS': 'EPSG:3857',
-            }
-            kwargs_translate = {
-                'format': 'PNG',
-                'outputType': gdal.GDT_Byte,
-            }
-            for tiff in list(set(glob.glob(os.path.join(self.TEMP_DIR, tag + '_*.tif'))) - set(
-                    glob.glob(os.path.join(self.TEMP_DIR, tag + '_*3857.tif')))):
-                print(f"{tiff} is being converted" )
+        tag = f'{self.mission}_{self.date_tag}'
+        # self.scn.save_datasets(writer='simple_image', filename=os.path.join(self.TEMP_DIR, tag + '_{name}.png'))
+        kwargs_warp = {
+            'srcSRS': 'EPSG:4326',
+            'dstSRS': 'EPSG:3857',
+        }
+        kwargs_translate = {
+            'format': 'PNG',
+            'outputType': gdal.GDT_Byte,
+        }
+        for tiff in list(set(glob.glob(os.path.join(self.TEMP_DIR, tag + '_*.tif'))) - set(
+                glob.glob(os.path.join(self.TEMP_DIR, tag + '_*3857.tif')))):
+            print(f"{tiff} is being converted" )
 
-                # add a flag for the name of the geotiff re-projected to 3857
-                projected_tif_name = tiff.replace('.tif', '_3857.tif')
+            # add a flag for the name of the geotiff re-projected to 3857
+            projected_tif_name = tiff.replace('.tif', '_3857.tif')
 
-                # re-project
-                gdal.Warp(projected_tif_name, tiff, **kwargs_warp)
+            # re-project
+            gdal.Warp(projected_tif_name, tiff, **kwargs_warp)
 
-                # png name of the geotiff re-projected to 3857
-                projected_png_name =  tiff.replace('.tif', '.png')
+            # png name of the geotiff re-projected to 3857
+            projected_png_name =  tiff.replace('.tif', '.png')
 
-                # export png
-                gdal.Translate(projected_png_name, projected_tif_name, **kwargs_translate)
+            # export png
+            gdal.Translate(projected_png_name, projected_tif_name, **kwargs_translate)
 
-                self.upload_to_mongodb(projected_png_name, ftype="png")
-                self.update_payload(file_name=f'{projected_png_name.split("/")[-1]}',
-                                    file_path=projected_png_name,
-                                    file_type='png',
-                                    file_size=os.path.getsize(projected_png_name),
-                                    file_status='converted')
-                self.insert_file()
-                self.upload_file(projected_png_name)
+            self.upload_to_mongodb(projected_png_name, ftype="png")
+            self.update_payload(file_name=f'{projected_png_name.split("/")[-1]}',
+                                file_path=projected_png_name,
+                                file_type='png',
+                                file_size=os.path.getsize(projected_png_name),
+                                file_status='converted')
+            self.insert_file()
+            self.upload_file(projected_png_name)
 
-                self._create_overiew()
+            self._create_overiew()
             return True
 
     @custom_printer

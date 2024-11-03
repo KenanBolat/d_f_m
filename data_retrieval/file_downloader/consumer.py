@@ -1,5 +1,7 @@
 import datetime
 import os
+import time
+
 import pika
 import json
 import requests
@@ -43,10 +45,24 @@ class FileConverterConsumer:
                 date_tag = response.json()[0]['date_tag']
                 satellite_mission = response.json()[0]['satellite_mission']
                 id = response.json()[0]['id']
-                dcv = DataConverter(date_tag, satellite_mission, id, file_list=files)
 
-                dcv.convert()
-                dcv.remove_files()
+                # Add time constraint to process the message
+                threshold_lower_bound = time.strptime('0500', '%H%M')
+                threshold_upper_bound = time.strptime('2000', '%H%M')
+                current_time =  time.strptime(date_tag[8:],'%H%M')
+
+                # Check if the current time is within the defined time constraint
+                if threshold_lower_bound < current_time < threshold_upper_bound:
+                    print(f"DateTag is in between the defined time constraint ==> Processing message: {current_time}")
+                    dcv = DataConverter(date_tag, satellite_mission, id, file_list=files)
+                    dcv.convert()
+                    dcv.remove_files()
+                    print(f"DateTag : {date_tag} has been processed successfully @ {datetime.datetime.now().strftime('%Y%m%d%H%S')}")
+                    print(f"V"*100)
+                else:
+                    print(f"X"*100)
+                    print(f"DateTag is outside the defined time constraint ==> Skipping message: {current_time} @ {datetime.datetime.now().strftime('%Y%m%d%H%S')}")
+                    print(f"X"*100)
 
             else:
                 print(f"data_down_consumer ==> Failed to retrieve data: {response.status_code} {response.json()}")

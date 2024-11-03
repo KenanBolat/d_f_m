@@ -9,6 +9,7 @@ services:
         - DEV=true
     ports:
       - '8000:8000'
+    restart: always
     volumes:
       - ./app/:/app
       - dev-static-data:/vol/web
@@ -136,13 +137,56 @@ services:
     build:
       context: ./data_retrieval/file_downloader/
       dockerfile: Dockerfile
+    command: ["/bin/sh", "-c", "python3 /app/server.py"]
     restart: always
+    healthcheck:
+      test:  ["CMD", "pgrep", "-f", "server.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     deploy:
-        replicas: 4
+        replicas: 2
         resources:
             limits:
                 cpus: "2"
                 memory: 8G
+    depends_on:
+      - rabbitmq
+      - app
+      - ftp_server
+      - ftp_checker
+      - db
+      - mongodb
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - DATA_DOWNLOADER_SVC=localhost
+      - DATA_DOWNLOADER_PORT=5000
+      - CORE_APP=app
+      - TOKEN=${TOKEN}
+      - MONGODB=mongodb
+      - FILE_AGE_LIMIT=111 # minutes
+    volumes:
+      - ./downloaded_files:/app/downloaded_files
+
+  data_converter:
+    image : data_converter:tmet
+    build:
+      context: ./data_retrieval/file_downloader/
+      dockerfile: Dockerfile
+    command: ["/bin/sh", "-c", "python3 /app/consumer.py"]
+    restart: always
+    healthcheck:
+      test:  ["CMD", "pgrep", "-f", "consumer.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    deploy:
+        replicas: 6
+        resources:
+            limits:
+                cpus: "4"
+                memory: 10G
     depends_on:
       - rabbitmq
       - app
