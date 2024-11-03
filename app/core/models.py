@@ -4,6 +4,7 @@ Database models.
 import uuid
 import os
 from enum import unique
+from django.core.files.storage import FileSystemStorage
 
 from django.conf import settings
 from django.db import models
@@ -21,6 +22,13 @@ def data_path(instance, filename):
 
     return os.path.join('uploads', 'data', filename)
 
+
+class OverwriteStorage(FileSystemStorage):
+    def get_available_name(self, name, max_length=None):
+        # If the file exists, delete it so the new file overwrites it
+        if self.exists(name):
+            os.remove(os.path.join(self.location, name))
+        return name
 
 class UserManager(BaseUserManager):
     """ Manager for users. """
@@ -242,7 +250,7 @@ class Notification(models.Model):
 
 class UploadedImage(models.Model):
     title = models.CharField(max_length=255, unique=True)
-    image = models.ImageField(upload_to='images/')
+    image = models.ImageField(upload_to='images/',  storage=OverwriteStorage())
     uploaded_at = models.DateTimeField(auto_now_add=True)
     deleted = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
