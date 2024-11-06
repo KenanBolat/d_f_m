@@ -131,7 +131,7 @@ class DataConverter:
         if self.check_bands():
             self._convert_netcdf(upload_flag=False)
             self._convert_tiff(upload_flag=False)
-            self._convert_tiff_aoi()
+            self._convert_tiff_aoi(upload_flag=False)
             # self._convert_png()
             self._convert_png_aoi()
 
